@@ -1,0 +1,718 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,dl, dt, dd, ol, ul, li, fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+}
+/* remember to define focus styles! */
+:focus {
+	outline: 0;
+}
+body {
+	color: black;
+	/* background-color: rgb(250, 250, 250); */
+}
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+	border-spacing: 0;
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal;
+}
+ 
+/* ------------------------------------------------------------------------------
+    G E N E R A L
+--------------------------------------------------------------------------------- */
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+body, input, textarea, select, button {
+	font-family: 'Open Sans', Segoe UI, Tahoma, Geneva, Verdana, Sans-Serif;
+	font-size: 13px;
+	margin: 0; padding: 0;
+}
+ol, ul, li {
+	list-style: none;
+}
+optgroup {
+	font-weight: bold;
+	font-style: normal;
+	padding-left: 5px;
+}
+option {
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left: 5px;
+}
+optgroup > option {
+	padding-left: 10px;
+}
+a:link, a:visited {
+	text-decoration: none;
+	color: #00E;
+}
+p {
+	line-height: 1.5;
+}
+hr {
+	color: lightgray;
+}
+
+
+/* content */
+#content-wrap {
+	clear: both;
+	margin: 0; padding: 0;
+	background: #fff;
+	width: 100%;
+	float: left;
+}
+
+#main {
+	float: left;
+	left: 200px;
+	position: absolute;
+	min-width: 300px;
+}
+
+#main .headerrow {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
+	background-color: #F0F0F0;
+	/* Да стоят на един ред елементите в този div */
+	white-space: nowrap;
+	/* Този div да е толкова широк, че да обхване всичките му елементи */
+	display: inline-block;
+}
+#main th.checkbox {
+	text-align: center; 
+	width: 50px;
+}
+#main td.checkbox {
+	text-align: center; 
+}
+
+#id-login h3 {
+	font-size: 1.2em;
+	padding-left: 15px;
+	margin-top: 15px;
+	margin-bottom: -5px;
+	color: #000;
+}
+
+
+/* sidemenu */
+#sidebar {
+	width: 200px;
+	float: left;
+	margin: 0;
+	position: absolute;
+	top: 0px;
+}
+.sidemenu, .submenu {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 10px;
+	margin-left: 0px;
+}
+.sidemenu ul, .submenu ul {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 10px;
+}
+.sidemenu li {
+	line-height: 17px;
+	padding-right: 10px;
+}
+.sidemenu li a:link,
+.sidemenu li a,
+.sidemenu li a:visited,
+.submenu li a:link,
+.submenu li a,
+.submenu li a:visited
+ {
+	font-size: 1.1em;
+	text-align: left;
+	color: #757575;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left: 10px;
+	padding-right: 10px;
+	display: block;
+	text-decoration: none;
+}
+.submenu li {
+	line-height: 16px;
+	padding-right: 10px;
+}
+.submenu {
+	font-size: 85% !important;
+}
+.sidemenu li a.selected {
+	background-color: #EEE;
+	color: #000;
+}
+.sidemenu li a:hover:not([href='#']), .submenu li a:hover {
+	background-color: #DDD;
+	color: #000;
+}
+
+.a-href {
+	height: 100% !important;
+	width: 100% !important;
+	padding: 4px 8px;
+}
+.a-href:hover {
+	background-color: rgba(0, 0, 0, 0.06);
+}
+td.td-no-padding {
+	padding: 0px !important;
+}
+td .td-href {
+	height: 100% !important;
+	width: 100% !important;
+	padding: 4px 8px;
+}
+td .td-href:hover {
+	background-color: rgba(0, 0, 0, 0.06);
+}
+td.ellipsis, .ellipsis select  {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 15rem;
+}
+
+.white-popup-block {
+	position: relative;
+	display: inline-block;
+}
+
+.header {
+	padding-bottom: 15px;
+	padding-top: 5px;
+	line-height: 22px;
+	clear: left;
+	font-size: 17px;
+	/* 
+	background-color: #F0F0F0;
+	padding-left: 10px;
+	padding-right: 10px;
+	*/
+}
+.sub-header {
+	margin-top: -15px;
+	padding-bottom: 10px;
+	clear: left;
+	font-size: 15px;
+}
+#nomedit .status-line {
+	clear: left;
+	padding-top: 5px;
+}
+
+#nomedit .nomedit-edit {
+	float: left;
+}
+
+#nomedit .row {
+	margin: 2px 0;
+	float: left;
+	clear: left;
+}
+.table-row {
+	margin: 2px 0;
+	display: table-row;
+}
+.table-cell-label {
+	display: table-cell;
+	text-align: right;
+	padding-right: 5px;
+	padding-left: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	max-width: 180px;
+	word-wrap: break-word;
+	vertical-align: middle;
+}
+.table-cell {
+	display: table-cell;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	vertical-align: middle;
+}
+.table-cell-label-big {
+	display: table-cell;
+	padding-right: 5px;
+	word-wrap: break-word;
+	vertical-align: middle;
+}
+
+input[type="text"], input[type="password"],
+textarea, 
+.searchbox input,
+table input[type="text"] {
+	font-family: inherit;
+	font-size: inherit;
+	border:1px solid #cfcfcf;
+	padding: 2px 2px;
+	color:#000;
+}
+#nomedit .textarea {
+	font-family: inherit;
+	font-size: inherit;
+	width:340px; 
+}
+select {
+	font-family: inherit;
+	font-size: inherit;
+	border:1px solid #cfcfcf;
+	/*padding: 1px 1px;*/
+}
+input:focus:not(.readonly):not(.button),
+select:focus:not(.readonly),
+#nomedit textarea:focus:not(.readonly) {
+	/*outline: 0px none;*/
+	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset, 0px 0px 8px rgba(102, 175, 233, 0.6);
+	border-color: #66AFE9;
+}
+
+#nomedit .text {
+	width:340px; 
+}
+#nomedit .text30 {
+	width:200px; 
+}
+#nomedit .text10 {
+	width:100px; 
+}
+#nomedit .checkbox {
+	vertical-align: middle;
+}
+#nomedit .date  {
+	width:100px; 
+}
+#nomedit .datetime {
+	width:120px; 
+}
+#nomedit .time {
+	width:50px; 
+}
+#nomedit .number  {
+	width:100px; 
+	text-align: right;
+}
+/* Number up to 99999.99 */
+#nomedit .number-small  {
+	width:50px; 
+	text-align: right;
+}
+#nomedit .readonly {
+	background-color: #F0F0F0;
+}
+#nomedit .hidden, 
+table .hidden,
+#sidemenu .hidden, 
+#display_text.hidden, 
+.nomedit-files .hidden  {
+	display: none !important;
+}
+.isnan {
+	border:1px solid red !important;
+}
+.isRequired {
+	border: 1px solid red !important;
+}
+.isAttention {
+	background-color: #FFBCBC !important;
+}
+select.mandatory.mandatory-empty option {
+	color: black;
+}
+select.mandatory.mandatory-empty option[disabled] {
+	color: grey;
+}
+select.mandatory.mandatory-empty {
+	color: grey;
+}
+
+
+.negative-number {
+	color: red !important;
+}
+
+input.button {
+	padding: 3px 4px;
+	border-width: 0;
+	cursor: pointer;
+	color: #FFF;
+	background-color: #2C76A6;
+}
+
+button.submit_button {
+	padding: 4px 5px;
+	border-width: 0;
+	cursor: pointer;
+	color: #FFF;
+	background-color: #2C76A6;
+}
+button.add_button {
+	padding: 4px 5px;
+	border-width: 0;
+	cursor: pointer;
+	color: #FFF;
+	background: #3da16a url(../images/svg/add_icon.svg) no-repeat left center;
+	padding-left: 40px;
+}
+button.add_button:hover {
+	background-color: #1b8048;
+}
+button.buttons-excel {
+	padding: 4px 5px;
+	border-width: 0;
+	cursor: pointer;
+	color: #FFF;
+	background: #2C76A6 url(../images/svg/excel_icon.svg) no-repeat left center;
+	padding-left: 40px;
+}
+
+input.button:disabled, button:disabled {
+	cursor: not-allowed;
+	background-color: #f2f2f2 !important;
+}
+
+.row-button {
+	margin-top: 20px;
+	float: left;
+	clear: left;
+	width: 100%;
+	min-width: 200px;
+}
+button.save_button {
+	padding: 6px 8px;
+	cursor: pointer;
+	border-width: 0;
+	color: #FFF;
+	background-color: #2C76A6;
+}
+button.cancel_button {
+	padding: 6px 8px;
+	cursor: pointer;
+	border-width: 0;
+	color:#444;
+	background-color: #E6E6E6;
+}
+button.delete_button {
+	padding: 6px 8px;
+	cursor: pointer;
+	float: right;
+	margin-left: 20px;
+	color:#444;
+	background-color: transparent;
+	border: 1px solid transparent;
+	border-color: #ccc;
+}
+button.delete_button:disabled {
+	cursor: not-allowed;
+	background-color: #f2f2f2 !important;
+}
+button.delete_button:hover {
+	background-color:#e23e4d;
+	color: #FFF;
+}
+button:hover {
+	background-color:#004085;
+	color: #FFF;
+}
+
+
+.clear-input {
+	font-family: Arial,Baskerville,monospace;
+	font-size: 22px;
+	width: 16px;
+	height: 16px;
+	line-height: 16px;
+	vertical-align: middle;
+	padding: 5px 5px 5px 10px;
+	cursor: pointer;
+}
+.clear-input:hover {
+	background-color: #E6E6E6 !important;
+	color: #000 !important;
+}
+.clear-input {
+	padding: 5px 5px 5px 5px;
+	margin-left: -5px;
+}
+.delete-line {
+	font-family: Arial,Baskerville,monospace;
+	font-size: 22px;
+	padding: 5px 5px 5px 5px;
+	cursor: pointer;
+	width: 100%;
+}
+.delete-line:hover {
+	background-color: #E6E6E6 !important;
+	color: #000 !important;
+}
+button.add-line {
+	padding: 4px 5px;
+	border-width: 0;
+	cursor: pointer;
+	color: #FFF;
+	background: #3da16a url(../images/svg/add_icon.svg) no-repeat left center;
+	padding-left: 40px;
+}
+button.add-line:hover {
+	background-color: #1b8048;
+}
+
+
+table .readonly  {
+	border: 0px !important;
+	background-color: transparent !important;
+}
+
+table .cell-has-note {
+	width: 5px;
+	height: 5px;
+	background-color: red !important;
+	/* td margin top 4, left 8*/
+	top: -4px;
+	right: -8px;
+	position: absolute;
+}
+table .td-no-padding .cell-has-note {
+	right: 0px;
+}
+table.child {
+	padding-left: 0px;
+	font-size: 12px;
+}
+
+#timeslots .warehouse_code {
+	display: table-row;
+	white-space: nowrap;
+}
+#timeslots .working_day {
+	display: table-cell;
+	padding-top: 10px;
+	padding-right: 30px;
+}
+
+/* ------------------------------------------------------------------------------
+		M I S C
+--------------------------------------------------------------------------------- */
+
+/* clearing */
+.clear {	display:inline-block; }
+.clear:after {
+	display:block;
+	visibility:hidden;
+	clear:both;
+	height:0;
+	content: " ";
+}
+
+
+
+/* --------------------------  Промени по компонентите ----------------------------*/
+
+/* За да се появява ui-dialog над magnificPopup */
+.ui-dialog { z-index : 9020 !important; }
+.dlg-no-title .ui-dialog-titlebar { display: none; }
+/* Да разкарам картинката от background */
+.ui-dialog-titlebar {
+	background: #F0F0F0 none repeat scroll 0% 0%;
+}
+
+/* За да се появява ui-autocomplete над magnificPopup */
+/*.ui-autocomplete.ui-front.ui-menu.ui-widget.ui-widget-content { */
+.ui-autocomplete {
+	 z-index: 10000 !important;
+}
+.ui-autocomplete {
+	max-height: 300px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden;
+	/* add padding to account for vertical scrollbar */
+	/*padding-right: 20px;*/
+}
+/* За да няма margin-top: 5px */
+.ui-menu .ui-menu-divider {
+	margin: 0;
+}
+
+/* Промени за използване на Tabs */
+.ui-tabs {
+	padding: 0;
+}
+.ui-tabs .ui-tabs-nav {
+	padding: 0px 0px 10px;
+}
+.ui-tabs .ui-state-active {
+	background: #F9F9F9;
+}
+
+table.dataTable {
+	width: auto;
+	float: left;
+}
+table.dataTable thead th,
+table.dataTable thead td {
+	padding-top: 6px;
+	padding-bottom: 6px;
+	/*
+	padding-left: 4px;
+	padding-right: 18px;
+	*/
+	padding-left: 8px;
+	padding-right: 8px;
+	line-height: 1;
+	background-color: #F0F0F0;
+}
+table.dataTable tbody th,
+table.dataTable tbody td {
+	padding-top: 6px;
+	padding-bottom: 6px;
+	padding-left: 8px;
+	padding-right: 8px;
+	/* Да няма wrap в редовете на таблицата */
+	white-space: nowrap;
+	vertical-align: middle;
+}
+table.dataTable tfoot th,
+table.dataTable tfoot td {
+	padding-top: 6px;
+	padding-bottom: 6px;
+	padding-left: 8px;
+	padding-right: 8px;
+	background-color: #F0F0F0;
+	/* Да няма wrap в редовете на таблицата */
+	white-space: nowrap;
+}
+table.dataTable thead th {
+	font-weight: normal;
+	/* За да се разпъва колоната, колкото е стойността, а не заглавието */
+	width: 5px;
+	white-space: normal;
+	/* vertical-align: bottom; */
+}
+/* Chrome има проблем при Fixed Header. Направо не се показва th, когато няма title */
+table.dataTable tbody th.dt-body-wrap,
+table.dataTable tbody td.dt-body-wrap {
+	white-space: normal !important;
+}
+/* Да се скрие Search, но все пак да прави филтриране. Ако се забрани със searching: false в опциите, то не прави търсене */
+.dataTables_filter {
+	display: none;
+}
+
+/* Скриване и показване на колони, без да се изтриват от DOM */
+.hide_column {
+	display: none;
+}
+
+/* За слагане на datatables бутоните в #headerrow - Excel button */
+div.dt-buttons {
+	float: none;
+	display: inline;
+}
+button.dt-button, div.dt-button, a.dt-button {
+	display: inline;
+	font-size: 100%;
+	padding: 3px 7px;
+	margin-left: 5px;
+}
+
+/* selected color #B0BED9 */
+table.dataTable tbody tr.selected {
+	background-color: #D7E4FF !important;
+}
+
+/* child rows */
+table.dataTable tbody div.slider {
+	display: none;
+}
+table.dataTable tbody td.no-padding {
+	padding: 0;
+}
+
+/* Да са в ляво бутоните за страниците */
+.dataTables_wrapper .dataTables_length {
+	clear: left;
+	padding-top: 5px;
+}
+.dataTables_wrapper .dataTables_paginate {
+	float: left;
+}
+
+/* За да търси картинките в моята images папка */
+table.dataTable thead .sorting {
+  /* background-image: url("/images/sort_both.png"); */
+	background-image: none;
+}
+table.dataTable thead .sorting_asc {
+  /* background-image: url("/images/sort_asc.png"); */
+	background-image: none;
+}
+table.dataTable thead .sorting_desc {
+  /* background-image: url("/images/sort_desc.png"); */
+	background-image: none;
+}
+table.dataTable thead .sorting_asc_disabled {
+  /* background-image: url("/images/sort_asc_disabled.png"); */
+	background-image: none;
+}
+table.dataTable thead .sorting_desc_disabled {
+  /* background-image: url("/images/sort_desc_disabled.png"); */
+	background-image: none;
+}
+
+
+.mfp-inline-holder .mfp-content,
+.mfp-ajax-holder .mfp-content {
+	width: auto;
+	padding: 10px 10px;
+	background: #F9F9F9 none repeat scroll 0% 0%;
+	color: #444;
+	border-radius: 4px;
+}
+
+.mfp-wrap {
+	overflow-x: auto !important;
+}
+
+.white-popup-block .mfp-close {
+	width: 20px;
+	height: 20px;
+	line-height: 20px;
+	background-color: #000 !important;
+	color: #FFF !important;
+}
+.mfp-figure .mfp-close {
+	cursor: inherit;
+	width: 20px;
+}
+
+
+/* hide the close x on the loading screen */
+.loadingScreenWindow .ui-dialog-titlebar-close {
+	display: none;
+}
+
+
+/* ----------------- край на Промени по компонентите ----------------------------*/

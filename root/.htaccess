@@ -1,0 +1,30 @@
+##  Can be commented out if causes errors, see notes above.
+Options +FollowSymLinks
+
+#  mod_rewrite in use
+RewriteEngine On
+
+
+#  Uncomment following line if your webserver's URL
+#  is not directly related to physical file paths.
+#  Update Your Joomla!/MamboDirectory (just / for root)
+
+# RewriteBase /
+
+# Ако директорията или файла съществуват, то прескачаме правилата
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule .? - [L]
+
+#
+# Трябва да се парсне x/y/z/w във вид на index.php?a=x&b=y&p1=z&p2=w
+# $_REQUEST{'a'}/$_REQUEST{'b'}/$_REQUEST{'p1'}/$_REQUEST{'p2'}/$_REQUEST{'p3'}/$_REQUEST{'p4'}
+#
+
+RewriteRule ^(.*)/(.*)/(.*)/(.*)/(.*)/(.*)$ index.php?a=$1&b=$2&p1=$3&p2=$4&p3=$5&p4=$6 [L,NS]
+RewriteRule ^(.*)/(.*)/(.*)/(.*)/(.*)$ index.php?a=$1&b=$2&p1=$3&p2=$4&p3=$5 [L,NS]
+RewriteRule ^(.*)/(.*)/(.*)/(.*)$ index.php?a=$1&b=$2&p1=$3&p2=$4 [L,NS]
+RewriteRule ^(.*)/(.*)/(.*)$ index.php?a=$1&b=$2&p1=$3 [L,NS]
+RewriteRule ^(.*)/(.*)$ index.php?a=$1&b=$2 [L,NS]
+RewriteRule ^(.*)$ index.php?a=$1 [L,NS]
+ 
