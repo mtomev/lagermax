@@ -15,6 +15,6 @@
 	*/
 
 	//define ('DONT_PUT_SYS_OPER', true);
-	//define ('TEST_MAIL_ADDRESS', 'mt@andreew-investment.com');
+	//define ('TEST_MAIL_ADDRESS', 'mtomev1@abv.bg');
 	//define ('USE_CONNECT', true);
 ?>

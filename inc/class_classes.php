@@ -826,9 +826,15 @@
 		public static function send_user_mail($data_mail, $silent = false) {
 			if ($data_mail['user_email']) {
 				$mail = new MyMailer;
-				$mail->AddAddress($data_mail['user_email'], $data_mail['full_name']);
-				$mail->Subject = "Metro Platform Lagermax";
-				$mail->Body = "http://$_SERVER[HTTP_HOST]". ($data_mail['org_id'] ? "/".$data_mail['org_id'] : ""). PHP_EOL
+				//$mail->AddAddress($data_mail['user_email'], $data_mail['user_full_name']);
+				$mail->AddAddress($data_mail['user_email']);
+				$mail->Subject = "Метро платформа Лагермакс";
+				$mail->Body = 
+					"Това е автоматично съобщение, което Ви предоставя достъп до WEB портала за Заявки на Метро платформа Лагермакс"
+					. PHP_EOL
+					. PHP_EOL . "http://$_SERVER[HTTP_HOST]". ($data_mail['org_id'] ? "/".$data_mail['org_id'] : "")
+					. PHP_EOL
+					. PHP_EOL . "Доставчик име: ".$data_mail['org_name']
 					. PHP_EOL . "Доставчик номер: ".$data_mail['org_id']
 					. PHP_EOL . "Име: ".$data_mail['user_name']
 					. PHP_EOL . "Парола: ".$data_mail['user_password'];
@@ -845,7 +851,8 @@
 			}
 			return false;
 		}
-	}
+
+	} // class _base
 
 	class ExecQuery {
 		// assoc array, откъдето да се взимат стойностите

@@ -59,6 +59,26 @@
 	// Disable initial sort on first column
 	$.fn.dataTable.defaults.aaSorting = [];
 
+	// This plugin permits to show the right page of DataTable to show the selected row
+	// https://github.com/DataTables/Plugins/blob/master/api/row().show().js
+	$.fn.dataTable.Api.register('row().show()', function() {
+		var page_info = this.table().page.info();
+		// Get row index
+		var new_row_index = this.index();
+		// Row position
+		var row_position = this.table().rows()[0].indexOf( new_row_index );
+		// Already on right page ?
+		if( row_position >= page_info.start && row_position < page_info.end ) {
+			// Return row object
+			return this;
+		}
+		// Find page number
+		var page_to_display = Math.floor( row_position / this.table().page.len() );
+		// Go to that page
+		this.table().page( page_to_display );
+		// Return row object
+		return this;
+	});
 
 	// Глобални променливи за селектиране и опресняване на ред при редактиране през magnificPopup
 	var oTable, edit_row, edit_id, edit_add_new = false, edit_delete = false;
@@ -134,14 +154,15 @@
 					fnShowErrorMessage('{#title_error#}', result);
 					return;
 				}
+				if (!edit_row) return;
 				try {
 					if (!edit_add_new)
 						edit_row.data(data);
 					else
 						edit_row = oTable.row.add(data);
-					edit_row.draw(false);
 					oTable.rows().deselect();
 					edit_row.select();
+					edit_row.draw().show().draw(false);
 					if (typeof callbackSuccess == 'function') callbackSuccess(edit_row);
 				} catch(err) {
 					fnShowErrorMessage('{#title_error#}', err);
@@ -524,7 +545,8 @@
 
 	function displayDocUpload ( data, rel ) {
 		if ( data )
-			return '<a rel="' +rel+'/'+data+ '" onclick="clickOpenFile(this.rel)" style="cursor: pointer;" title="' +data+ '">'
+			//return '<a rel="' +rel+'/'+data+ '" onclick="clickOpenFile(this.rel)" style="cursor: pointer;" title="' +data+ '">'
+			return '<a href="' + rel + '/' + data + '" target="_blank" title="' + data + '">'
 							+ displayDIV100('<img style="vertical-align: middle;" src="/images/document-16.png" alt="" border="0">')
 						+ '</a>'
 		else
@@ -771,12 +793,17 @@
 
 
 	// Създава списъка от <option> за <select> от двумерен JSON { { id: <id>, name: <name> }, ... }
-	function generate_select_option_2D (select_list, selected_key) {
+	function generate_select_option_2D (select_list, selected_key, auto_select_alone) {
+		// auto_select_alone == true - ако е един елемент в списъка, направо да го избира
 		var html = '';
+		if (typeof(auto_select_alone)==='undefined') auto_select_alone = false;
 
 		for (var i = 0, len = select_list.length; i < len; i++) {
 			html += '<option value="'+select_list[i].id+'" ';
-			if ( select_list[i].id == selected_key )
+			if ( select_list[i].id == selected_key && (len > 2 || !auto_select_alone || i > 0))
+				html += ' selected';
+			else
+			if (len == 2 && auto_select_alone && i == 1)
 				html += ' selected';
 			html += '>'+select_list[i].name+'</option>';
 		}

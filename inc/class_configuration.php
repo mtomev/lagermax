@@ -90,22 +90,43 @@
 		}
 
 
-		function temp_update () {
-			// Генериране на user.user_password, user_name
-			$table_name = 'space_pict';
-			$sql_query = "SELECT user_id, user_name, user_password from `user`";
-      $sql_query .= " where user_id > 100";
+		function mass_mailing () {
+			// Изпращане на мейли в групи от по 100
+			$sql_query = "SELECT user_id, user_email, user_full_name, org_id, org_name, user_name, user_password from view_user";
+      $sql_query .= PHP_EOL . "where is_active = '1' and user_email is not null and user_email <> '' and email_sended <> '1'";
+      $sql_query .= PHP_EOL . "order by user_id";
+      $sql_query .= PHP_EOL . "limit 100";
 			$query_result = _base::get_query_result($sql_query);
 			while ($query_data = _base::sql_fetch_assoc($query_result))
 				$temp[] = $query_data;
 			_base::sql_free_result($query_result);
 
 			if ($temp) {
+				$mail = new MyMailer;
+				// SMTP connection will not close after each email sent, reduces SMTP overhead
+				$mail->SMTPKeepAlive = true;
+				$mail->Subject = "WEB портал на Метро платформа Лагермакс";
 				_base::start_transaction();
-				foreach($temp as $line) {
-					$line['user_name'] = _base::random_password();
-					$sql_query = "UPDATE `user` set user_name = '" . $line['user_name'] . "'"
-						. PHP_EOL . " where user_id = ".$line['user_id'];
+				foreach($temp as $data_mail) {
+					if ($data_mail['user_email']) {
+						$mail->AddAddress($data_mail['user_email']);
+						$mail->Body = 
+							"Това е автоматично съобщение, което Ви предоставя достъп до WEB портала за Заявки на Метро платформа Лагермакс"
+							. PHP_EOL
+							. PHP_EOL . "http://$_SERVER[HTTP_HOST]". ($data_mail['org_id'] ? "/".$data_mail['org_id'] : "")
+							. PHP_EOL
+							. PHP_EOL . "Доставчик име: ".$data_mail['org_name']
+							. PHP_EOL . "Доставчик номер: ".$data_mail['org_id']
+							. PHP_EOL . "Име: ".$data_mail['user_name']
+							. PHP_EOL . "Парола: ".$data_mail['user_password'];
+
+						if(!$mail->Send()) {
+							echo $data_mail['user_id'] . PHP_EOL . 'Mailer Error: ' . $mail->ErrorInfo;
+							//break;
+						}
+						$mail->clearAddresses();
+					}
+					$sql_query = "UPDATE `user` set email_sended = '1' where user_id = ".$data_mail['user_id'];
 					_base::execute_sql($sql_query);
 				}
 				_base::commit_transaction();

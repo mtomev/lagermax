@@ -378,6 +378,7 @@
 
 			_base::commit_transaction();
 			_base::put_sys_oper(__METHOD__, 'save', $_SESSION['table_edit'], $id);
+			echo $id;
 		}
 
 		function aviso_delete () {

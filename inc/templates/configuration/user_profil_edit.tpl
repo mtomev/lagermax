@@ -94,6 +94,9 @@
 </div>
 
 <script type="text/javascript">
+	edit_row = null;
+	edit_id = 0;
+	
 	// Проверка дали няма въведен вече такъв потребител
 	$('#user_name', '#nomedit').change(function () {
 		var org_id = {$data.org_id|default:0};

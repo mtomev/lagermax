@@ -3,7 +3,7 @@
 
 	class MyMailer extends PHPMailer {
     // Set default variables for all new objects
-    public $FromName = "Metro Platform";
+    public $FromName = "Метро платформа Лагермакс";
     public $Mailer   = "smtp";
 
 		

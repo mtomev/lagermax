@@ -4,6 +4,7 @@
 	<div class="headerrow" id="headerrow">
 		{include file='configuration/btn_add.tpl'}
 		{include file='main_menu/list_search.tpl'}
+		<button id="mass_mailing" class="submit_button" title="Масово изпращане на мейли до първите 100 потребителя, които имат въведен e-mail и до които още не са изпратени.&#013;Не пита, а направо изпраща.&#013;След като им ги изпрати, отбелязва в тези потребители че са им изпратени мейли."><span>Mass Mailing</span></button>
 	</div>
 
 	<table id="table_id"></table>
@@ -143,6 +144,17 @@
 
 	$('#submit_button', '#headerrow').click( function () {
 		oTable.ajax.reload( vTable.select_row, false );
+	});
+
+	$('#mass_mailing').click(function () {
+		waitingDialog('Mass Mailing -> ...');
+		jQuery.post('/configuration/mass_mailing', {}, function (result) {
+			closeWaitingDialog();
+			if (result)
+				fnShowErrorMessage('', result);
+			else
+				location.reload();
+		});
 	});
 </script>
 {/block}

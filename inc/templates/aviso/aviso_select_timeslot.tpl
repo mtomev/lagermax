@@ -39,11 +39,11 @@
 	$('#aviso_date_timeslot', '#nomedit_timeslot').change(function () {
 		var data = {
 			aviso_id: {$data.id},
-			warehouse_id: EsCon.getParsedVal($('#warehouse_id', '#edit')),
-			warehouse_type: EsCon.getParsedVal($('#warehouse_type', '#edit')),
+			warehouse_id: EsCon.getParsedVal($('#warehouse_id', '#aviso_edit')),
+			warehouse_type: EsCon.getParsedVal($('#warehouse_type', '#aviso_edit')),
 			aviso_date: EsCon.getParsedVal($('#aviso_date_timeslot', '#nomedit_timeslot')),
-			aviso_time: EsCon.getParsedVal($('#aviso_time', '#edit')),
-			qty_pallet_calc: EsCon.getParsedVal($('#qty_pallet_calc', '#edit')),
+			aviso_time: EsCon.getParsedVal($('#aviso_time', '#aviso_edit')),
+			qty_pallet_calc: EsCon.getParsedVal($('#qty_pallet_calc', '#aviso_edit')),
 		};
 		$.ajax({
 			url: "/aviso/get_aviso_timeslot/{$data.id}",
@@ -81,20 +81,40 @@
 	$('#save_button_timeslot').click (function () {
 		if (!EsCon.check_mandatory($('#nomedit_timeslot .mandatory'))) return false;
 
-		$('#edit #aviso_date_timeslot').val(EsCon.formatDate($('#nomedit_timeslot #aviso_date_timeslot').val()));
-		$('#edit #aviso_time_timeslot').val($('#nomedit_timeslot #aviso_time_timeslot').val());
+		$('#aviso_edit #aviso_date_timeslot').val(EsCon.formatDate($('#nomedit_timeslot #aviso_date_timeslot').val()));
+		$('#aviso_edit #aviso_time_timeslot').val($('#nomedit_timeslot #aviso_time_timeslot').val());
 		($.magnificPopup.instance).close();
 
 		waitingDialog();
-		jQuery.post('/aviso/aviso_save/{$data.id}', EsCon.serialize($('#edit :input').not('#table_line :input')), function (result) {
-			if (result) {
+		/*
+		jQuery.post('/aviso/aviso_save/{$data.id}', EsCon.serialize($('#aviso_edit :input').not('#table_line :input')), function (result) {
+			if (!Number(result)) {
 				closeWaitingDialog();
 				fnShowErrorMessage('{#title_error#}', result);
 			}
 			else {
+				clickOpenFile('/aviso/aviso_display/'+result+'/MP_Aviso_'+result+'.pdf');
 				window.location.href = callback_url;
 			}
 		});
+		*/
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/aviso/aviso_save/{$data.id}',
+			data: EsCon.serialize($('#aviso_edit :input').not('#table_line :input')),
+			success: function (result) {
+				if (!Number(result)) {
+					closeWaitingDialog();
+					fnShowErrorMessage('{#title_error#}', result);
+				}
+				else {
+					clickOpenFile('/aviso/aviso_display/'+result+'/MP_Aviso_'+result+'.pdf');
+					window.location.href = callback_url;
+				}
+			},
+		});
+		
 	});
 	$('#cancel_button_timeslot', '#nomedit_timeslot').click (function () {
 		($.magnificPopup.instance).close();

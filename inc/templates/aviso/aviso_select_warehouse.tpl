@@ -50,7 +50,7 @@
 					return false;
 				}
 				try {
-					var html = generate_select_option_2D(data, 0);
+					var html = generate_select_option_2D(data, 0, true);
 					$('#warehouse_id', '#nomedit').empty().append(html);
 				}
 				catch(err) {

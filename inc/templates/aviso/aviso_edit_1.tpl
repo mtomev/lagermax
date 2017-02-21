@@ -8,7 +8,7 @@
 		{else}
 		<div class="header">{#Add#} {#table_aviso#}</div>
 		{/if}
-		<div id="edit" class="nomedit-edit">
+		<div id="aviso_edit" class="nomedit-edit">
 			<div style="display: table;">
 				<div style="float: left;">
 					<div class="table-row">
@@ -130,11 +130,11 @@
 	callback_url = "{$callback_url}" || ref;
 
 // Група от общи
-	EsCon.set_datepicker();
-	// Това се прилага само за показаните със smarty променливи стойности в #edit, но не и за показаните с рендер функции в таблиците
-	EsCon.set_number_val($('.number, .number-small, .time', '#edit'));
+	EsCon.set_datepicker('input.date', '#aviso_edit');
+	// Това се прилага само за показаните със smarty променливи стойности в #aviso_edit, но не и за показаните с рендер функции в таблиците
+	EsCon.set_number_val($('.number, .number-small, .time', '#aviso_edit'));
 	// Да сложим attr placeholder на всички с .mandatory
-	EsCon.set_mandatory($('#edit .mandatory'));
+	EsCon.set_mandatory($('#aviso_edit .mandatory'));
 
 	// Ще ги задам така, защото по-късно динамично се добавят DOM елементи от същия вид
 	$('#nomedit').on('focus', '.number, .number-small, .date, .time', EsCon.inputEvent.focusin);
@@ -177,7 +177,7 @@
 					render: function ( data, type, row ) {
 						var shtml  = '<select row_id="'+row.id+'" ';
 						shtml += 'name="org_metro_code" class="mandatory">';
-						shtml += generate_select_option_2D(self.org_metro_list, row.org_metro_code);
+						shtml += generate_select_option_2D(self.org_metro_list, row.org_metro_code, true);
 						shtml += '</select>';
 						return shtml;
 					}
@@ -199,7 +199,7 @@
 				{ title: "{#shop_name#}", name: 'shop_name', data: 'shop_name', className: "",
 					render: function ( data, type, row ) {
 						var shtml  = '<select row_id="'+row.id+'" name="shop_id" class="mandatory">';
-						shtml += generate_select_option_2D(self.shop_list, row.shop_id);
+						shtml += generate_select_option_2D(self.shop_list, row.shop_id, true);
 						shtml += '</select>';
 						return shtml;
 					}
@@ -292,7 +292,7 @@
 					+datatable_get_footer_value(api, 'qty_pack')/{$data.w_pack2pallet|default:1}
 				/*{/if}*/
 					;
-				$('#edit #qty_pallet_calc').val(qty_pallet_calc);
+				$('#aviso_edit #qty_pallet_calc').val(qty_pallet_calc);
 				$footer = $( api.column('metro_request_no:name').footer() );
 				$footer.html('{#qty_pallet_calc#}: '+qty_pallet_calc.toFixed(2));
 			}
@@ -522,11 +522,11 @@
 		// warehouse_id, aviso_date, aviso_time, qty_pallet_calc
 		var data = {
 			aviso_id: {$data.id},
-			warehouse_id: EsCon.getParsedVal($('#warehouse_id', '#edit')),
-			warehouse_type: EsCon.getParsedVal($('#warehouse_type', '#edit')),
-			aviso_date: EsCon.getParsedVal($('#aviso_date', '#edit')),
-			aviso_time: EsCon.getParsedVal($('#aviso_time', '#edit')),
-			qty_pallet_calc: EsCon.getParsedVal($('#qty_pallet_calc', '#edit')),
+			warehouse_id: EsCon.getParsedVal($('#warehouse_id', '#aviso_edit')),
+			warehouse_type: EsCon.getParsedVal($('#warehouse_type', '#aviso_edit')),
+			aviso_date: EsCon.getParsedVal($('#aviso_date', '#aviso_edit')),
+			aviso_time: EsCon.getParsedVal($('#aviso_time', '#aviso_edit')),
+			qty_pallet_calc: EsCon.getParsedVal($('#qty_pallet_calc', '#aviso_edit')),
 		};
 		showMFP('/aviso/aviso_select_timeslot/{$data.id}', data);
 
