@@ -517,7 +517,10 @@
 		}
 
 		function user_save () {
-		 	if (!_base::CheckAccess('user_edit')) return;
+			// Ако записа идва от user_profil_edit, тогава да си го записва
+			$is_user_profil_edit = $_POST['user_profil_edit'];
+			if (!$is_user_profil_edit)
+				if (!_base::CheckAccess('user_edit')) return;
 
 			$id = $_REQUEST['p1'];
 			$table = 'user';
@@ -532,8 +535,10 @@
 				$query->table = '"USER"';
 			$query->AddParam($table.'_name');
 			$query->AddParam('user_password');
-			$query->AddParam('user_role_id', 'n');
-			$query->AddParam('org_id', 'n');
+			if (!$is_user_profil_edit)
+				$query->AddParam('user_role_id', 'n');
+			if (!$is_user_profil_edit)
+				$query->AddParam('org_id', 'n');
 			$query->AddParam('w_group_id', 'n');
 			$query->AddParam('warehouse_id', 'n');
 			$query->AddParam('aviso_driver_name');
@@ -542,8 +547,10 @@
 			$query->AddParam('user_full_name');
 			$query->AddParam('user_phone');
 			$query->AddParam('user_email');
-			$query->AddParam('is_active', 'c');
-			$query->AddParam('email_sended', 'c');
+			if (!$is_user_profil_edit)
+				$query->AddParam('is_active', 'c');
+			if (!$is_user_profil_edit)
+				$query->AddParam('email_sended', 'c');
 			if ($id != 0) {
 				$query->update([$table."_id" => $id]);
 				$new_id = $id;

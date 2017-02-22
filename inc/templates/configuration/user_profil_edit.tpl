@@ -87,6 +87,7 @@
 
 		<input type="hidden" name="email_sended" value="{$data.email_sended}">
 		<input type="hidden" name="is_active" value="{$data.is_active}">
+		<input type="hidden" name="user_profil_edit" value="1">
 
 	</div>
 

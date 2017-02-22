@@ -160,7 +160,7 @@
 			if ($logon_user_id)
 				$logon_note = '';
 			else
-				$logon_note = _base::escape_string("wrong ".$_POST['login_user']."/".$_POST['login_pass']);
+				$logon_note = _base::escape_string("wrong ".$org_id."/".$user."/".$pass);
 
 			/*
 			if (version_compare(PHP_VERSION, '5.3.0') >= 0)

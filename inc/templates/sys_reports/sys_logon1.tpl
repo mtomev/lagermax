@@ -9,20 +9,19 @@
 			</select>
 		</span>
 
-		<span class="">
-			<span class="">&nbsp;&nbsp;</span>
-			{#from_date#}
-			<input name="from_date" id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.sys_logon.from_date}">
+		<span class="">&nbsp;&nbsp;</span>
+		{#from_date#}
+		<input name="from_date" id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.sys_logon.from_date}">
 
-			<span class="">&nbsp;&nbsp;</span>
-			{#to_date#}
-			<input name="to_date" id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.sys_logon.to_date}">
+		<span class="">&nbsp;&nbsp;</span>
+		{#to_date#}
+		<input name="to_date" id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.sys_logon.to_date}">
 
 
-			<span class="">&nbsp;&nbsp;</span>
-			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
-		</span>
+		<span class="">&nbsp;&nbsp;</span>
+		<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
 
+		{include file='main_menu/list_search.tpl'}
 	</div>
 
 	<div>
