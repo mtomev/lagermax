@@ -51,8 +51,8 @@
 						</div>
 					</div>
 
-					{* за склад 2. Консолидирани доставки (BBXD) - тип Бус / Камион *}
-					{if $data.warehouse_type == 2}
+					{* за '2'-BBXD - тип Бус / Камион *}
+					{if $data.warehouse_type == '2'}
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_truck_type#}</div>
 						<div class="table-cell">
@@ -193,8 +193,8 @@
 					}
 				},
 
-				/*{if $data.warehouse_type == 3 || $data.warehouse_type == 4}*/
-				// Метро магазин - само за склад 3. и 4.
+				/*{if $data.warehouse_type == '3'}*/
+				// Метро магазин - само за 3 PAXD
 				// shop_name, shop_id
 				{ title: "{#shop_name#}", name: 'shop_name', data: 'shop_name', className: "",
 					render: function ( data, type, row ) {
@@ -221,7 +221,7 @@
 						return shtml;
 					}
 				},
-				/*{if $data.warehouse_type != 1}*/
+				/*{if $data.warehouse_type != '1'}*/
 				// qty_pack
 				{ title: "{#qty_pack#}", name: 'qty_pack', data: 'qty_pack', className: "dt-right sum_footer_cnt",
 					render: function ( data, type, row ) {
@@ -239,7 +239,7 @@
 				},
 				/*{/if}*/
 
-				/*{if $data.warehouse_type != 1}*/
+				/*{if $data.warehouse_type != '1'}*/
 				// weight
 				{ title: "{#weight#}", name: 'weight', data: 'weight', className: "dt-right sum_footer_qty",
 					render: function ( data, type, row ) {
@@ -251,7 +251,7 @@
 					}
 				},
 				/*{/if}*/
-				/*{if $data.warehouse_type != 1}*/
+				/*{if $data.warehouse_type != '1'}*/
 				// volume
 				{ title: "{#volume#}", name: 'volume', data: 'volume', className: "dt-right sum_footer_qty",
 					render: function ( data, type, row ) {
@@ -288,7 +288,7 @@
 				$footer.html('<button id="btn_addLine" class="add-line"><span>{#btn_addLine#}</span></button>');
 				
 				var qty_pallet_calc = datatable_get_footer_value(api, 'qty_pallet')
-				/*{if $data.warehouse_type != 1}*/
+				/*{if $data.warehouse_type != '1'}*/
 					+datatable_get_footer_value(api, 'qty_pack')/{$data.w_pack2pallet|default:1}
 				/*{/if}*/
 					;
@@ -431,8 +431,8 @@
 			}
 
 			var shop = {};
-			/*{if $data.warehouse_type == 3 || $data.warehouse_type == 4}*/
-			// За склад 3. и 4. - максимум 3 реда за един Метро магазин
+			/*{if $data.warehouse_type == '3'}*/
+			// За 3 PAXD - максимум 3 реда за един Метро магазин
 			// - ако има повече от един ред за един Метро магазин, то Метро код на доставчик трябва да е различен за всеки ред
 			for (var i = 0, len = self.data_line.length; i < len; i++) {
 				shop['s'+self.data_line[i].shop_id] = {
@@ -454,7 +454,7 @@
 					return false;
 
 				var qty_req_message = '{#qty_pallet#}';
-				/*{if $data.warehouse_type != 1}*/
+				/*{if $data.warehouse_type != '1'}*/
 				var qty_req_message = '{#qty_pallet#} или {#qty_pack#}';
 				/*{/if}*/
 				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='qty_pallet'].mandatory", '#nomedit'), qty_req_message))
@@ -467,9 +467,9 @@
 					return false;
 
 
-				/*{if $data.warehouse_type == 3 || $data.warehouse_type == 4}*/
+				/*{if $data.warehouse_type == '3'}*/
 				shop['s'+self.data_line[i].shop_id].row_count++;
-				// За склад 3. и 4. - максимум 3 реда за един Метро магазин
+				// За 3 PAXD - максимум 3 реда за един Метро магазин
 				if (shop['s'+self.data_line[i].shop_id].row_count > 3) {
 					fnShowErrorMessage('{#title_attention#}', '{#max_3rows_per_shop#}!');
 					return false;

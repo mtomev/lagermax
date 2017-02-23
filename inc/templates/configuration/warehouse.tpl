@@ -46,7 +46,8 @@
 				{ title: "{#w_max_pallet#}", data: 'w_max_pallet', className: "dt-right", render: EsCon.formatCountHideZero },
 				{ title: "{#w_pack2pallet#}", data: 'w_pack2pallet', className: "dt-right", render: EsCon.formatCountHideZero },
 
-				{ title: "{#warehouse_template#}", data: 'warehouse_template' },
+				//{ title: "{#warehouse_template#}", data: 'warehouse_template' },
+				{ title: "{#warehouse_type#}", data: 'warehouse_type', render: warehouse_type },
 				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding",
 					render: function ( data, type, row ) {
 						return displayCheckbox(row.is_active);

@@ -607,6 +607,17 @@
 			}
 		else return data;
 	}
+	function warehouse_type( data, type, row, meta ) {
+		if (typeof(type)==='undefined') type = 'display';
+		if ( type ==='display')
+			switch (data) {
+				case '1': return '{#warehouse_type_1#}';
+				case '2': return '{#warehouse_type_2#}';
+				case '3': return '{#warehouse_type_3#}';
+				default: return '';
+			}
+		else return data;
+	}
 
 	function calendar_is_working_day( data, type, row, meta ) {
 		if (typeof(type)==='undefined') type = 'display';

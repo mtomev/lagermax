@@ -47,12 +47,14 @@
 				<input id="w_interval" class="number-small mandatory calc_timeslots" data-type="Count" type="text" name="w_interval" value="{$data.w_interval}">
 			</div>
 		</div>
+		{*
 		<div class="table-row">
 			<div class="table-cell-label">{#w_count#}</div>
 			<div class="table-cell">
 				<input id="w_count" class="number-small mandatory" data-type="Count" type="text" name="w_count" value="{$data.w_count}">
 			</div>
 		</div>
+		*}
 		<div class="table-row">
 			<div class="table-cell-label">{#w_max_pallet#}</div>
 			<div class="table-cell">
@@ -72,10 +74,22 @@
 	</div>
 
 	<div style="clear: left;">
+		{*
 		<div class="table-row">
 			<div class="table-cell-label">{#warehouse_template#}</div>
 			<div class="table-cell">
 				<input id="warehouse_template" class="text10 mandatory" type="text" maxlength="{$data.field_width.warehouse_template}" name="warehouse_template" value="{$data.warehouse_template}">
+			</div>
+		</div>
+		*}
+		<input type="hidden" id="warehouse_template" name="warehouse_template" value="{$data.warehouse_template}">
+
+		<div class="table-row">
+			<div class="table-cell-label">{#warehouse_type#}</div>
+			<div class="table-cell">
+				<select id="warehouse_type" name="warehouse_type" class="text10 mandatory"> 
+					{html_options options=$select_warehouse_type selected=$data.warehouse_type}
+				</select>
 			</div>
 		</div>
 		

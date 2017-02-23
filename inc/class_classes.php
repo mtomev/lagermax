@@ -313,6 +313,18 @@
 		}
 
 
+		public static function get_select_warehouse_type($smarty_var = null) {
+			if (!$smarty_var) $smarty_var = 'select_warehouse_type';
+			$temp['0'] = '&nbsp;';
+			$temp['1'] = self::$smarty->getConfigVars('warehouse_type_1');
+			$temp['2'] = self::$smarty->getConfigVars('warehouse_type_2');
+			$temp['3'] = self::$smarty->getConfigVars('warehouse_type_3');
+
+			self::$smarty->assign ($smarty_var, $temp);
+			return $temp;
+		}
+
+
 
 		public static function get_lookup_field($table, $field_id, $id, $field_name) {
 			if ($id != 0) {

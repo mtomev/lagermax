@@ -210,8 +210,12 @@
 				// Ако е ново Авизо
 				if (!_base::CheckAccess('aviso_add')) return;
 				$data['warehouse_id'] = $warehouse_id;
-				$warehouse_template = _base::get_lookup_field('warehouse', 'warehouse_id', $data['warehouse_id'], 'warehouse_template');
-				$data['warehouse_template'] = $warehouse_template;
+				// Дефиницията на склада
+				$warehouse = _base::select_sql("select * from warehouse where warehouse_id = $warehouse_id");
+				$data['warehouse_template'] = $warehouse['warehouse_template'];
+				$data['w_pack2pallet'] = $warehouse['w_pack2pallet'];
+				$data['warehouse_type'] = $warehouse['warehouse_type'];
+
 				if (intVal($_SESSION['userdata']['org_id']))
 					$data['org_id'] = $_SESSION['userdata']['org_id'];
 				else
@@ -219,7 +223,7 @@
 					$data['org_id'] = $_SESSION['aviso']['org_id'];
 				$data['aviso_truck_type'] = '0';
 				$data['aviso_status'] = '0';
-				$data['w_pack2pallet'] = _base::get_lookup_field('warehouse', 'warehouse_id', $data['warehouse_id'], 'w_pack2pallet');
+
 				$data['aviso_driver_name'] = $_SESSION['userdata']['aviso_driver_name'];
 				$data['aviso_driver_phone'] = $_SESSION['userdata']['aviso_driver_phone'];
 			}
@@ -228,7 +232,6 @@
 				if (!_base::CheckGrant('aviso_view'))
 					if (!_base::CheckAccess('aviso_edit')) return;
 				$warehouse_id = intVal($data['warehouse_id']);
-				$warehouse_template = $data['warehouse_template'];
 				
 				// Ако Авизото е старо и потребителя няма право view_all_suppliers "Достъп до всички Доставчици", да не може да го записва
 				if (!$_SESSION['userdata']['grants']['view_all_suppliers']) {
@@ -249,7 +252,7 @@
 					}
 				}
 			}
-			$data['warehouse_type'] = $data['warehouse_id'];
+			$warehouse_template = $data['warehouse_template'];
 			$_SESSION['display_path'] = "aviso/aviso_edit_".$warehouse_template.".tpl";
 
 			$this->smarty->assign ('data', $data);
@@ -673,7 +676,7 @@
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
 			$aviso = _base::sql_fetch_assoc($query_result);
 			_base::sql_free_result($query_result);
-			$warehouse_type = $aviso['warehouse_id'];
+			$warehouse_type = $aviso['warehouse_type'];
 
 			// Данните от редовете
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
@@ -780,8 +783,8 @@
 			$pdf->SetFont('Calibri','B',11);
 			$pdf->Ln();
 			// Метро магазин, Доставчик Номер, Поръчка, ПАЛЕТИ Бр., Кг, куб. м.,  КОЛЕТИ Бр., Кг, куб. м.
-			// Метро магазин - само за склад 3. и 4. PAXD
-			if ($warehouse_type == 3 or $warehouse_type == 4) {
+			// Метро магазин - само за '3' PAXD
+			if ($warehouse_type == '3') {
 				$w = array(50, 20, 30, 10,20,15, 10,20,15);
 			} else {
 				$w = array(50, 20, 30, 10,20,15, 10,20,15);
@@ -789,7 +792,7 @@
 			$i = 0;
 			// Заглавен ред на таблицата
 			$y = $pdf->GetY();
-			if ($warehouse_type == 3 or $warehouse_type == 4)
+			if ($warehouse_type == '3')
 				$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', "Метро магазин"), 1, 0, 'C');
 			else
 				$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', ""), 1, 0, 'C');

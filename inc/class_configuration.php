@@ -149,8 +149,15 @@
 			$id = $_REQUEST['p1'];
 
 			_base::get_select_list('w_group');
+			_base::get_select_warehouse_type();
 
 			$data = _base::nomen_list_edit('warehouse', $id, true);
+			
+			// При нов, някои подразбиращи се стойности
+			if (!$id) {
+				$data['warehouse_template'] = '1';
+				$data['warehouse_type'] = '0';
+			}
 
 			$this->smarty->assign ('data', $data);
 			$_SESSION['warehouse_id'] = $id;
@@ -177,6 +184,7 @@
 			$query->AddParam('w_max_pallet', 'n', 0);
 			$query->AddParam('w_pack2pallet', 'n', 0);
 			$query->AddParam('warehouse_template');
+			$query->AddParam('warehouse_type');
 			$query->AddParam('is_active', 'c');
 			if ($id != 0) {
 				$query->update([$table."_id" => $id]);

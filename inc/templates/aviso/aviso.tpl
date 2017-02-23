@@ -111,7 +111,7 @@
 			oTable.rows().every( function () {
 				var row = this;
 				if (row.data().{$nomen_id} == id) {
-					row.select();
+					row.select().show().draw(false);
 					return false;
 				}
 			});
