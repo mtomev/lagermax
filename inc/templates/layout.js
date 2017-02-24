@@ -43,10 +43,12 @@
 			"processing": "Processing...",
 		},
 
-			//rowId: "id"+'id',
+		rowId: 'id',
+		/*
 		"createdRow": function( row, data, dataIndex ) {
 			$(row).attr('id', 'id-'+data['id']);
 		},
+		*/
 
 		colReorder: false,
 
@@ -65,6 +67,8 @@
 		var page_info = this.table().page.info();
 		// Get row index
 		var new_row_index = this.index();
+		if (new_row_index === undefined)
+			return this;
 		// Row position
 		var row_position = this.table().rows()[0].indexOf( new_row_index );
 		// Already on right page ?
@@ -77,6 +81,18 @@
 		// Go to that page
 		this.table().page( page_to_display );
 		// Return row object
+		return this;
+	});
+	// https://github.com/DataTables/Plugins/blob/master/api/page.jumpToData().js
+	// table.page.jumpToData( "Allan Jardine", 0 );
+	$.fn.dataTable.Api.register( 'page.jumpToData()', function ( data, column ) {
+		var pos = this.column(column, { order:'current' }).data().indexOf( data );
+
+		if ( pos >= 0 ) {
+			var page = Math.floor( pos / this.page.info().length );
+			this.page( page ).draw( false );
+		}
+
 		return this;
 	});
 

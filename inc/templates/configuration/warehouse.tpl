@@ -57,15 +57,9 @@
 
 			// Да маркираме като selected последно редактирания запис
 			initComplete: function () {
-				/*{assign var="nomen_id" value="{$smarty.session.table_edit}_id"}*/
-				var id = edit_id || {$smarty.session.$nomen_id|default:0};
-				this.api().rows().every( function () {
-					var row = this;
-					if (row.data().{$nomen_id} == id) {
-						row.select();
-					return false;
-				}
-				});
+				var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
+				this.api().rows('#'+id).select();
+				this.api().row({ selected: true }).show().draw(false);
 			}
 		}); // Datatable
 		datatable_add_btn_excel();

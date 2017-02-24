@@ -54,8 +54,9 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
-			// aviso_date, warehouse_code, aviso_time, shop_name
-			order: [[1, 'asc'], [2, 'asc'], [3, 'asc'], [4, 'asc']],
+			// aviso_date, warehouse_code, aviso_time, aviso_id, shop_name
+			order: [[1, 'asc'], [2, 'asc'], [3, 'asc'], [0, 'asc'], [4, 'asc']],
+
 			"ajax": function (data, callback, settings) {
 				var api = this.api();
 				api.clear().columns().search('');
@@ -108,7 +109,7 @@
 			},
 			*/
 			columns: [
-				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_aviso_edit },
+				{ title: "#", data: 'aviso_id', className: "dt-center td-no-padding", render: display_aviso_edit },
 
 				{ title: "{#aviso_date#}", name: 'aviso_date', data: 'aviso_date', className: "dt-center auto_filter",	render: EsCon.formatDate },
 				{ title: "{#warehouse_code#}", name: 'warehouse_code', data: 'warehouse_code', className: "auto_filter" },
@@ -158,15 +159,20 @@
 			datatable_auto_filter_column(oTable, 'aviso_status', aviso_status, false);
 
 			// Да маркираме като selected последно редактирания запис
-			/*{assign var="nomen_id" value="{$smarty.session.table_edit}_id"}*/
-			var id = edit_id || {$smarty.session.$nomen_id|default:0};
-			oTable.rows().every( function () {
-				var row = this;
-				if (row.data().{$nomen_id} == id) {
-					row.select();
-					return false;
-				}
-			});
+			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
+//var local_start = Date.now();
+			// По oTable.data()
+			var data = oTable.data();
+			var ids = [];
+			for (var i = 0, len = data.length; i < len; i++) {
+				if (data[i].aviso_id == id) 
+					ids.push('#'+data[i].aviso_id+'-'+data[i].aviso_line_id);
+			}
+			oTable.rows(ids).select();
+			// Те това е бавното - .draw(false) !!!
+			//oTable.row({ selected: true }).show().draw(false);
+//console.log('oTable.rows().every '+(Date.now() - local_start));
+
 
 			// Заради Иконата за Upload
 			$("#table_id tbody tr").on("click", 'td input, td select, td a', function() {

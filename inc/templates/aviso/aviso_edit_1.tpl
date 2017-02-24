@@ -177,7 +177,7 @@
 					render: function ( data, type, row ) {
 						var shtml  = '<select row_id="'+row.id+'" ';
 						shtml += 'name="org_metro_code" class="mandatory">';
-						shtml += generate_select_option_2D(self.org_metro_list, row.org_metro_code, true);
+						shtml += generate_select_option_2D(self.org_metro_list, row.org_metro_code);
 						shtml += '</select>';
 						return shtml;
 					}
@@ -199,7 +199,7 @@
 				{ title: "{#shop_name#}", name: 'shop_name', data: 'shop_name', className: "",
 					render: function ( data, type, row ) {
 						var shtml  = '<select row_id="'+row.id+'" name="shop_id" class="mandatory">';
-						shtml += generate_select_option_2D(self.shop_list, row.shop_id, true);
+						shtml += generate_select_option_2D(self.shop_list, row.shop_id);
 						shtml += '</select>';
 						return shtml;
 					}
@@ -347,6 +347,10 @@
 				data.qty_pack = '0';
 				data.weight = '0';
 				data.volume = '0';
+				
+				// Ако има само един метро код на Доставчки
+				if (self.org_metro_list.length == 2)
+					data.org_metro_code = self.org_metro_list[1].id;
 				
 				self.data_line.push(data);
 				var edit_row = self.oTableLine.row.add( data )

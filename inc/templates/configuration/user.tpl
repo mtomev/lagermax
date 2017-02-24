@@ -110,16 +110,9 @@
 			});
 
 			// Да маркираме като selected последно редактирания запис
-			/*{assign var="nomen_id" value="{$smarty.session.table_edit}_id"}*/
-			var id = edit_id || {$smarty.session.$nomen_id|default:0};
-			oTable.rows().every( function () {
-				var row = this;
-				//if (row.data().{$smarty.session.table_edit}_id == id) {
-				if (row.data().{$nomen_id} == id) {
-					row.select();
-					return false;
-				}
-			});
+			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
+			oTable.rows('#'+id).select();
+			oTable.row({ selected: true }).show().draw(false);
 		}
 
 		// Добавяне на tfoot

@@ -106,15 +106,21 @@
 			datatable_auto_filter_column(oTable, 'aviso_status', aviso_status, false);
 
 			// Да маркираме като selected последно редактирания запис
-			{assign var="nomen_id" value="{$smarty.session.table_edit}_id"}
-			var id = edit_id || {$smarty.session.$nomen_id|default:0};
+			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
+//var local_start = Date.now();
+			oTable.rows('#'+id).select();
+			// Те това е бавното - show() !!!
+			oTable.row({ selected: true }).show().draw(false);
+			/*
 			oTable.rows().every( function () {
 				var row = this;
-				if (row.data().{$nomen_id} == id) {
+				if (row.data().id == id) {
 					row.select().show().draw(false);
 					return false;
 				}
 			});
+			*/
+//console.log('oTable.rows().every '+(Date.now() - local_start));
 
 			// Заради Иконата за Upload
 			$("#table_id tbody tr").on("click", 'td input, td select, td a', function() {

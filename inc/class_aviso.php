@@ -154,14 +154,13 @@
 			if ($_SESSION[$sub_menu]['where_add'])
 				$where .= $_SESSION[$sub_menu]['where_add'];
 
-			// Подредени по най-новите първи
-			$sql_query = "select view_aviso_detail.*, view_aviso_detail.aviso_id as field_id
+			$sql_query = "select view_aviso_detail.*
 				from view_aviso_detail 
 				$where";
 			$query_result = _base::get_query_result($sql_query);
 			$data = array();
 			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
-				$data[] = $query_data + array('id' => $query_data['field_id']);
+				$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
 			}
 			_base::sql_free_result($query_result);
 			//echo json_encode($data);
