@@ -1,3 +1,4 @@
+{$dont_include_lang=true}
 {extends file="layout.tpl"}
 {block name=content}
 <div id="main" {*class="mfp-inline-holder"*}>

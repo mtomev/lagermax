@@ -170,7 +170,7 @@
 					fnShowErrorMessage('{#title_error#}', result);
 					return;
 				}
-				if (!edit_row) return;
+				if (!edit_row && !edit_add_new) return;
 				try {
 					if (!edit_add_new)
 						edit_row.data(data);

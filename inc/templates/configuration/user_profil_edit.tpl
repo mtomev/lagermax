@@ -14,6 +14,7 @@
 			<div class="table-cell-label">{#user_password#}</div>
 			<div class="table-cell">
 				<input id="user_password" class="text30 mandatory" type="text" maxlength="{$data.field_width.user_password}" name="user_password" value="{$data.user_password}">
+				<button class="submit_button" id="gen_password" title="{#btn_gen_password_title#}"><span>{#btn_gen_password#}</span></button>
 			</div>
 		</div>
 		<div class="table-row">
@@ -141,6 +142,15 @@
 				}
 				EsCon.set_mandatory($('#nomedit #warehouse_id.mandatory'));
 			} // success
+		});
+	});
+
+	$('#gen_password').click (function () {
+		$.ajax({
+			url: '/configuration/ajax_gen_password',
+			success: function (result) {
+				$('#user_password', '#nomedit').val(result);
+			}
 		});
 	});
 

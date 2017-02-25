@@ -14,6 +14,7 @@
 			<div class="table-cell-label">{#user_password#}</div>
 			<div class="table-cell">
 				<input id="user_password" class="text30 mandatory" type="text" maxlength="{$data.field_width.user_password}" name="user_password" value="{$data.user_password}">
+				<button class="submit_button" id="gen_password" title="{#btn_gen_password_title#}"><span>{#btn_gen_password#}</span></button>
 			</div>
 		</div>
 		<div class="table-row">
@@ -95,28 +96,30 @@
 		</div>
 		<hr>
 
-		<div class="table-row">
-			<div class="table-cell-label"></div>
-			<div class="table-cell">
-				<input id="email_sended" class="" type="checkbox" name="email_sended" value="1" {if $data.email_sended == '1'}checked="checked"{/if}>&nbsp;email sended
+		<div style="float: left;">
+			<div class="table-row">
+				<div class="table-cell-label"></div>
+				<div class="table-cell">
+					<input id="email_sended" class="" type="checkbox" name="email_sended" value="1" {if $data.email_sended == '1'}checked="checked"{/if}>&nbsp;email sended
+				</div>
+			</div>
+
+			<div class="table-row">
+				<div class="table-cell-label"></div>
+				<div class="table-cell">
+					<input id="is_active" class="" type="checkbox" name="is_active" value="1" {if $data.is_active}checked="checked"{/if}>&nbsp;{#is_active#}
+				</div>
 			</div>
 		</div>
 
-		<div class="table-row">
-			<div class="table-cell-label"></div>
-			<div class="table-cell">
-				<input id="is_active" class="" type="checkbox" name="is_active" value="1" {if $data.is_active}checked="checked"{/if}>&nbsp;{#is_active#}
+		<div style="float: left; margin-left:40px;">
+			<div class="table-row">
+				<div class="table-cell-label"></div>
+				<div class="table-cell">
+					<button class="submit_button" id="btn_test_email"><span>{#btn_test_email#}</span></button>
+				</div>
 			</div>
 		</div>
-
-		{if $data.id > 0}
-		<div class="table-row">
-			<div class="table-cell-label"></div>
-			<div class="table-cell">
-				<button class="submit_button" id="test_email"><span>mail to: {$data.user_email}</span></button>
-			</div>
-		</div>
-		{/if}
 
 	</div>
 
@@ -124,14 +127,18 @@
 </div>
 
 <script type="text/javascript">
-	$('#test_email').click (function () {
+	$('#btn_test_email').click (function () {
 		var user_email = $('#user_email', '#nomedit').val();
 		if (!user_email) return false;
 		saveData(false, function() {
 			waitingDialog('sending to {$data.full_name} {$data.user_email}');
-			
+			if ({$data.id} > 0)
+				var url = '/configuration/send_test_mail/{$data.user_id}';
+			else
+				var url = '/configuration/send_test_mail/-1';
+
 			$.ajax({
-				url: '/configuration/send_test_mail/{$data.user_id}',
+				url: url,
 				data: $('#edit :input').serialize(),
 				dataType: 'html',
 				//timeout: 5000,
@@ -139,9 +146,9 @@
 					closeWaitingDialog();
 					if (result) {
 						fnShowErrorMessage('', result);
-						return false;
+						if ({$data.id} > 0)
+							return false;
 					}
-					if (typeof(fancyboxSaved) == 'function') fancyboxSaved();
 					($.magnificPopup.instance).close();
 				}
 			});
@@ -166,9 +173,12 @@
 	});
 
 	$('#user_email', '#nomedit').change(function () {
-		var user_email = $('#user_email', '#nomedit').val();
-		$('#test_email span', '#nomedit').html('mail to: '+user_email);
+		if ($('#user_email', '#nomedit').val())
+			$('#btn_test_email', '#nomedit').show();
+		else
+			$('#btn_test_email', '#nomedit').hide();
 	});
+	$('#user_email', '#nomedit').trigger('change');
 
 	// При смяна на w_group_id, да изтегля списъка от складовете
 	// w_group_id, aviso_date, aviso_time, брой палети
@@ -197,6 +207,15 @@
 				}
 				EsCon.set_mandatory($('#nomedit #warehouse_id.mandatory'));
 			} // success
+		});
+	});
+
+	$('#gen_password').click (function () {
+		$.ajax({
+			url: '/configuration/ajax_gen_password',
+			success: function (result) {
+				$('#user_password', '#nomedit').val(result);
+			}
 		});
 	});
 

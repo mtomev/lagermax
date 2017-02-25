@@ -1,4 +1,5 @@
 <?php
+	//require_once(INC_DIR . '/class_classes.php');
 	foreach (glob (INC_DIR . '/class_*.php') as $filename) {
 		require_once ($filename);
 	}

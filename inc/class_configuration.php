@@ -70,25 +70,6 @@
 			echo json_encode(array('data' => $data));
 		}
 
-		function send_test_mail() {
-			// user_id
-			$user_id = $_REQUEST['p1'];
-			if (!$user_id) return;
-
-			$data_mail = _base::nomen_list_edit('user', $user_id, true, null, null, false);
-
-			if ($data_mail['user_email']) {
-				for($i=1; $i<=1; $i++) {
-					if (!_base::send_user_mail($data_mail, false)) return;
-				}
-				_base::start_transaction();
-				$sql_query = "UPDATE `user` set email_sended = '1'"
-					. PHP_EOL . " where user_id = $user_id";
-				_base::execute_sql($sql_query);
-				_base::commit_transaction();
-			}
-		}
-
 
 		function mass_mailing () {
 			// Изпращане на мейли в групи от по 100
@@ -628,6 +609,32 @@
 			}
 
 			return true;
+		}
+
+		function send_test_mail() {
+			// user_id
+			$user_id = $_REQUEST['p1'];
+			if (!$user_id) return;
+			// Ако -1, то е изпращане на мейл при нов потребител
+			if ($user_id < 0)
+				$user_id = $_SESSION['user_id'];
+
+			$data_mail = _base::nomen_list_edit('user', $user_id, true, null, null, false);
+
+			if ($data_mail['user_email']) {
+				for($i=1; $i<=1; $i++) {
+					if (!_base::send_user_mail($data_mail, false)) return;
+				}
+				_base::start_transaction();
+				$sql_query = "UPDATE `user` set email_sended = '1'"
+					. PHP_EOL . " where user_id = $user_id";
+				_base::execute_sql($sql_query);
+				_base::commit_transaction();
+			}
+		}
+
+		function ajax_gen_password () {
+			echo _base::random_password();
 		}
 
 

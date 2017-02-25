@@ -90,7 +90,9 @@
 	<div style="padding-right: 10px;">
 		<div style="margin-left: 10px;">
 			<button id="logout_button" class="submit_button"><span>{#btn_logout#}</span></button>
+			{if !$dont_include_lang}
 			{include file='main_menu/sidebar_lang.tpl'}
+			{/if}
 		</div>
 		<div class="a-href" style="margin-top: 10px; padding: 4px 10px;">
 		<a rel="/configuration/user_profil_edit" onclick="showMFP(this.rel)" style="cursor: pointer;" title="{#edit_profil_title#}">{$smarty.session.userdata.user_name}</a>

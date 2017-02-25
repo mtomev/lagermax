@@ -19,7 +19,8 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
-			order: [[4, 'asc']],
+			// 4 org_name, 1 user_name
+			order: [[4, 'asc'], [1, 'asc']],
 			//data: { },
 			ajax: {
 				url: '/configuration/ajax_list/user',
