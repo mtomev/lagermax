@@ -188,6 +188,11 @@
 			$id = $_REQUEST['p1'];
 
 			if ($_POST{'process'} == 'delete' && $id) {
+				if (_base::check_used_id('aviso', $id, 'warehouse_id')) {
+					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
+					_base::show_error($message);
+				}
+
 				$sql_query = "DELETE FROM warehouse WHERE warehouse_id = $id";
 				_base::execute_sql($sql_query);
 
@@ -252,6 +257,11 @@
 			$id = $_REQUEST['p1'];
 
 			if ($_POST{'process'} == 'delete' && $id) {
+				if (_base::check_used_id('warehouse', $id, 'w_group_id')) {
+					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
+					_base::show_error($message);
+				}
+
 				$sql_query = "DELETE FROM w_group WHERE w_group_id = $id";
 				_base::execute_sql($sql_query);
 
@@ -371,11 +381,20 @@
 			$id = $_REQUEST['p1'];
 
 			if ($_POST{'process'} == 'delete' && $id) {
+				if (_base::check_used_id('aviso', $id, 'org_id')) {
+					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
+					_base::show_error($message);
+				}
+
+				_base::start_transaction();
+				
 				$sql_query = "DELETE FROM org WHERE org_id = $id";
 				_base::execute_sql($sql_query);
 
 				$sql_query = "DELETE FROM org_metro WHERE org_id = $id";
 				_base::execute_sql($sql_query);
+
+				_base::commit_transaction();
 
 				unset($_SESSION{'org_id'});
 				_base::put_sys_oper(__METHOD__, 'delete', $_SESSION['table_edit'], $id);
@@ -440,8 +459,17 @@
 			$id = $_REQUEST['p1'];
 
 			if ($_POST{'process'} == 'delete' && $id) {
+				if (_base::check_used_id('aviso_line', $id, 'shop_id')) {
+					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
+					_base::show_error($message);
+				}
+
+				_base::start_transaction();
+
 				$sql_query = "DELETE FROM shop WHERE shop_id = $id";
 				_base::execute_sql($sql_query);
+
+				_base::commit_transaction();
 
 				unset($_SESSION{'shop_id'});
 				_base::put_sys_oper(__METHOD__, 'delete', $_SESSION['table_edit'], $id);
@@ -723,6 +751,11 @@
 			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
+				if (_base::check_used_id('user', $id, 'user_role_id')) {
+					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
+					_base::show_error($message);
+				}
+
 				$sql_query = "DELETE FROM user_role WHERE user_role_id = $id";
 				_base::execute_sql($sql_query);
 				unset($_SESSION['user_role_id']);

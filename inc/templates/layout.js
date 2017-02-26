@@ -167,7 +167,7 @@
 				try {
 					var data = JSON.parse(result)
 				} catch(err) {
-					fnShowErrorMessage('{#title_error#}', result);
+					fnShowErrorMessage('', result);
 					return;
 				}
 				if (!edit_row && !edit_add_new) return;
@@ -181,7 +181,7 @@
 					edit_row.draw().show().draw(false);
 					if (typeof callbackSuccess == 'function') callbackSuccess(edit_row);
 				} catch(err) {
-					fnShowErrorMessage('{#title_error#}', err);
+					fnShowErrorMessage('', err);
 				}
 			}
 		});
@@ -262,12 +262,12 @@
 			data: post_data,
 			success: function(html) {
 				if (html.substr(1, 4) == '!DOC') {
-					fnShowErrorMessage('{#title_error#}', '{#access_denied#}');
+					fnShowErrorMessage('', '{#access_denied#}');
 					return false;
 				}
 //console.log(html);
 				if (html.substr(0, 5) == 'Error') {
-					fnShowErrorMessage('{#title_error#}', html);
+					fnShowErrorMessage('', html);
 					return false;
 				}
 				//try {
@@ -277,7 +277,7 @@
 					});
 				/*
 				} catch(err) {
-					fnShowErrorMessage('{#title_error#}', err+'\n'+html);
+					fnShowErrorMessage('', err+'\n'+html);
 				}
 				*/
 			}
@@ -367,10 +367,7 @@
 									($.magnificPopup.instance).close();
 
 								if (result) {
-									console.log(result);
-									console.log(textStatus);
-									console.log(jqXHR);
-									$(error_prepend_elem).prepend( result );
+									fnShowErrorMessage('', result);
 								} else {
 									// callback фукнция, намираща се във <table>.tpl - Тя опреснява реда в таблицата
 									if (typeof(fancyboxDeleted) == 'function') fancyboxDeleted();
@@ -954,6 +951,16 @@
 	}
 
 
+	function select2chosen(el) {
+		var opt = $.extend({
+			width: "15rem",
+			no_results_text: " ",
+			placeholder_text_single: " ",
+			placeholder_text_multiple: " ",
+			//allow_single_deselect: true,
+		}, $(el).data());
+		$(el).chosen(opt).addClass("hasChosen");
+	}
 
 
 	$.ajaxSetup({

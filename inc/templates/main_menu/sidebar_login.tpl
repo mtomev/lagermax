@@ -61,7 +61,7 @@
 				else {
 					$('#display_text').addClass("hidden");
 					if (result)
-						fnShowErrorMessage('{#title_error#}', result);
+						fnShowErrorMessage('', result);
 				}
 			}
 		});
@@ -77,7 +77,7 @@
 				fnShowInfoMessage('', 'Изпратен е мейл на посочения в профила e-mail адрес');
 			} else {
 				if (result)
-					fnShowErrorMessage('{#title_error#}', result);
+					fnShowErrorMessage('', result);
 			}
 		});
 

@@ -61,7 +61,7 @@
 		jQuery.post('/configuration/{$smarty.session.table_edit}_save/{$data.id}', ser_data, function (result) {
 			if (result) {
 				if (typeof(callbackSaveError) == 'function') callbackSaveError();
-				fnShowErrorMessage('{#title_error#}', result);
+				fnShowErrorMessage('', result);
 			} else {
 				if (typeof(fancyboxSaved) == 'function') fancyboxSaved();
 				if (typeof(callBack) == 'function') callBack();

@@ -5,7 +5,7 @@
 	<div class="headerrow" id="headerrow">
 		<span class="">
 			{#w_group_name#}
-			<select class="param" id="w_group_id" name="w_group_id"> 
+			<select class="" id="w_group_id" name="w_group_id"> 
 				{html_options options=$select_w_group selected={$smarty.session.$sub_menu.w_group_id}}
 			</select>
 		</span>

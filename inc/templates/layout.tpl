@@ -35,6 +35,8 @@
 	<link rel="stylesheet" type="text/css" href="/js/DataTables/datatables.min.css"/>
 	<script type="text/javascript" src="/js/DataTables/datatables.min.js"></script>
 
+	<link rel="stylesheet" href="/js/chosen/chosen.min.css" />
+	<script src="/js/chosen/chosen.jquery.min.js"></script>
 
 	{* Винаги трябва да е последно *}
 	<link rel="stylesheet" type="text/css" media="screen" href="/css/layout.css" />

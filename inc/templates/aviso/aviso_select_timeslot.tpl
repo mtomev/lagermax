@@ -90,7 +90,7 @@
 		jQuery.post('/aviso/aviso_save/{$data.id}', EsCon.serialize($('#aviso_edit :input').not('#table_line :input')), function (result) {
 			if (!Number(result)) {
 				closeWaitingDialog();
-				fnShowErrorMessage('{#title_error#}', result);
+				fnShowErrorMessage('', result);
 			}
 			else {
 				clickOpenFile('/aviso/aviso_display/'+result+'/MP_Aviso_'+result+'.pdf');
@@ -106,7 +106,7 @@
 			success: function (result) {
 				if (!Number(result)) {
 					closeWaitingDialog();
-					fnShowErrorMessage('{#title_error#}', result);
+					fnShowErrorMessage('', result);
 				}
 				else {
 					clickOpenFile('/aviso/aviso_display/'+result+'/MP_Aviso_'+result+'.pdf');

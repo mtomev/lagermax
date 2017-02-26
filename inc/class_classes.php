@@ -427,7 +427,7 @@
 					$skip_first--;
 					continue;
 				}
-				$result .= basename($stack['file'])." [".$stack['line']."] => " . $stack['class']."::".$stack['function'] . PHP_EOL;
+				$result .= '  ' . basename($stack['file'])." [".$stack['line']."] => " . $stack['class']."::".$stack['function'] . PHP_EOL;
 			}
 			return $result;
 		}
@@ -465,8 +465,7 @@
 
 			_base::rollback_transaction();
 			_base::commitReadTr();
-//file_put_contents($_SERVER['DOCUMENT_ROOT'].'/tr.log', 'startReadTr' . PHP_EOL, FILE_APPEND);
-//file_put_contents($_SERVER['DOCUMENT_ROOT'].'/tr.log', _base::get_trace(), FILE_APPEND);
+//_base::log_in_file('startReadTr');
 			exit;
 		}
 
@@ -480,42 +479,51 @@
 
 
 		public static function startReadTr() {
-			if (!DB_FIREBIRD) return false;
-
 			if (!self::$WriteTr and !self::$ReadTr) {
-				self::$ReadTr = ibase_trans(IBASE_READ | IBASE_COMMITTED | IBASE_REC_VERSION | IBASE_NOWAIT, self::$dbMain);
+				if (!DB_FIREBIRD) {
+					//self::$ReadTr = mysqli_begin_transaction(self::$mysqli, MYSQLI_TRANS_START_READ_ONLY);
+					self::$ReadTr = mysqli_begin_transaction(self::$mysqli);
+				} else {
+					self::$ReadTr = ibase_trans(IBASE_READ | IBASE_COMMITTED | IBASE_REC_VERSION | IBASE_NOWAIT, self::$dbMain);
+				}
+				_base::log_in_file('startReadTr ' . self::$ReadTr);
 			}
-			return self::$ReadTr;
 		}
 		public static function commitReadTr() {
-			if (!DB_FIREBIRD) return false;
-			
 			if (self::$ReadTr) {
-				ibase_commit(self::$ReadTr);
+				if (!DB_FIREBIRD) {
+					mysqli_commit(self::$mysqli);
+				} else {
+					ibase_commit(self::$ReadTr);
+				}
 				self::$ReadTr = false;
+				_base::log_in_file('commitReadTr');
 			}
 		}
 
 		public static function start_transaction() {
-			// Връща false, ако не е била стартирана преди това и true, ако е била стартирана
-			
+			_base::log_in_file('start_transaction '.self::$transaction_count);
+			// Ако няма реално стартирана WriteTr, то я стартираме, иначе само увеличаваме брояча
 			if (self::$transaction_count > 0)
-				$result = true;
+				self::$transaction_count++;
 			else {
-				if (!DB_FIREBIRD)
+				// проверява се дали има стартирана Read и тя се Commit
+				_base::commitReadTr();
+
+				if (!DB_FIREBIRD) {
 					mysqli_autocommit(self::$mysqli, false);
+					//self::$WriteTr = mysqli_begin_transaction(self::$mysqli, MYSQLI_TRANS_START_READ_WRITE);
+					self::$WriteTr = mysqli_begin_transaction(self::$mysqli);
+				}
 				else {
-					// проверява се дали има стартирана Read и тя се Commit
-					_base::commitReadTr();
 					self::$WriteTr = ibase_trans(IBASE_WRITE | IBASE_COMMITTED | IBASE_REC_VERSION | IBASE_NOWAIT, self::$dbMain);
 				}
-				$result = false;
+				self::$transaction_count++;
+				_base::log_in_file('real start '.self::$transaction_count, false);
 			}
-
-			self::$transaction_count++;
-			return $result;
 		}
 		public static function commit_transaction() {
+			_base::log_in_file('commit_transaction '.self::$transaction_count);
 			if (self::$transaction_count > 1)
 				self::$transaction_count--;
 			else
@@ -526,12 +534,14 @@
 				}
 				else {
 					ibase_commit(self::$WriteTr);
-					self::$WriteTr = false;
 				}
+				self::$WriteTr = false;
 				self::$transaction_count--;
+				_base::log_in_file('real commit '.self::$transaction_count, false);
 			}
 		}
 		public static function rollback_transaction() {
+			_base::log_in_file('rollback_transaction '.self::$transaction_count);
 			if (self::$transaction_count > 0) {
 				if (!DB_FIREBIRD) {
 					mysqli_rollback(self::$mysqli);
@@ -539,9 +549,10 @@
 				}
 				else {
 					ibase_rollback(self::$WriteTr);
-					self::$WriteTr = false;
 				}
+				self::$WriteTr = false;
 				self::$transaction_count--;
+				_base::log_in_file('real rollback '.self::$transaction_count, false);
 			}
 		}
 
@@ -593,12 +604,13 @@
 
 
 		public static function get_query_result($sql_query) {
+			// Ако няма стартирана self::$WriteTr и self::$ReadTr, стартирам self::$ReadTr
+			if (!self::$WriteTr and !self::$ReadTr)
+				_base::startReadTr();
+
 			if (!DB_FIREBIRD)
 				$query_result = mysqli_query(self::$mysqli, $sql_query);
 			else {
-				// Ако няма стартирана self::$WriteTr и self::$ReadTr, стартирам self::$ReadTr
-				if (!self::$WriteTr and !self::$ReadTr)
-					_base::startReadTr();
 				// Ако е стартирана WriteTr се изпълнява в нея, иначе в ReadTr
 				$in_tr = (self::$WriteTr) ? self::$WriteTr : self::$ReadTr;
 				if (!$in_tr)
@@ -862,6 +874,21 @@
 			return false;
 		}
 
+		public static function finish_db_connection() {
+			if (self::$WriteTr)
+				_base::log_in_file('finish WriteTr', false);
+			if (self::$transaction_count > 0)
+				_base::log_in_file('finish transaction_count ' . self::$transaction_count, false);
+			_base::rollback_transaction();
+			_base::commitReadTr();
+			_base::log_in_file('==============', false);
+		}
+		public static function log_in_file($message, $inclide_trace = true) {
+			return;
+			file_put_contents($_SERVER['DOCUMENT_ROOT'].'/tr.log', $message . PHP_EOL, FILE_APPEND);
+			if ($inclide_trace)
+				file_put_contents($_SERVER['DOCUMENT_ROOT'].'/tr.log', _base::get_trace(1), FILE_APPEND);
+		}
 	} // class _base
 
 	class ExecQuery {

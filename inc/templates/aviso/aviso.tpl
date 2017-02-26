@@ -5,7 +5,7 @@
 	<div class="headerrow" id="headerrow">
 		<span class="ellipsis">
 			{#org_name#}
-			<select class="param" id="org_id" name="org_id"> 
+			<select class="select2chosen" id="org_id" name="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
 			</select>
 		</span>
@@ -183,15 +183,19 @@
 
 	var vTable;
 	$(document).ready( function () {
-		vTable = new InitTable;
 
 		EsCon.set_datepicker('.date', '#headerrow');
 		$('.number, .number-small, .date', '#headerrow').on('focus', EsCon.inputEvent.focusin);
 		$('.number, .number-small, .date', '#headerrow').on('change', EsCon.inputEvent.change);
-		$('#headerrow :input').not('#searchbox').on('keydown', function(e) {
+		$('#headerrow :input').not('#searchbox, .chosen-search :input').on('keydown', function(e) {
 			if(e.keyCode == 13) $('#submit_button', '#headerrow').trigger('click');
 		});
 
+		$("select.select2chosen:not(.hasChosen)", '#headerrow').each(function (idx, el) {
+			select2chosen(el);
+		});
+
+		vTable = new InitTable;
 		$('#submit_button', '#headerrow').trigger('click');
 	}); // $(document).ready
 

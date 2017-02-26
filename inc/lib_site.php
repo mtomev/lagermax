@@ -34,9 +34,8 @@
 				if (mysqli_connect_errno()) {
 					echo "Failed to connect to MySQL: " . mysqli_connect_error();
 				}
-				$this->mysqli = $mysqli_conn;
-				_base::$mysqli = $this->mysqli;
-				mysqli_set_charset($this->mysqli, 'utf8');
+				_base::$mysqli = $mysqli_conn;
+				mysqli_set_charset(_base::$mysqli, 'utf8');
 			}
 			else
 			{
@@ -97,8 +96,7 @@
 		}
 
 		function __destruct () {
-			_base::rollback_transaction();
-			_base::commitReadTr();
+			_base::finish_db_connection();
 		}
 
 		public function display () {

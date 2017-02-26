@@ -38,7 +38,7 @@
 	$('#save_button').click (function () {
 		jQuery.post('/main_menu/languages_save/{$clang}', $('#edit :input').serialize(), function (result) {
 			if (result) 
-				fnShowErrorMessage('{#title_error#}', result);
+				fnShowErrorMessage('', result);
 			else
 				window.location.href = '/main_menu/languages';
 		});

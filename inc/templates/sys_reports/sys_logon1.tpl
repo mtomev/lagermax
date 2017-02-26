@@ -4,7 +4,7 @@
 	<div class="headerrow" id="headerrow">
 		<span class="">
 			{#table_user#}
-			<select class="param" id="user_id" name="user_id"> 
+			<select class="" id="user_id" name="user_id"> 
 				{html_options options=$select_user selected={$smarty.session.sys_logon.user_id}}
 			</select>
 		</span>
@@ -91,8 +91,8 @@
 				}
 				catch(err) {
 					closeWaitingDialog();
-					//fnShowErrorMessage('{#title_error#}', err+'\n'+data);
-					fnShowErrorMessage('{#title_error#}', err);
+					//fnShowErrorMessage('', err+'\n'+data);
+					fnShowErrorMessage('', err);
 				}
 			} // success
 		});

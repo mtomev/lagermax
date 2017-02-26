@@ -714,5 +714,36 @@ table.dataTable thead .sorting_desc_disabled {
 	display: none;
 }
 
-
+.chosen-container-single .chosen-single {
+	border-radius: unset;
+	line-height: 21px;
+  background: #fff;
+	height: 23px;
+	margin-top: -3px;
+	box-shadow: unset;
+	border: 1px solid #cfcfcf;
+	padding-left: 4px;
+}
+.chosen-container-single .chosen-single span {
+	margin-right: 20px;
+}
+.chosen-container .chosen-drop {
+	width: auto;
+}
+.chosen-container-single .chosen-drop {
+	border-radius: unset;
+}
+.chosen-container-active.chosen-with-drop .chosen-single {
+  background: #fff;
+}
+.chosen-container .chosen-results {
+	max-height: 400px;
+}
+.chosen-container .chosen-results li {
+	padding: 5px 20px 5px 4px;
+}
+.chosen-container .chosen-results li.highlighted {
+	background: #D7E4FF;
+	color: #000;
+}
 /* ----------------- край на Промени по компонентите ----------------------------*/

@@ -28,7 +28,7 @@
 		<div class="table-row">
 			<div class="table-cell-label">{#table_org#}</div>
 			<div class="table-cell">
-				<select id="org_id" name="org_id" class="text"> 
+				<select id="org_id" name="org_id" class="text select2chosen" data-width="340px;"> 
 					{html_options options=$select_org selected=$data.org_id}
 				</select>
 			</div>
@@ -222,4 +222,9 @@
 	function callbackSave() {
 		return true;
 	}
+
+	$("select.select2chosen:not(.hasChosen)", '#nomedit').each(function (idx, el) {
+		select2chosen(el);
+	});
+
 </script>
