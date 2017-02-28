@@ -336,7 +336,7 @@ table .hidden,
 	border: 1px solid red !important;
 }
 .isAttention {
-	background-color: #FFBCBC !important;
+	background-color: #FFECEC !important;
 }
 select.mandatory.mandatory-empty option {
 	color: black;

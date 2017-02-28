@@ -36,16 +36,50 @@
 	window.history.replaceState({ }, '{#site_title#}', current_url);
 
 	function InitTable () {
-		var self = this;
+		var _self = this;
 		this.mainTable = $("#table_id");
 		this.last_params = {};
+
+		this.SetParams = function() {
+			_self.last_params['org_id'] = $('#org_id', '#headerrow').val();
+
+			_self.last_params['from_date'] = EsCon.getParsedVal($('#from_date', '#headerrow'));
+			_self.last_params['to_date'] = EsCon.getParsedVal($('#to_date', '#headerrow'));
+		}
+		_self.SetParams();
 
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
 			// aviso_date, aviso_time
 			order: [[3, 'asc'], [4, 'asc']],
-			data: {},
+			"ajax": function (data, callback, settings) {
+				var api = this.api();
+				api.clear().columns().search('');
+				$.ajax({
+					url: '/aviso/get_list_aviso',
+					method: "POST",
+					data: _self.last_params,
+					"dataType": "json",
+					"cache": false,
+					success: function (result) {
+						callback( result );
+					},
+					"error": function (xhr, error, thrown) {
+						api.clear().columns().search('').draw();
+						if ( error == "parsererror" ) {
+							//fnShowErrorMessage('', 'Invalid JSON response');
+							fnShowErrorMessage('', xhr.responseText);
+						}
+						else if ( xhr.readyState === 4 ) {
+							fnShowErrorMessage('', 'Ajax error');
+						}
+						else
+							fnShowErrorMessage('', xhr.responseText);
+					}
+				});
+			},
+
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_aviso_edit },
 
@@ -72,7 +106,17 @@
 					}
 				},
 
-				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', render: aviso_status },
+				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', className: "td-no-padding",
+					render: function ( data, type, row ) {
+						if (type !== 'display') return data;
+						data = aviso_status(data, type);
+						/*{if $smarty.session.userdata.grants.aviso_reception_edit == '1' || $smarty.session.userdata.grants.aviso_reception_view == '1'}*/
+						return '<a href="/aviso/aviso_edt_complete/'+row.aviso_id+'" rel="edit_'+row.aviso_id+'" title="{#aviso_complete#}">'+displayDIV100(data)+'</a>';
+						/*{else}*/
+						return displayDIV100(data);
+						/*{/if}*/
+					}
+				},
 
 				// aviso_truck_no
 				{ title: "{#aviso_truck_no#}", data: 'aviso_truck_no' },
@@ -80,6 +124,10 @@
 				{ title: "{#aviso_driver_name#}", data: 'aviso_driver_name' },
 				// aviso_driver_phone
 				{ title: "{#aviso_driver_phone#}", data: 'aviso_driver_phone' },
+
+				{ title: "{#aviso_start_exec#}", data: 'aviso_start_exec', className: "",	render: EsCon.formatDate },
+				{ title: "{#aviso_end_exec#}", data: 'aviso_end_exec', className: "",	render: EsCon.formatDate },
+				{ title: "{#note#}", data: 'aviso_reject_reason', className: "ellipsis" , render: displayEllipses },
 			],
 
 			"footerCallback": function( tfoot, data, start, end, display ) {
@@ -96,6 +144,9 @@
 				});
 			},
 
+			initComplete: function () {
+				_self.select_row();
+			},
 		} // Datatable
 
 		this.select_row = function() {
@@ -129,36 +180,8 @@
 			});
 		}
 
-		this.LoadData = function(params) {
-			if (typeof(params)==='undefined') {
-				params = self.last_params;
-			} else
-				self.last_params = jQuery.extend(true, [], params);
-			waitingDialog();
-			$.ajax({
-				url: '/aviso/get_list_aviso',
-				method: "POST",
-				data: params,
-				success: function (result) {
-					try {
-						if (result)
-							result = JSON.parse(result);
-					}
-					catch(err) {
-						closeWaitingDialog();
-						fnShowErrorMessage('', result);
-						console.log(err);
-						return;
-					}
-					if (result) {
-						oTable.clear().columns().search('').rows.add(result);
-					} else
-						oTable.clear().columns().search('');
-					closeWaitingDialog();
-					oTable.draw();
-					self.select_row();
-				} // success
-			});
+		this.LoadData = function(resetPaging) {
+			oTable.ajax.reload( _self.select_row, resetPaging );
 		}
 
 		// Добавяне на tfoot
@@ -166,24 +189,11 @@
 		oTable = this.mainTable.DataTable(config);
 		datatable_add_btn_excel();
 
-
 		commonInitMFP();
-
 	} // InitTable
-
-	function fancyboxSaved() {
-		vTable.LoadData();
-		//commonFancyboxSaved('/configuration/list_refresh/aviso/' + edit_id, edit_id);
-	}
-	function fancyboxDeleted() {
-		vTable.LoadData();
-		//commonFancyboxDeleted();
-	}
-
 
 	var vTable;
 	$(document).ready( function () {
-
 		EsCon.set_datepicker('.date', '#headerrow');
 		$('.number, .number-small, .date', '#headerrow').on('focus', EsCon.inputEvent.focusin);
 		$('.number, .number-small, .date', '#headerrow').on('change', EsCon.inputEvent.change);
@@ -196,18 +206,19 @@
 		});
 
 		vTable = new InitTable;
-		$('#submit_button', '#headerrow').trigger('click');
 	}); // $(document).ready
 
 
 	$('#submit_button', '#headerrow').click( function () {
-		var params = {};
-		params['org_id'] = $('#org_id', '#headerrow').val();
-
-		params['from_date'] = EsCon.getParsedVal($('#from_date', '#headerrow'));
-		params['to_date'] = EsCon.getParsedVal($('#to_date', '#headerrow'));
-
-		vTable.LoadData(params);
+		vTable.SetParams();
+		vTable.LoadData();
 	});
+
+	function fancyboxSaved() {
+		vTable.LoadData(false);
+	}
+	function fancyboxDeleted() {
+		vTable.LoadData(false);
+	}
 </script>
 {/block}

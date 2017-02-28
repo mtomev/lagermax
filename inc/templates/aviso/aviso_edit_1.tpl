@@ -130,30 +130,15 @@
 	var ref = document.referer;
 	callback_url = "{$callback_url}" || ref;
 
-// Група от общи
-	EsCon.set_datepicker('input.date', '#aviso_edit');
-	// Това се прилага само за показаните със smarty променливи стойности в #aviso_edit, но не и за показаните с рендер функции в таблиците
-	EsCon.set_number_val($('.number, .number-small, .time', '#aviso_edit'));
-	// Да сложим attr placeholder на всички с .mandatory
-	EsCon.set_mandatory($('#aviso_edit .mandatory'));
-
-	// Ще ги задам така, защото по-късно динамично се добавят DOM елементи от същия вид
-	$('#nomedit').on('focus', '.number, .number-small, .date, .time', EsCon.inputEvent.focusin);
-	$('#nomedit').on('change', '.number, .number-small, .date, .time', EsCon.inputEvent.change);
-	$('#nomedit').on('keydown', '.number, .number-small', EsCon.inputEvent.keydown);
-// край на Група от общи
-
-	$('#aviso_status', '#nomedit').val(aviso_status($('#aviso_status', '#nomedit').val()));
-
   // Редовете от Авизото
 	function table_line () {
-		var self = this;
+		var _self = this;
 		this.mainTable = $("#table_line");
 
 		// Съхраняваме data_line, за сравняване на въведените данни - дали има промяна
 		// data_line е json_encode Array [ Object, ... ]
 		this.data_line = {$data_line};
-		this.data_line_old = jQuery.extend(true, [], self.data_line);
+		this.data_line_old = jQuery.extend(true, [], _self.data_line);
 		this.deleted_line = {};
 		this.oTableLine;
 		
@@ -168,7 +153,7 @@
 			"bSort": false,
 			searching: false,
 			fixedHeader: false,
-			data: self.data_line,
+			data: _self.data_line,
 			columns: [
 				{ title: "#", name: 'id', data: 'id', className: "dt-center " },
 
@@ -178,7 +163,7 @@
 					render: function ( data, type, row ) {
 						var shtml  = '<select row_id="'+row.id+'" ';
 						shtml += 'name="org_metro_code" class="mandatory">';
-						shtml += generate_select_option_2D(self.org_metro_list, row.org_metro_code);
+						shtml += generate_select_option_2D(_self.org_metro_list, row.org_metro_code);
 						shtml += '</select>';
 						return shtml;
 					}
@@ -189,7 +174,7 @@
 					render: function ( data, type, row ) {
 						if (!data) data = '';
 						var shtml = '<input type="text" class="text30 mandatory" row_id="'+row.id+'" ';
-						shtml += 'maxlength="'+self.empty_line.field_width.metro_request_no+'" name="metro_request_no" value="'+data+'">';
+						shtml += 'maxlength="'+_self.empty_line.field_width.metro_request_no+'" name="metro_request_no" value="'+data+'">';
 						return shtml;
 					}
 				},
@@ -200,7 +185,7 @@
 				{ title: "{#shop_name#}", name: 'shop_name', data: 'shop_name', className: "",
 					render: function ( data, type, row ) {
 						var shtml  = '<select row_id="'+row.id+'" name="shop_id" class="mandatory">';
-						shtml += generate_select_option_2D(self.shop_list, row.shop_id);
+						shtml += generate_select_option_2D(_self.shop_list, row.shop_id);
 						shtml += '</select>';
 						return shtml;
 					}
@@ -307,40 +292,17 @@
 			else
 				var element = edit_row.node();
 
-			// Трябва да се прикачи на елемент вътре в <tbody>, за да може после да сработи tbody.onclick
-			// Обаче не се разпостранява върху добавените редове, затова го пъхам тук
-			if (!edit_row)
-				$('#table_line tbody tr').on("click", "td input, td select, td textarea", function() {
-					// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-					self.oTableLine.rows().deselect();
-				});
-			else
-				$(element).on("click", "td input, td select, td textarea", function() {
-					// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-					self.oTableLine.rows().deselect();
-				});
-
 			EsCon.set_mandatory($('.mandatory', element));
 		} // localAfterRowAppend
 
 
 		this.TableFinit = function() {
-			// Селектиране на фокусирания ред
-			$('#table_line tbody').on("focus", "td input, td select, td textarea", function(event) {
-				// Ако текущия ред не е selected
-				var edit_row = $(event.target).closest('tr');
-				if (!$(edit_row).hasClass('selected')) {
-					self.oTableLine.rows().deselect();
-					self.oTableLine.row(edit_row).select();
-				}
-			});
-
 			$('#table_line tfoot').on('click', '#btn_addLine', function () {
 				// !!! Трябва да се прави extend с {}, за да стане като Object, а не Array
-				var data = jQuery.extend(true, {}, self.empty_line);
-				self.counter++;
+				var data = jQuery.extend(true, {}, _self.empty_line);
+				_self.counter++;
 				
-				data.id = self.counter.toString();
+				data.id = _self.counter.toString();
 				data.aviso_line_id = data.id;
 				data.real_id = 0;
 
@@ -350,14 +312,14 @@
 				data.volume = '0';
 				
 				// Ако има само един метро код на Доставчки
-				if (self.org_metro_list.length == 2)
-					data.org_metro_code = self.org_metro_list[1].id;
+				if (_self.org_metro_list.length == 2)
+					data.org_metro_code = _self.org_metro_list[1].id;
 				
-				self.data_line.push(data);
-				var edit_row = self.oTableLine.row.add( data )
-				self.oTableLine.rows().deselect();
+				_self.data_line.push(data);
+				var edit_row = _self.oTableLine.row.add( data )
+				_self.oTableLine.rows().deselect();
 				edit_row.draw().select();
-				self.localAfterRowAppend(edit_row);
+				_self.localAfterRowAppend(edit_row);
 				
 				return false;
 			});
@@ -367,14 +329,19 @@
 			$('#btn_addLine', '#nomedit').trigger('click');
 			/*{/if}*/
 
-			self.localAfterRowAppend();
+			_self.localAfterRowAppend();
+
+			$('#table_line tbody').on("click", "input, select, textarea", function() {
+				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
+				_self.oTableLine.rows().deselect();
+			});
 
 			$('#table_line tbody', '#nomedit').on('click', '.delete-line', function () {
-				var row = self.oTableLine.row($(this).parents("tr"));
+				var row = _self.oTableLine.row($(this).parents("tr"));
 				// Ако текущия ред не е selected
 				if (!$(row).hasClass('selected')) {
-					self.oTableLine.rows().deselect();
-					self.oTableLine.row(row).select();
+					_self.oTableLine.rows().deselect();
+					_self.oTableLine.row(row).select();
 				}
 				fnModalDialog('{#Confirm#}', '{#btn_removeLine#}', 
 					function (row) {
@@ -382,12 +349,12 @@
 
 						// Ако е стар запис, добавяме в списъка от deleted_line
 						if (parseInt(data.real_id))
-							self.deleted_line[data.real_id] = data.real_id;
+							_self.deleted_line[data.real_id] = data.real_id;
 
-						self.data_line = self.data_line.filter(function( obj ) {
+						_self.data_line = _self.data_line.filter(function( obj ) {
 							return obj.id !== data.id;
 						});
-						self.data_line_old = self.data_line_old.filter(function( obj ) {
+						_self.data_line_old = _self.data_line_old.filter(function( obj ) {
 							return obj.id !== data.id;
 						});
 
@@ -405,23 +372,23 @@
 					value = $element.prop('checked') ? '1':'0';
 				var name = $element.attr('name');
 				var $row = $element.parents('tr');
-				var data = self.oTableLine.row($row).data();
+				var data = _self.oTableLine.row($row).data();
 				data[name] = value;
 				if (name == 'qty_pallet')
-					self.oTableLine.cell( $row, 'qty_pack:name' ).invalidate();
+					_self.oTableLine.cell( $row, 'qty_pack:name' ).invalidate();
 				if (name == 'qty_pack')
-					self.oTableLine.cell( $row, 'qty_pallet:name' ).invalidate();
+					_self.oTableLine.cell( $row, 'qty_pallet:name' ).invalidate();
 				if (name == 'qty_pallet' || name == 'qty_pack' || name == 'weight' || name == 'volume') {
-					self.oTableLine.draw(false);
+					_self.oTableLine.draw(false);
 				}
 			});
 		}
 
 		// Добавяне на tfoot
-		self.mainTable.append("<tfoot>" + '<tr>' + config.columns.map(function () { return "<td></td>"; }).join("") + '</tr>' + "</tfoot>");
+		_self.mainTable.append("<tfoot>" + '<tr>' + config.columns.map(function () { return "<td></td>"; }).join("") + '</tr>' + "</tfoot>");
 		// Създаваме си таблицата
-		self.oTableLine = self.mainTable.DataTable(config);
-		self.TableFinit();
+		_self.oTableLine = _self.mainTable.DataTable(config);
+		_self.TableFinit();
 
 
 		this.prepareToSave = function() {
@@ -430,7 +397,7 @@
 				$(this).removeClass('isRequired');
 			});
 			// Трябва да има поне един ред
-			if (self.data_line.length == 0) {
+			if (_self.data_line.length == 0) {
 				fnShowErrorMessage('{#title_attention#}', '{#one_row_is_required#}!')
 				return false;
 			}
@@ -439,62 +406,62 @@
 			/*{if $data.warehouse_type == '3'}*/
 			// За 3 PAXD - максимум 3 реда за един Метро магазин
 			// - ако има повече от един ред за един Метро магазин, то Метро код на доставчик трябва да е различен за всеки ред
-			for (var i = 0, len = self.data_line.length; i < len; i++) {
-				shop['s'+self.data_line[i].shop_id] = {
-					shop_id: self.data_line[i].shop_id,
+			for (var i = 0, len = _self.data_line.length; i < len; i++) {
+				shop['s'+_self.data_line[i].shop_id] = {
+					shop_id: _self.data_line[i].shop_id,
 					row_count: 0,
 					org_metro_code: []
 				}
 			}
 			/*{/if}*/
 
-			for (var i = 0, len = self.data_line.length; i < len; i++) {
-				if (!checkRequiredSelect($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='org_metro_code'].mandatory", '#nomedit'), '{#org_metro_code#}'))
+			for (var i = 0, len = _self.data_line.length; i < len; i++) {
+				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='org_metro_code'].mandatory", '#nomedit'), '{#org_metro_code#}'))
 					return false;
 
-				if (!checkRequired($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='metro_request_no'].mandatory", '#nomedit'), '{#metro_request_no#}'))
+				if (!checkRequired($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='metro_request_no'].mandatory", '#nomedit'), '{#metro_request_no#}'))
 					return false;
 
-				if (!checkRequiredSelect($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='shop_id'].mandatory", '#nomedit'), '{#shop_name#}'))
+				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='shop_id'].mandatory", '#nomedit'), '{#shop_name#}'))
 					return false;
 
 				var qty_req_message = '{#qty_pallet#}';
 				/*{if $data.warehouse_type != '1'}*/
 				var qty_req_message = '{#qty_pallet#} или {#qty_pack#}';
 				/*{/if}*/
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='qty_pallet'].mandatory", '#nomedit'), qty_req_message))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pallet'].mandatory", '#nomedit'), qty_req_message))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='qty_pack'].mandatory", '#nomedit'), qty_req_message))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pack'].mandatory", '#nomedit'), qty_req_message))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='weight'].mandatory", '#nomedit'), '{#weight#}'))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='weight'].mandatory", '#nomedit'), '{#weight#}'))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+self.data_line[i].id+" [name='volume'].mandatory", '#nomedit'), '{#volume#}'))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='volume'].mandatory", '#nomedit'), '{#volume#}'))
 					return false;
 
 
 				/*{if $data.warehouse_type == '3'}*/
-				shop['s'+self.data_line[i].shop_id].row_count++;
+				shop['s'+_self.data_line[i].shop_id].row_count++;
 				// За 3 PAXD - максимум 3 реда за един Метро магазин
-				if (shop['s'+self.data_line[i].shop_id].row_count > 3) {
+				if (shop['s'+_self.data_line[i].shop_id].row_count > 3) {
 					fnShowErrorMessage('{#title_attention#}', '{#max_3rows_per_shop#}!');
 					return false;
 				}
 				// - ако има повече от един ред за един Метро магазин, то Метро код на доставчик трябва да е различен за всеки ред
-				for (var j = 0, len1 = shop['s'+self.data_line[i].shop_id].org_metro_code.length; j < len1; j++)
-					if (shop['s'+self.data_line[i].shop_id].org_metro_code[j] == self.data_line[i].org_metro_code) {
+				for (var j = 0, len1 = shop['s'+_self.data_line[i].shop_id].org_metro_code.length; j < len1; j++)
+					if (shop['s'+_self.data_line[i].shop_id].org_metro_code[j] == _self.data_line[i].org_metro_code) {
 						fnShowErrorMessage('{#title_attention#}', '{#org_metro_code_per_row_in_shop#}!');
 						return false;
 					}
-				shop['s'+self.data_line[i].shop_id].org_metro_code.push(self.data_line[i].org_metro_code);
+				shop['s'+_self.data_line[i].shop_id].org_metro_code.push(_self.data_line[i].org_metro_code);
 				/*{/if}*/
 
 
 				// Ако е чисто нов, направо се включва
-				if (self.data_line[i].real_id == 0)
-					data[self.data_line[i].id] = self.data_line[i];
+				if (_self.data_line[i].real_id == 0)
+					data[_self.data_line[i].id] = _self.data_line[i];
 				else
-				if ( !linesIsEquals(self.data_line[i], self.data_line_old[i]) )
-					data[self.data_line[i].id] = self.data_line[i];
+				if ( !linesIsEquals(_self.data_line[i], _self.data_line_old[i]) )
+					data[_self.data_line[i].id] = _self.data_line[i];
 			}
 			// Само ако има редове, записваме JSON във data_line. Иначе го оставяме празно
 			if (!jQuery.isEmptyObject( data ))
@@ -502,8 +469,8 @@
 			else
 				$('#data_line', '#nomedit').val("");
 
-			if (!jQuery.isEmptyObject( self.deleted_line ))
-				$('#deleted_line', '#nomedit').val(JSON.stringify(self.deleted_line));
+			if (!jQuery.isEmptyObject( _self.deleted_line ))
+				$('#deleted_line', '#nomedit').val(JSON.stringify(_self.deleted_line));
 			else
 				$('#deleted_line', '#nomedit').val("");
 
@@ -514,6 +481,21 @@
 
 	var vLocalTable;
 	$(document).ready( function () {
+	// Група от общи
+		EsCon.set_datepicker('input.date', '#aviso_edit');
+		// Това се прилага само за показаните със smarty променливи стойности в #aviso_edit, но не и за показаните с рендер функции в таблиците
+		EsCon.set_number_val($('.number, .number-small, .time', '#aviso_edit'));
+		// Да сложим attr placeholder на всички с .mandatory
+		EsCon.set_mandatory($('#aviso_edit .mandatory'));
+
+		// Ще ги задам така, защото по-късно динамично се добавят DOM елементи от същия вид
+		$('#nomedit').on('focus', '.number, .number-small, .date, .time', EsCon.inputEvent.focusin);
+		$('#nomedit').on('change', '.number, .number-small, .date, .time', EsCon.inputEvent.change);
+		$('#nomedit').on('keydown', '.number, .number-small', EsCon.inputEvent.keydown);
+	// край на Група от общи
+
+		$('#aviso_status', '#nomedit').val(aviso_status($('#aviso_status', '#nomedit').val()));
+
 		vLocalTable = new table_line;
 	});
 

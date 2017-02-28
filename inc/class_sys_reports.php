@@ -9,8 +9,11 @@
 		
 		function deflt () {
 		 	if (!_base::CheckAccess('sys_reports')) return;
-			$_SESSION['main_menu'] = 'sys_reports';
-			$_SESSION['sub_menu'] = '-';
+			// Ако е подаден $_REQUEST['p1'], то тогава се извиква от бутона Изпълни
+			if (!$_REQUEST['p1']) {
+				$_SESSION['main_menu'] = 'sys_reports';
+				$_SESSION['sub_menu'] = '-';
+			}
 			//$_SESSION{'display_path'} = 'sys_reports/deflt.tpl';
 		}
 

@@ -136,6 +136,10 @@
 
 				{ title: "{#qty_pallet_calc#}", data: 'qty_pallet_calc', className: "dt-right sum_footer_qty",	render: EsCon.formatQuantityHideZero },
 
+				{ title: "{#qty_pallet_rcvd#}", data: 'qty_pallet_rcvd', className: "dt-right sum_footer_cnt",	render: EsCon.formatCountHideZero },
+				{ title: "{#qty_pack_rcvd#}", data: 'qty_pack_rcvd', className: "dt-right sum_footer_cnt",	render: EsCon.formatCountHideZero },
+				{ title: "{#qty_pallet_rcvd_calc#}", data: 'qty_pallet_rcvd_calc', className: "dt-right sum_footer_qty",	render: EsCon.formatQuantityHideZero },
+
 				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', render: aviso_status },
 
 				{ title: "{#org_metro_code#}", name: 'org_metro_code', data: 'org_metro_code', className: "" },
@@ -228,7 +232,6 @@
 		});
 
 		vTable = new InitTable;
-		//$('#submit_button', '#headerrow').trigger('click');
 	}); // $(document).ready
 
 

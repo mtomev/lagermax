@@ -96,8 +96,8 @@
 			if ($_SESSION[$sub_menu]['where_add'])
 				$where .= $_SESSION[$sub_menu]['where_add'];
 
-			$data = _base::nomen_list_json('aviso', true, 'aviso_id', $where);
-			echo $data;
+			$data = _base::nomen_list('aviso', true, 'aviso_id', $where);
+			echo json_encode(array('data' => $data));
 		}
 
 
@@ -243,7 +243,14 @@
 				if (!_base::CheckGrant('aviso_view'))
 					if (!_base::CheckAccess('aviso_edit')) return;
 				$warehouse_id = intVal($data['warehouse_id']);
-				
+
+				// Ако потребител към някой доставчик, без право да вижда всички доставчици, се опитва да отвори неправомерно друго Авизо
+				if (intVal($_SESSION['userdata']['org_id']) and $data['org_id'] != $_SESSION['userdata']['org_id'] and !$_SESSION['userdata']['grants']['view_all_suppliers']) {
+					$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+					$_SESSION['display_text'] = $this->smarty->getConfigVars('access_denied');
+					return;
+				}
+
 				// Ако Авизото е старо и потребителя няма право view_all_suppliers "Достъп до всички Доставчици", да не може да го записва
 				if (!$_SESSION['userdata']['grants']['view_all_suppliers']) {
 					// Ако текущия час е > от config_aviso_until_time, то започваме от по-следващия работен ден
@@ -318,6 +325,18 @@
 			} else {
 				if (!_base::CheckAccess('aviso_edit', false)) return;
 			}
+			
+			// Проверки за неправомерност
+			// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
+				if (!$id)
+					$temp = _base::select_sql("select org_id from aviso WHERE aviso_id = $id");
+				else
+					$temp['org_id'] = $_POST['org_id'];
+				if ($temp['org_id'] != $_SESSION['userdata']['org_id'])
+					_base::show_error($this->smarty->getConfigVars('access_denied'));
+			}
+
 
 			$_POST['aviso_date'] = $_POST['aviso_date_timeslot'];
 			$_POST['aviso_time'] = $_POST['aviso_time_timeslot'];
@@ -406,7 +425,7 @@
 				if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
 					$temp = _base::select_sql("select org_id from aviso WHERE aviso_id = $id");
 					if ($temp['org_id'] != $_SESSION['userdata']['org_id'])
-						_base::show_error('Нямате право да изтривате това Авизо');
+						_base::show_error($this->smarty->getConfigVars('access_denied'));
 				}
 
 				$sql_query = "DELETE FROM aviso WHERE aviso_id = $id";
@@ -664,6 +683,161 @@
 			$data = _base::nomen_list_json('aviso', true, 'aviso_id', $where);
 			//$this->smarty->assign ('data', $data);
 			echo $data;
+		}
+
+
+		function aviso_edt_complete () {
+			// aviso_id
+			$id = intVal($_REQUEST['p1']);
+
+			if (!$id) return;
+
+			if (!_base::CheckGrant('aviso_reception_view'))
+				if (!_base::CheckAccess('aviso_reception_edit')) return;
+
+			$data = _base::nomen_list_edit('aviso', $id, true);
+			$warehouse_id = intVal($data['warehouse_id']);
+			if ($_SESSION['userdata']['grants']['aviso_reception_delete'])
+				$data['allow_delete'] = true;
+			else
+				$data['allow_delete'] = false;
+			if ($_SESSION['userdata']['grants']['aviso_reception_edit'])
+				$data['allow_edit'] = true;
+			else
+				$data['allow_edit'] = false;
+			
+			// Ако потребител към някой доставчик, без право да вижда всички доставчици, се опитва да отвори неправомерно друго Авизо
+			if (intVal($_SESSION['userdata']['org_id']) and $data['org_id'] != $_SESSION['userdata']['org_id'] and !$_SESSION['userdata']['grants']['view_all_suppliers']) {
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				$_SESSION['display_text'] = $this->smarty->getConfigVars('access_denied');
+				return;
+			}
+
+			// Ако Авизото е старо и потребителя няма право view_all_suppliers "Достъп до всички Доставчици", да не може да го записва
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers']) {
+				// Ако текущия час е > от config_aviso_until_time, то започваме от по-следващия работен ден
+				$config_aviso_until_time = _base::get_config('config_aviso_until_time');
+				if (!$config_aviso_until_time) $config_aviso_until_time = '17:00';
+				if (strtotime($config_aviso_until_time) <= strtotime(date("H:i")))
+					$days = 2;
+				else
+					$days = 1;
+				// Зареждаме работните дни в масива working_days
+				$this->load_working_days(date("Y-m-d"), 2);
+				$curr_date = $this->next_working_day(date("Y-m-d"), $days);
+				
+				if ($curr_date > $data['aviso_date']) {
+					$data['allow_delete'] = false;
+					$data['allow_edit'] = false;
+				}
+			}
+
+			// С какъв интерфейс се редактира
+			//$warehouse_template = $data['warehouse_template'];
+			//$_SESSION['display_path'] = "aviso/aviso_edit_".$warehouse_template.".tpl";
+
+			$data['aviso_status_old'] = $data['aviso_status'];
+			if ($data['aviso_status_old'] < '7')
+				$data['aviso_status'] = '7';
+			$this->smarty->assign ('data', $data);
+
+
+			// Редовете от Авизото
+			$data_line = array();
+			$query_result = _base::get_query_result("select * from view_aviso_line WHERE aviso_id = $id order by aviso_line_id");
+			while ($query_data = _base::sql_fetch_assoc($query_result)) {
+				$data_line[] = $query_data + array('id' => $query_data['aviso_line_id']);
+			}
+			_base::sql_free_result($query_result);
+			$this->smarty->assign ('data_line', json_encode($data_line));
+
+			//_base::sql_add_field_width($query_result, $empty_line);
+
+			_base::get_select_aviso_status(null, true);
+
+			$this->smarty->assign ('callback_url', "$_SERVER[HTTP_REFERER]");
+
+			$_SESSION['aviso_id'] = $id;
+			$_SESSION['table_edit'] = 'aviso';
+			_base::put_sys_oper(__METHOD__, 'edit', $_SESSION['table_edit'], $id);
+		}
+
+
+		function aviso_save_complete () {
+			// aviso_id
+			$id = intVal($_REQUEST['p1']);
+
+			if (!$id) return;
+			if (!_base::CheckAccess('aviso_reception_edit', false)) return;
+			
+			// Проверки за неправомерност
+			// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
+				$temp = _base::select_sql("select org_id from aviso WHERE aviso_id = $id");
+				if ($temp['org_id'] != $_SESSION['userdata']['org_id'])
+					_base::show_error($this->smarty->getConfigVars('access_denied'));
+			}
+
+			$aviso_status_old = $_POST['aviso_status_old'];
+			$aviso_status = $_POST['aviso_status'];
+
+			_base::start_transaction();
+
+			$query = new ExecQuery('aviso');
+			$query->AddParam('aviso_status', 'c');
+			$query->AddParam('aviso_reject_reason');
+
+			//Попълва се в момента на сетване на статус от 0 на 3/7/9 или от 3 на 9
+			//- изчиства се при сетване на статус от 3/7/9 на 0
+			if ($aviso_status_old === '0' and $aviso_status >= '3')
+				$query->AddParamExt('aviso_start_exec', date("Y-m-d H:i:s"), 'd');
+			else
+			if ($aviso_status_old >= '3' and $aviso_status === '0')
+				$query->AddParamExt('aviso_start_exec', '', 'd');
+
+			// Попълва се в момента на сетване на статус от 0/3 на 7/9
+			// - изчиства се при сетване на статус от 7/9 на 3/0
+			if ($aviso_status_old <= '3' and $aviso_status >= '7')
+				$query->AddParamExt('aviso_end_exec', date("Y-m-d H:i:s"), 'd');
+			else
+			if ($aviso_status_old >= '7' and $aviso_status <= '3')
+				$query->AddParamExt('aviso_end_exec', '', 'd');
+
+			$query->update(["aviso_id" => $id]);
+			
+			$_SESSION['aviso_id'] = $id;
+
+
+			// Запис в aviso_line
+			// Ако е връщане на Авизо, направо нулирам приетите количества
+			if ($aviso_status == '9') {
+				$sql_query = "UPDATE aviso_line SET qty_pallet_rcvd = 0, qty_pack_rcvd = 0 WHERE aviso_id = $id";
+				_base::execute_sql($sql_query);
+			} else {
+				$data_line = $_POST['data_line'];
+				if ($data_line) {
+					// data_line - array['aviso_line_id' => array[<field_name> => <value>]]
+					$data_line = json_decode($data_line, true);
+					foreach($data_line as $aviso_line_id => $line) {
+						// AddParam ще добави параметъра, само ако е го има в масива
+						$query = new ExecQuery('aviso_line');
+						$query->a_get_values = $line;
+						$query->add_cr_mo = false;
+						$query->generator_name = false;
+
+						$query->AddParam('qty_pallet_rcvd', 'n', 0);
+						$query->AddParam('qty_pack_rcvd', 'n', 0);
+
+						$query->update(["aviso_id" => $id, "aviso_line_id" => $aviso_line_id]);
+
+						unset($query);
+					}
+				} // data_line
+			}
+
+			_base::commit_transaction();
+			_base::put_sys_oper(__METHOD__, 'save', $_SESSION['table_edit'], $id);
+			echo $id;
 		}
 
 

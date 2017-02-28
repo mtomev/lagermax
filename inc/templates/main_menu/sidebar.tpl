@@ -65,9 +65,8 @@
 			</ul>
 			</li>
 
-			{if $smarty.session.userdata.grants.sys_reports == '1'}
-			{*<li><a main_menu="sys_reports" href="/sys_reports/deflt">{#menu_sys_reports#}</a>*}
-			<li><a main_menu="sys_reports" href="#">{#menu_sys_reports#}</a>
+			{if $smarty.session.userdata.grants.sys_reports == '1' && $smarty.session.userdata.user_id == '1'}
+			<li><a main_menu="sys_reports" href="/sys_reports/deflt">{#menu_sys_reports#}</a>
 			{else}
 			<li><a main_menu="sys_reports" href="#">{#menu_sys_reports#}</a>
 			{/if}
