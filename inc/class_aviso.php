@@ -123,8 +123,13 @@
 			if (!isset($_SESSION[$sub_menu]['to_date']))
 				$_SESSION[$sub_menu]['to_date'] = date('Y-m-d');
 
+			if (!isset($_SESSION[$sub_menu]['aviso_status']))
+				//$_SESSION[$sub_menu]['aviso_status'] = '37';
+				$_SESSION[$sub_menu]['aviso_status'] = -1;
+
 			_base::get_select_list('org', null, 'org_name');
 			_base::get_select_list('warehouse', null, 'warehouse_code', null, 'warehouse_code');
+			_base::get_select_aviso_status();
 
 			_base::set_table_edit_AccessRights('aviso');
 			// Ако е подадено $where_add, то от съответната функция ще се запише в базата
@@ -149,6 +154,13 @@
 				$where .= " and aviso_date >= '$from_date'";
 			if ($to_date)
 				$where .= " and aviso_date <= '$to_date'";
+
+			if ($_SESSION[$sub_menu]['aviso_status'] != -1) {
+				if ($_SESSION[$sub_menu]['aviso_status'] != '37')
+					$where .= " and (aviso_status = '{$_SESSION[$sub_menu]['aviso_status']}')";
+				else
+					$where .= " and (aviso_status in ('3','7'))";
+			}
 
 			// Ако е извикано от подменютата за Инвестиционни или Оперативни разходи
 			if ($_SESSION[$sub_menu]['where_add'])

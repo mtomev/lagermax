@@ -322,6 +322,19 @@
 			return $temp;
 		}
 
+		public static function get_select_aviso_status($smarty_var = null) {
+			if (!$smarty_var) $smarty_var = 'select_aviso_status';
+			$temp[-1] = '&nbsp;';
+			$temp['0'] = self::$smarty->getConfigVars('aviso_status_0');
+			$temp['3'] = self::$smarty->getConfigVars('aviso_status_3');
+			$temp['7'] = self::$smarty->getConfigVars('aviso_status_7');
+			$temp['9'] = self::$smarty->getConfigVars('aviso_status_9');
+			$temp['37'] = self::$smarty->getConfigVars('aviso_status_3').'+'.self::$smarty->getConfigVars('aviso_status_7');
+
+			self::$smarty->assign ($smarty_var, $temp);
+			return $temp;
+		}
+
 
 
 		public static function get_lookup_field($table, $field_id, $id, $field_name) {

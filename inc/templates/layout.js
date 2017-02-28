@@ -616,6 +616,7 @@
 				case '0': return '{#aviso_status_0#}';
 				case '3': return '{#aviso_status_3#}';
 				case '7': return '{#aviso_status_7#}';
+				case '9': return '{#aviso_status_9#}';
 				default: return '';
 			}
 		else return data;

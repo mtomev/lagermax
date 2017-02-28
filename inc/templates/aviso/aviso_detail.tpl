@@ -23,6 +23,14 @@
 		<input name="to_date" id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
 		<span class="">&nbsp;&nbsp;</span>
 
+		<span class="">
+			{#aviso_status#}
+			<select class="" id="aviso_status" name="aviso_status"> 
+				{html_options options=$select_aviso_status selected={$smarty.session.$sub_menu.aviso_status}}
+			</select>
+		</span>
+		<span class="">&nbsp;&nbsp;</span>
+
 		<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
 
 		{include file='main_menu/list_search.tpl'}
@@ -45,6 +53,7 @@
 		this.SetParams = function() {
 			_self.last_params['warehouse_id'] = $('#warehouse_id', '#headerrow').val();
 			_self.last_params['org_id'] = $('#org_id', '#headerrow').val();
+			_self.last_params['aviso_status'] = $('#aviso_status', '#headerrow').val();
 
 			_self.last_params['from_date'] = EsCon.getParsedVal($('#from_date', '#headerrow'));
 			_self.last_params['to_date'] = EsCon.getParsedVal($('#to_date', '#headerrow'));
