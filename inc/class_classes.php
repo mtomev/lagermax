@@ -330,8 +330,10 @@
 			$temp['3'] = self::$smarty->getConfigVars('aviso_status_3');
 			$temp['7'] = self::$smarty->getConfigVars('aviso_status_7');
 			$temp['9'] = self::$smarty->getConfigVars('aviso_status_9');
-			if (!$for_edit)
+			if (!$for_edit) {
+				$temp['03'] = self::$smarty->getConfigVars('aviso_status_0').'+'.self::$smarty->getConfigVars('aviso_status_3');
 				$temp['37'] = self::$smarty->getConfigVars('aviso_status_3').'+'.self::$smarty->getConfigVars('aviso_status_7');
+			}
 
 			self::$smarty->assign ($smarty_var, $temp);
 			return $temp;
