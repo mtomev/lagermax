@@ -132,6 +132,7 @@
 				if (data.data.substr(0, 5) == '\<!DOC')
 					this.close();
 			},
+			/*
 			open: function() {
 				// Ако ширината на .documentElmagnificPopup е > от екрана, да позиционирам вертикално Top
 				// window.outerWidth - document.documentElement.clientWidth = ширината на scrollBar
@@ -139,19 +140,9 @@
 				if (this.content.outerWidth() > 2*document.documentElement.clientWidth - window.outerWidth)
 					this.wrap.addClass('mfp-align-top');
 			},
+			*/
 		}
 	});
-	// Added to make calendar drop downs work properly
-	$.magnificPopup.instance._onFocusIn = function(e) {
-
-			if( $(e.target).hasClass('ui-datepicker-month') ) {
-					return true;
-			}
-			if( $(e.target).hasClass('ui-datepicker-year') ) {
-					return true;
-			}
-			$.magnificPopup.proto._onFocusIn.call(this,e);
-	};
 
 	function commonFancyboxAfterClose() {
 		// Изтриване на паразитните .dz-hidden-input, защото се натрупват с всяко отваряне
@@ -249,13 +240,14 @@
 		});
 	} // InitMFP
 
-	function showMFP(url, post_data) {
+	function showMFP(url, post_data, focus_item) {
 		if (typeof(post_data) === 'undefined') {
 			type = 'GET';
 			post_data = { };
 		} else {
 			type = 'POST';
 		}
+		if (typeof(focus_item)==='undefined') focus_item = '';
 		$.ajax({
 			type: type,
 			url: url,
@@ -272,7 +264,9 @@
 				}
 				//try {
 					$.magnificPopup.open({
-						items: { src: html, type: 'inline' },
+						items: { src: html },
+						type: 'inline',
+						focus: focus_item,
 						preloader: true,
 					});
 				/*

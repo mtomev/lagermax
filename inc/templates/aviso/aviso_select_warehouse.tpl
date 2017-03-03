@@ -24,7 +24,7 @@
 	</div>
 
 	<div class="row-button">
-		<button class="save_button" id="save_button"><span>{#btn_Save#}</span></button>
+		<button class="save_button" id="save_button"><span>{#btn_Next#}</span></button>
 		<button class="cancel_button" id="cancel_button"><span>{#btn_Cancel#}</span></button>
 	</div>
 

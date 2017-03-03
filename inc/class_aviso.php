@@ -329,7 +329,7 @@
 			// Проверки за неправомерност
 			// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
 			if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
-				if (!$id)
+				if ($id)
 					$temp = _base::select_sql("select org_id from aviso WHERE aviso_id = $id");
 				else
 					$temp['org_id'] = $_POST['org_id'];
@@ -703,6 +703,86 @@
 		}
 
 
+		function aviso_edit_receipt () {
+		 	if (!_base::CheckAccess('aviso_reception_edit')) return;
+
+			// aviso_id
+			$id = intVal($_REQUEST['p1']);
+
+			$data = _base::nomen_list_edit('aviso', $id, true);
+			$data['aviso_status_old'] = $data['aviso_status'];
+			if ($data['aviso_id'] and $data['aviso_status_old'] < '3')
+				$data['aviso_status'] = '3';
+
+			// Списъци за избор
+			_base::get_select_aviso_status(null, true);
+
+			$this->smarty->assign ('callback_url', "$_SERVER[HTTP_REFERER]");
+			$this->smarty->assign('data', $data);
+		}
+
+		function aviso_save_receipt () {
+			// aviso_id
+			$id = intVal($_REQUEST['p1']);
+
+			if (!$id) return;
+			if (!_base::CheckAccess('aviso_reception_edit', false)) return;
+			
+			// Проверки за неправомерност
+			// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
+				$temp = _base::select_sql("select org_id from aviso WHERE aviso_id = $id");
+				if ($temp['org_id'] != $_SESSION['userdata']['org_id'])
+					_base::show_error($this->smarty->getConfigVars('access_denied'));
+			}
+
+			$aviso_status_old = $_POST['aviso_status_old'];
+			$aviso_status = $_POST['aviso_status'];
+
+			_base::start_transaction();
+
+			$query = new ExecQuery('aviso');
+			$query->AddParam('aviso_status', 'c');
+			$query->AddParam('aviso_reject_reason');
+
+			//Попълва се в момента на сетване на статус от 0 на 3/7/9 или от 3 на 9
+			//- изчиства се при сетване на статус от 3/7/9 на 0
+			if ($aviso_status_old === '0' and $aviso_status >= '3')
+				$query->AddParamExt('aviso_start_exec', date("Y-m-d H:i:s"), 'd');
+			else
+			if ($aviso_status_old >= '3' and $aviso_status === '0')
+				$query->AddParamExt('aviso_start_exec', '', 'd');
+
+			// Попълва се в момента на сетване на статус от 0/3 на 7/9
+			// - изчиства се при сетване на статус от 7/9 на 3/0
+			if ($aviso_status_old <= '3' and $aviso_status >= '7')
+				$query->AddParamExt('aviso_end_exec', date("Y-m-d H:i:s"), 'd');
+			else
+			if ($aviso_status_old >= '7' and $aviso_status <= '3')
+				$query->AddParamExt('aviso_end_exec', '', 'd');
+
+			$query->update(["aviso_id" => $id]);
+			
+			$_SESSION['aviso_id'] = $id;
+
+			_base::commit_transaction();
+			_base::put_sys_oper(__METHOD__, 'save', $_SESSION['table_edit'], $id);
+			echo $id;
+		}
+
+
+		function aviso_select_for_complete () {
+		 	if (!_base::CheckAccess('aviso_reception_edit')) return;
+
+			// aviso_id
+			$id = intVal($_REQUEST['p1']);
+
+			$data = _base::nomen_list_edit('aviso', $id, true);
+
+			$this->smarty->assign ('callback_url', "$_SERVER[HTTP_REFERER]");
+			$this->smarty->assign('data', $data);
+		}
+
 		function aviso_edt_complete () {
 			// aviso_id
 			$id = intVal($_REQUEST['p1']);
@@ -778,7 +858,6 @@
 			$_SESSION['table_edit'] = 'aviso';
 			_base::put_sys_oper(__METHOD__, 'edit', $_SESSION['table_edit'], $id);
 		}
-
 
 		function aviso_save_complete () {
 			// aviso_id
@@ -856,6 +935,7 @@
 			_base::put_sys_oper(__METHOD__, 'save', $_SESSION['table_edit'], $id);
 			echo $id;
 		}
+
 
 
 		function aviso_display () {

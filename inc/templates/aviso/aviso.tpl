@@ -158,10 +158,13 @@
 
 			// Да маркираме като selected последно редактирания запис
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
+console.log(id);
 //var local_start = Date.now();
+			oTable.rows({ selected: true }).deselect();
 			oTable.rows('#'+id).select();
-			// Те това е бавното - show() !!!
+			// Те това е бавното - .draw(false) !!!
 			oTable.row({ selected: true }).show().draw(false);
+console.log(oTable.row({ selected: true }));
 			/*
 			oTable.rows().every( function () {
 				var row = this;

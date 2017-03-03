@@ -218,20 +218,15 @@ td.ellipsis, .ellipsis select  {
 	clear: left;
 	font-size: 15px;
 }
-#nomedit .status-line {
+.status-line {
 	clear: left;
 	padding-top: 5px;
 }
 
-#nomedit .nomedit-edit {
+.nomedit-edit {
 	float: left;
 }
 
-#nomedit .row {
-	margin: 2px 0;
-	float: left;
-	clear: left;
-}
 .table-row {
 	margin: 2px 0;
 	display: table-row;
@@ -270,7 +265,7 @@ table input[type="text"] {
 	padding: 2px 2px;
 	color:#000;
 }
-#nomedit .textarea {
+.nomedit-edit .textarea {
 	font-family: inherit;
 	font-size: inherit;
 	width:340px; 
@@ -283,50 +278,46 @@ select {
 }
 input:focus:not(.readonly):not(.button),
 select:focus:not(.readonly),
-#nomedit textarea:focus:not(.readonly) {
+.nomedit-edit textarea:focus:not(.readonly) {
 	/*outline: 0px none;*/
 	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset, 0px 0px 8px rgba(102, 175, 233, 0.6);
 	border-color: #66AFE9;
 }
 
-#nomedit .text {
+.nomedit-edit .text {
 	width:340px; 
 }
-#nomedit .text30 {
+.nomedit-edit .text30 {
 	width:200px; 
 }
-#nomedit .text10 {
+.nomedit-edit .text10 {
 	width:100px; 
 }
-#nomedit .checkbox {
+.nomedit-edit .checkbox {
 	vertical-align: middle;
 }
-#nomedit .date  {
+.nomedit-edit .date  {
 	width:100px; 
 }
-#nomedit .datetime {
+.nomedit-edit .datetime {
 	width:120px; 
 }
-#nomedit .time {
+.nomedit-edit .time {
 	width:50px; 
 }
-#nomedit .number  {
+.nomedit-edit .number  {
 	width:100px; 
 	text-align: right;
 }
 /* Number up to 99999.99 */
-#nomedit .number-small  {
+.nomedit-edit .number-small  {
 	width:50px; 
 	text-align: right;
 }
-#nomedit .readonly {
+.nomedit-edit .readonly {
 	background-color: #F0F0F0;
 }
-#nomedit .hidden, 
-table .hidden,
-#sidemenu .hidden, 
-#display_text.hidden, 
-.nomedit-files .hidden  {
+.hidden {
 	display: none !important;
 }
 .isnan {

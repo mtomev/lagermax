@@ -2,10 +2,10 @@
 {extends file="layout.tpl"}
 {block name=content}
 <div id="main" {*class="mfp-inline-holder"*}>
-	<div id="nomedit" class="white-popup-block">
+	<div id="aviso_edit" class="white-popup-block">
 		<div class="header">{#aviso_complete#}</div>
 
-		<div id="aviso_edit" class="nomedit-edit">
+		<div class="nomedit-edit">
 			<div style="display: table;">
 				<div style="float: left;">
 					<div class="table-row">
@@ -77,11 +77,7 @@
 				<div class="table-cell-label">{#aviso_status#}</div>
 				<div class="table-cell">
 					<input id="aviso_status_old" class="text10 readonly" type="text" value="{$data.aviso_status_old}" readonly>
-				</div>
-				<div class="table-cell">
 					&nbsp;-->&nbsp;
-				</div>
-				<div class="table-cell">
 					<select id="aviso_status" name="aviso_status" class="text10"> 
 						{html_options options=$select_aviso_status selected=$data.aviso_status}
 					</select>
@@ -107,18 +103,17 @@
 
 		<div class="row-button">
 		{if $data.allow_edit}
-			<button class="save_button" id="save_button"><span>{#btn_Save#}</span></button>
+			<button class="save_button" id="save_button_aviso"><span>{#btn_Save#}</span></button>
 		{/if}
 			<span>id:{$data.id}</span>
-			<button class="cancel_button" id="cancel_button"><span>{#btn_Cancel#}</span></button>
+			<button class="cancel_button" id="cancel_button_aviso"><span>{#btn_Cancel#}</span></button>
 		</div>
 		{include file='main_menu/status_line.tpl'}
 	</div>
 </div>
 
 <script type="text/javascript">
-	var ref = document.referer;
-	callback_url = "{$callback_url}" || ref;
+	var callback_url = "{$callback_url}" || document.referer;
 
   // Редовете от Авизото
 	function table_line () {
@@ -282,9 +277,9 @@
 			}
 			// Само ако има редове, записваме JSON във data_line. Иначе го оставяме празно
 			if (!jQuery.isEmptyObject( data ))
-				$('#data_line', '#nomedit').val(JSON.stringify(data));
+				$('#data_line', '#aviso_edit').val(JSON.stringify(data));
 			else
-				$('#data_line', '#nomedit').val("");
+				$('#data_line', '#aviso_edit').val("");
 
 			return true;
 		}
@@ -301,19 +296,19 @@
 		EsCon.set_mandatory($('#aviso_edit .mandatory'));
 
 		// Ще ги задам така, защото по-късно динамично се добавят DOM елементи от същия вид
-		$('#nomedit').on('focus', '.number, .number-small, .date, .time', EsCon.inputEvent.focusin);
-		$('#nomedit').on('change', '.number, .number-small, .date, .time', EsCon.inputEvent.change);
-		$('#nomedit').on('keydown', '.number, .number-small', EsCon.inputEvent.keydown);
+		$('#aviso_edit').on('focus', '.number, .number-small, .date, .time', EsCon.inputEvent.focusin);
+		$('#aviso_edit').on('change', '.number, .number-small, .date, .time', EsCon.inputEvent.change);
+		$('#aviso_edit').on('keydown', '.number, .number-small', EsCon.inputEvent.keydown);
 	// край на Група от общи
 
-		$('#aviso_status_old', '#nomedit').val(aviso_status($('#aviso_status_old', '#nomedit').val()));
+		$('#aviso_status_old', '#aviso_edit').val(aviso_status($('#aviso_status_old', '#aviso_edit').val()));
 
 		vLocalTable = new table_line;
 	});
 
-	$('#save_button', '#nomedit').click (function () {
-		$('#aviso_status_new', '#nomedit').val('7');
-		if (!EsCon.check_mandatory($('#nomedit .mandatory').not('#table_line .mandatory'))) return false;
+	$('#save_button_aviso', '#aviso_edit').click (function () {
+		$('#aviso_status_new', '#aviso_edit').val('7');
+		if (!EsCon.check_mandatory($('#aviso_edit .mandatory').not('#table_line .mandatory'))) return false;
 
 		// Редовете от таблицата
 		if (!vLocalTable.prepareToSave()) return;
@@ -334,7 +329,7 @@
 		});
 	});
 
-	$('#cancel_button', '#nomedit').click (function () {
+	$('#cancel_button_aviso', '#aviso_edit').click (function () {
 		window.location.href = callback_url;
 	});
 </script>

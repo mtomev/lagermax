@@ -2,14 +2,13 @@
 {extends file="layout.tpl"}
 {block name=content}
 <div id="main" {*class="mfp-inline-holder"*}>
-{*<div class="mfp-content">*}
-	<div id="nomedit" class="white-popup-block">
+	<div id="aviso_edit" class="white-popup-block">
 		{if $data.id > 0}
 		<div class="header">{#Edit#} {#table_aviso#}</div>
 		{else}
 		<div class="header">{#Add#} {#table_aviso#}</div>
 		{/if}
-		<div id="aviso_edit" class="nomedit-edit">
+		<div class="nomedit-edit">
 			<div style="display: table;">
 				<div style="float: left;">
 					<div class="table-row">
@@ -52,8 +51,6 @@
 						</div>
 					</div>
 
-					{* за '2'-BBXD - тип Бус / Камион *}
-					{if $data.warehouse_type == '2'}
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_truck_type#}</div>
 						<div class="table-cell">
@@ -61,9 +58,6 @@
 							<input class="checkbox" type="radio" name="aviso_truck_type" value="1" style="margin-left: 10px;" {if $data.aviso_truck_type == '1'}checked{/if}>&nbsp;{#aviso_truck_type_1#}
 						</div>
 					</div>
-					{else}
-					<input type="hidden" id="aviso_truck_type" name="aviso_truck_type" value="{$data.aviso_truck_type}">
-					{/if}
 				</div>
 
 				{* Time Slot *}
@@ -113,17 +107,16 @@
 		<div class="row-button">
 		{* Или потребителя може да редактира или е нов и потребителя може да добавя *}
 		{if $data.allow_edit || ($smarty.session.userdata.grants.aviso_add == '1' && $data.id == 0)}
-			<button class="save_button" id="save_button"><span>{#btn_Save#}</span></button>
+			<button class="save_button" id="save_button_aviso" title="{#select_timeslot#}"><span>{#btn_Next#}</span></button>
 		{/if}
 			<span>id:{$data.id}</span>
-			<button class="cancel_button" id="cancel_button"><span>{#btn_Cancel#}</span></button>
+			<button class="cancel_button" id="cancel_button_aviso"><span>{#btn_Cancel#}</span></button>
 		{if $data.allow_delete}
-			<button class="delete_button" id="delete_button"><span>{#btn_Delete#}</span></button>
+			<button class="delete_button" id="delete_button_aviso"><span>{#btn_Delete#}</span></button>
 		{/if}
 		</div>
 		{include file='main_menu/status_line.tpl'}
 	</div>
-{*</div>*}
 </div>
 
 <script type="text/javascript">
@@ -326,7 +319,7 @@
 			
 			/*{if $data.id == 0}*/
 			// Ако е ново Авизо, автоматично добавяне на един ред
-			$('#btn_addLine', '#nomedit').trigger('click');
+			$('#btn_addLine', '#aviso_edit').trigger('click');
 			/*{/if}*/
 
 			_self.localAfterRowAppend();
@@ -336,7 +329,7 @@
 				_self.oTableLine.rows().deselect();
 			});
 
-			$('#table_line tbody', '#nomedit').on('click', '.delete-line', function () {
+			$('#table_line tbody', '#aviso_edit').on('click', '.delete-line', function () {
 				var row = _self.oTableLine.row($(this).parents("tr"));
 				// Ако текущия ред не е selected
 				if (!$(row).hasClass('selected')) {
@@ -416,26 +409,26 @@
 			/*{/if}*/
 
 			for (var i = 0, len = _self.data_line.length; i < len; i++) {
-				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='org_metro_code'].mandatory", '#nomedit'), '{#org_metro_code#}'))
+				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='org_metro_code'].mandatory", '#aviso_edit'), '{#org_metro_code#}'))
 					return false;
 
-				if (!checkRequired($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='metro_request_no'].mandatory", '#nomedit'), '{#metro_request_no#}'))
+				if (!checkRequired($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='metro_request_no'].mandatory", '#aviso_edit'), '{#metro_request_no#}'))
 					return false;
 
-				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='shop_id'].mandatory", '#nomedit'), '{#shop_name#}'))
+				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='shop_id'].mandatory", '#aviso_edit'), '{#shop_name#}'))
 					return false;
 
 				var qty_req_message = '{#qty_pallet#}';
 				/*{if $data.warehouse_type != '1'}*/
 				var qty_req_message = '{#qty_pallet#} или {#qty_pack#}';
 				/*{/if}*/
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pallet'].mandatory", '#nomedit'), qty_req_message))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pallet'].mandatory", '#aviso_edit'), qty_req_message))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pack'].mandatory", '#nomedit'), qty_req_message))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pack'].mandatory", '#aviso_edit'), qty_req_message))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='weight'].mandatory", '#nomedit'), '{#weight#}'))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='weight'].mandatory", '#aviso_edit'), '{#weight#}'))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='volume'].mandatory", '#nomedit'), '{#volume#}'))
+				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='volume'].mandatory", '#aviso_edit'), '{#volume#}'))
 					return false;
 
 
@@ -465,14 +458,14 @@
 			}
 			// Само ако има редове, записваме JSON във data_line. Иначе го оставяме празно
 			if (!jQuery.isEmptyObject( data ))
-				$('#data_line', '#nomedit').val(JSON.stringify(data));
+				$('#data_line', '#aviso_edit').val(JSON.stringify(data));
 			else
-				$('#data_line', '#nomedit').val("");
+				$('#data_line', '#aviso_edit').val("");
 
 			if (!jQuery.isEmptyObject( _self.deleted_line ))
-				$('#deleted_line', '#nomedit').val(JSON.stringify(_self.deleted_line));
+				$('#deleted_line', '#aviso_edit').val(JSON.stringify(_self.deleted_line));
 			else
-				$('#deleted_line', '#nomedit').val("");
+				$('#deleted_line', '#aviso_edit').val("");
 
 			return true;
 		}
@@ -489,18 +482,18 @@
 		EsCon.set_mandatory($('#aviso_edit .mandatory'));
 
 		// Ще ги задам така, защото по-късно динамично се добавят DOM елементи от същия вид
-		$('#nomedit').on('focus', '.number, .number-small, .date, .time', EsCon.inputEvent.focusin);
-		$('#nomedit').on('change', '.number, .number-small, .date, .time', EsCon.inputEvent.change);
-		$('#nomedit').on('keydown', '.number, .number-small', EsCon.inputEvent.keydown);
+		$('#aviso_edit').on('focus', '.number, .number-small, .date, .time', EsCon.inputEvent.focusin);
+		$('#aviso_edit').on('change', '.number, .number-small, .date, .time', EsCon.inputEvent.change);
+		$('#aviso_edit').on('keydown', '.number, .number-small', EsCon.inputEvent.keydown);
 	// край на Група от общи
 
-		$('#aviso_status', '#nomedit').val(aviso_status($('#aviso_status', '#nomedit').val()));
+		$('#aviso_status', '#aviso_edit').val(aviso_status($('#aviso_status', '#aviso_edit').val()));
 
 		vLocalTable = new table_line;
 	});
 
-	$('#save_button', '#nomedit').click (function () {
-		if (!EsCon.check_mandatory($('#nomedit .mandatory').not('#table_line .mandatory'))) return false;
+	$('#save_button_aviso', '#aviso_edit').click (function () {
+		if (!EsCon.check_mandatory($('#aviso_edit .mandatory').not('#table_line .mandatory'))) return false;
 
 		// Редовете от таблицата
 		if (!vLocalTable.prepareToSave()) return;
@@ -520,10 +513,10 @@
 		// Записа се извършва в aviso_select_timeslot.tpl
 	});
 
-	$('#cancel_button', '#nomedit').click (function () {
+	$('#cancel_button_aviso', '#aviso_edit').click (function () {
 		window.location.href = callback_url;
 	});
-	$('#delete_button', '#nomedit').click (function () {
+	$('#delete_button_aviso', '#aviso_edit').click (function () {
 		fnDeleteDialog('/aviso/aviso_delete/{$data.id}', '{#table_aviso#}', '#main', false);
 	});
 	function fancyboxDeleted() {

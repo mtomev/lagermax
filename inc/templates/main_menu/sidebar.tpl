@@ -5,31 +5,36 @@
 	<div id="sidemenu">
 		<ul class="sidemenu">
 
+			<li>
 			{if $smarty.session.userdata.grants.aviso == '1'}
-			<li><a main_menu="aviso" href="/aviso/aviso">{#menu_aviso#}</a>
+			<a main_menu="aviso" href="/aviso/aviso">{#menu_aviso#}</a>
 			{else}
-			<li><a main_menu="aviso" href="#">{#menu_aviso#}</a>
+			<a main_menu="aviso" href="#">{#menu_aviso#}</a>
 			{/if}
 			<ul main_menu="aviso" class="submenu">
 				{if $smarty.session.userdata.grants.aviso_detail == '1'}
 				<li><a sub_menu="aviso_detail" href="/aviso/aviso_detail">{#menu_aviso_detail#}</a></li>
 				{/if}
+				{if $smarty.session.userdata.grants.aviso_reception == '1'}
+				{*<li><a sub_menu="aviso_reception" href="/aviso/aviso_reception">{#menu_aviso_reception#}</a></li>*}
+				<li><a id="aviso_edit_receipt" sub_menu="aviso_reception" href="/aviso/aviso_edit_receipt">{#menu_aviso_reception#}</a></li>
+				{/if}
+				{if $smarty.session.userdata.grants.aviso_reception == '1'}
+				<li><a id="aviso_select_for_complete" sub_menu="aviso_reception" href="/aviso/aviso_select_for_complete">{#aviso_complete#}</a></li>
+				{/if}
 			</ul>
 			</li>
 
-			{if $smarty.session.userdata.grants.aviso_reception == '1'}
-			<li><a main_menu="aviso_reception" href="/aviso/aviso_reception">{#menu_aviso_reception#}</a>
-			{/if}
-
 			{if $smarty.session.userdata.grants.reports == '1'}
-			<li><a main_menu="reports" href="/reports/timeslot">{#menu_reports#}</a>
+			<li><a main_menu="reports" href="/reports/timeslot">{#menu_reports#}</a></li>
 			{/if}
 
+			<li>
 			{if $smarty.session.userdata.grants.configuration == '1'}
-			{*<li><a main_menu="configuration" href="/configuration">{#menu_configuration#}</a>*}
-			<li><a main_menu="configuration" href="#">{#menu_configuration#}</a>
+			{*<a main_menu="configuration" href="/configuration">{#menu_configuration#}</a>*}
+			<a main_menu="configuration" href="#">{#menu_configuration#}</a>
 			{else}
-			<li><a main_menu="configuration" href="#">{#menu_configuration#}</a>
+			<a main_menu="configuration" href="#">{#menu_configuration#}</a>
 			{/if}
 			<ul main_menu="configuration" class="submenu">
 				{if $smarty.session.userdata.grants.w_group == '1'}
@@ -65,10 +70,11 @@
 			</ul>
 			</li>
 
+			<li>
 			{if $smarty.session.userdata.grants.sys_reports == '1' && $smarty.session.userdata.user_id == '1'}
-			<li><a main_menu="sys_reports" href="/sys_reports/deflt">{#menu_sys_reports#}</a>
+			<a main_menu="sys_reports" href="/sys_reports/deflt">{#menu_sys_reports#}</a>
 			{else}
-			<li><a main_menu="sys_reports" href="#">{#menu_sys_reports#}</a>
+			<a main_menu="sys_reports" href="#">{#menu_sys_reports#}</a>
 			{/if}
 			<ul main_menu="sys_reports" class="submenu">
 				{if $smarty.session.userdata.grants.sys_oper == '1'}
@@ -144,4 +150,24 @@
 		});
 	});
 
+	$('#aviso_edit_receipt, #aviso_select_for_complete', '#sidemenu').on('click', function(event) {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+		is_edit_child = false;
+
+		$this = $(this);
+
+		var url = $this.attr("url");
+		if (!url)
+			url = $this.attr("href");
+		var a_rel = $this.attr("rel");
+
+		// Дали е нов елемент, който после се добавя в таблицата
+		edit_row = null;
+		edit_id = 0;
+		edit_delete = false;
+		edit_add_new = false;
+		if (url === '') return;
+		showMFP(url, { }, '#aviso_id');
+	});
 </script>
