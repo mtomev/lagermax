@@ -158,13 +158,10 @@
 
 			// Да маркираме като selected последно редактирания запис
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
-console.log(id);
 //var local_start = Date.now();
-			oTable.rows({ selected: true }).deselect();
-			oTable.rows('#'+id).select();
+			oTable.rows('#'+id).select().draw(false);
 			// Те това е бавното - .draw(false) !!!
 			oTable.row({ selected: true }).show().draw(false);
-console.log(oTable.row({ selected: true }));
 			/*
 			oTable.rows().every( function () {
 				var row = this;
@@ -184,6 +181,7 @@ console.log(oTable.row({ selected: true }));
 		}
 
 		this.LoadData = function(resetPaging) {
+			oTable.rows({ selected: true }).deselect();
 			oTable.ajax.reload( _self.select_row, resetPaging );
 		}
 

@@ -296,42 +296,51 @@
 	});
 
 
-	function checkRequired(a, field_caption) {
+	function checkRequired(a, field_caption, data_type) {
 		// Ако не съществува selector a, излизаме
 		if (!$(a).length) return true;
-		if (typeof(field_caption)==='undefined') field_caption = $(a).parent().prev().html();
-		var value = $(a).val();
-		if (value.length < 1) {
+		// data_type == '', 'Date', 'Numeric'
+		if (typeof (data_type) === 'undefined') data_type = '';
+		if (typeof (field_caption) === 'undefined') {
+			// Търсим Етикет. Първо предишния елемент
+			var label = $(a).prev();
+			if (label.length < 1)
+				label = $(a).parent().prev();
+			field_caption = label.html();
+		}
+
+		var isOK = true;
+		if (!data_type) {
+			var value = $(a).val();
+			if (!value || value.length < 1)
+				isOK = false;
+		} else
+		if (data_type == 'Numeric') {
+			var value = Number(EsCon.getParsedVal($(a)));
+			if (value === 0)
+				isOK = false;
+		} else
+		if (data_type == 'Date') {
+			var value = EsCon.getParsedVal($(a));
+			if (!value)
+				isOK = false;
+		}
+
+		if (!isOK) {
 			$(a).addClass('isRequired');
-			fnShowErrorMessage('{#title_attention#}', '"'+field_caption+'" {#is_required#}!')
+			fnShowErrorMessage('{#title_attention#}', '"' + field_caption + '" {#is_required#}!')
 			return false;
 		} else
 			return true;
 	}
 	function checkRequiredNumeric(a, field_caption) {
-		if (!$(a).length) return true;
-		if (typeof(field_caption)==='undefined') field_caption = $(a).parent().prev().html();
-		var val = Number(EsCon.getParsedVal($(a)));
-		if (val === 0) {
-			$(a).addClass('isRequired');
-			fnShowErrorMessage('{#title_attention#}', '"'+field_caption+'" {#is_required#}!')
-			return false;
-		} else
-			return true;
+		return checkRequired(a, field_caption, 'Numeric');
 	}
 	function checkRequiredDate(a, field_caption) {
-		if (!$(a).length) return true;
-		if (typeof(field_caption)==='undefined') field_caption = $(a).parent().prev().html();
-		var val = EsCon.getParsedVal($(a));
-		if (!val) {
-			$(a).addClass('isRequired');
-			fnShowErrorMessage('{#title_attention#}', '"'+field_caption+'" {#is_required#}!')
-			return false;
-		} else
-			return true;
+		return checkRequired(a, field_caption, 'Date');
 	}
 	function checkRequiredSelect(a, field_caption) {
-		return checkRequiredNumeric(a, field_caption);
+		return checkRequired(a, field_caption, 'Numeric');
 	}
 
 

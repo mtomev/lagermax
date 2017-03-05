@@ -119,6 +119,8 @@
 	$('#save_button_receipt').click (function () {
 		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
 		if (!aviso_id) return;
+		if (!checkRequired($("#aviso_status", '#aviso_receipt'), '{#aviso_status#}'))
+			return false;
 
 		waitingDialog();
 		$.ajax({

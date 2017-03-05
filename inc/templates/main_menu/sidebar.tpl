@@ -16,7 +16,6 @@
 				<li><a sub_menu="aviso_detail" href="/aviso/aviso_detail">{#menu_aviso_detail#}</a></li>
 				{/if}
 				{if $smarty.session.userdata.grants.aviso_reception == '1'}
-				{*<li><a sub_menu="aviso_reception" href="/aviso/aviso_reception">{#menu_aviso_reception#}</a></li>*}
 				<li><a id="aviso_edit_receipt" sub_menu="aviso_reception" href="/aviso/aviso_edit_receipt">{#menu_aviso_reception#}</a></li>
 				{/if}
 				{if $smarty.session.userdata.grants.aviso_reception == '1'}

@@ -627,82 +627,6 @@
 		}
 
 
-		function aviso_reception ($where_add = '') {
-		 	if (!_base::CheckAccess('aviso_reception')) return;
-			$_SESSION['main_menu'] = 'aviso_reception';
-			$_SESSION['sub_menu'] = 'aviso_reception';
-			$sub_menu = $_SESSION['sub_menu'];
-			_base::readFilterToSESSION_new($sub_menu);
-			$this->smarty->assign ('current_url', '/aviso/aviso_reception');
-
-			// Запомням в $_SESSION where_add
-			$_SESSION[$sub_menu]['where_add'] = $where_add;
-
-			/*
-			_base::get_select_list('org', null, 'org_name');
-			if (!isset($_SESSION[$sub_menu]['org_id']))
-				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
-			// Ако потребителя няма право да вижда всички Доставчици
-			if (!$_SESSION['userdata']['grants']['view_all_suppliers'])
-				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
-			*/
-
-			if (!isset($_SESSION[$sub_menu]['from_date']))
-				// Днешна дата - 7 дни
-				//$_SESSION[$sub_menu]['from_date'] = date('Y-m-d', strtotime(date("Y-m-d"). ' - 7 days'));
-				$_SESSION[$sub_menu]['from_date'] = date('Y-m-d');
-
-			_base::get_select_aviso_status();
-			if (!isset($_SESSION[$sub_menu]['aviso_status']))
-				$_SESSION[$sub_menu]['aviso_status'] = '03';
-				//$_SESSION[$sub_menu]['aviso_status'] = -1;
-
-			_base::set_table_edit_AccessRights('aviso');
-			// Ако е подадено $where_add, то от съответната функция ще се запише в базата
-			if (!$where_add)
-				_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
-		}
-
-		// Тази функция се вика само като ajax
-		function get_list_aviso_reception () {
-			$sub_menu = 'aviso_reception';
-			_base::readFilterToSESSION_new($sub_menu);
-			$where = "WHERE (1=1)";
-
-			/*
-			if (!isset($_SESSION[$sub_menu]['org_id']))
-				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
-			// Ако потребителя няма право да вижда всички Доставчици
-			if (!$_SESSION['userdata']['grants']['view_all_suppliers'])
-				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
-			
-			if ($_SESSION[$sub_menu]['org_id'])
-				$where .= " and (org_id = {$_SESSION[$sub_menu]['org_id']})";
-			*/
-
-			$from_date = $_SESSION[$sub_menu]['from_date'];
-			$to_date = $_SESSION[$sub_menu]['to_date'];
-			if ($from_date)
-				$where .= " and aviso_date >= '$from_date'";
-			if ($to_date)
-				$where .= " and aviso_date <= '$to_date'";
-
-			if ($_SESSION[$sub_menu]['aviso_status'] != -1) {
-				if ($_SESSION[$sub_menu]['aviso_status'] != '37')
-					$where .= " and (aviso_status = '{$_SESSION[$sub_menu]['aviso_status']}')";
-				else
-					$where .= " and (aviso_status in ('3','7'))";
-			}
-
-			// Ако е извикано от подменютата за Инвестиционни или Оперативни разходи
-			if ($_SESSION[$sub_menu]['where_add'])
-				$where .= $_SESSION[$sub_menu]['where_add'];
-
-			$data = _base::nomen_list('aviso', true, 'aviso_id', $where);
-			echo json_encode(array('data' => $data));
-		}
-
-
 		function aviso_edit_receipt () {
 		 	if (!_base::CheckAccess('aviso_reception_edit')) return;
 
@@ -715,7 +639,11 @@
 				$data['aviso_status'] = '3';
 
 			// Списъци за избор
-			_base::get_select_aviso_status(null, true);
+			//_base::get_select_aviso_status(null, true);
+			$temp['0'] = $this->smarty->getConfigVars('aviso_status_0');
+			$temp['3'] = $this->smarty->getConfigVars('aviso_status_3');
+			$temp['9'] = $this->smarty->getConfigVars('aviso_status_9');
+			$this->smarty->assign('select_aviso_status', $temp);
 
 			$this->smarty->assign ('callback_url', "$_SERVER[HTTP_REFERER]");
 			$this->smarty->assign('data', $data);
@@ -764,6 +692,16 @@
 			$query->update(["aviso_id" => $id]);
 			
 			$_SESSION['aviso_id'] = $id;
+
+			// Ако е връщане на Авизо, направо нулирам приетите количества
+			// Също и ако е сваляне на статуса от >= 7 на <= 3
+			if (
+				($aviso_status_old != '9' and $aviso_status == '9')
+				or ($aviso_status_old >= '7' and $aviso_status <= '3') 
+			) {
+				$sql_query = "UPDATE aviso_line SET qty_pallet_rcvd = 0, qty_pack_rcvd = 0 WHERE aviso_id = $id";
+				_base::execute_sql($sql_query);
+			}
 
 			_base::commit_transaction();
 			_base::put_sys_oper(__METHOD__, 'save', $_SESSION['table_edit'], $id);
@@ -906,7 +844,7 @@
 
 			// Запис в aviso_line
 			// Ако е връщане на Авизо, направо нулирам приетите количества
-			if ($aviso_status == '9') {
+			if ($aviso_status == '9' or $aviso_status <= '3') {
 				$sql_query = "UPDATE aviso_line SET qty_pallet_rcvd = 0, qty_pack_rcvd = 0 WHERE aviso_id = $id";
 				_base::execute_sql($sql_query);
 			} else {

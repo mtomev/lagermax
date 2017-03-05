@@ -207,6 +207,7 @@
 		}
 
 		this.LoadData = function(resetPaging) {
+			oTable.rows().deselect();
 			oTable.ajax.reload( _self.select_row, resetPaging );
 		}
 
