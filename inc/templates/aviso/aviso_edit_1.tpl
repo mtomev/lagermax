@@ -409,26 +409,26 @@
 			/*{/if}*/
 
 			for (var i = 0, len = _self.data_line.length; i < len; i++) {
-				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='org_metro_code'].mandatory", '#aviso_edit'), '{#org_metro_code#}'))
+				if (!checkRequiredSelect($("#table_line tbody tr#"+_self.data_line[i].id+" [name='org_metro_code'].mandatory", '#aviso_edit'), '{#org_metro_code#}'))
 					return false;
 
-				if (!checkRequired($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='metro_request_no'].mandatory", '#aviso_edit'), '{#metro_request_no#}'))
+				if (!checkRequired($("#table_line tbody tr#"+_self.data_line[i].id+" [name='metro_request_no'].mandatory", '#aviso_edit'), '{#metro_request_no#}'))
 					return false;
 
-				if (!checkRequiredSelect($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='shop_id'].mandatory", '#aviso_edit'), '{#shop_name#}'))
+				if (!checkRequiredSelect($("#table_line tbody tr#"+_self.data_line[i].id+" [name='shop_id'].mandatory", '#aviso_edit'), '{#shop_name#}'))
 					return false;
 
 				var qty_req_message = '{#qty_pallet#}';
 				/*{if $data.warehouse_type != '1'}*/
 				var qty_req_message = '{#qty_pallet#} или {#qty_pack#}';
 				/*{/if}*/
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pallet'].mandatory", '#aviso_edit'), qty_req_message))
+				if (!checkRequiredNumeric($("#table_line tbody tr#"+_self.data_line[i].id+" [name='qty_pallet'].mandatory", '#aviso_edit'), qty_req_message))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='qty_pack'].mandatory", '#aviso_edit'), qty_req_message))
+				if (!checkRequiredNumeric($("#table_line tbody tr#"+_self.data_line[i].id+" [name='qty_pack'].mandatory", '#aviso_edit'), qty_req_message))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='weight'].mandatory", '#aviso_edit'), '{#weight#}'))
+				if (!checkRequiredNumeric($("#table_line tbody tr#"+_self.data_line[i].id+" [name='weight'].mandatory", '#aviso_edit'), '{#weight#}'))
 					return false;
-				if (!checkRequiredNumeric($("#table_line tbody tr#id-"+_self.data_line[i].id+" [name='volume'].mandatory", '#aviso_edit'), '{#volume#}'))
+				if (!checkRequiredNumeric($("#table_line tbody tr#"+_self.data_line[i].id+" [name='volume'].mandatory", '#aviso_edit'), '{#volume#}'))
 					return false;
 
 
