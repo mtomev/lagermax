@@ -68,14 +68,10 @@
 
 <script type="text/javascript">
 	var callback_url = "{$callback_url}" || document.referer;
-	$(document).ready( function () {
-		EsCon.set_mandatory($('#aviso_receipt .mandatory'));
-		//$('#org_name', '#aviso_receipt').val(data.org_name);
-	});
 
 	$('#aviso_id', '#aviso_receipt').change(function () {
 		var aviso_id = Number(EsCon.getParsedVal($('#aviso_id', '#aviso_receipt')));
-		if (!aviso_id) return;
+		if (!aviso_id) aviso_id = -1;
 		$.ajax({
 			url: "/configuration/list_refresh/aviso/"+aviso_id,
 			method: "POST",
@@ -116,6 +112,16 @@
 		});
 	});
 
+
+	$(document).ready( function () {
+		EsCon.set_mandatory($('#aviso_receipt .mandatory'));
+		
+		/*{if $data.aviso_id}*/
+		$('#aviso_id', '#aviso_receipt').val({$data.aviso_id});
+		$('#aviso_id', '#aviso_receipt').trigger("change");
+		/*{/if}*/
+	});
+
 	$('#save_button_receipt').click (function () {
 		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
 		if (!aviso_id) return;
@@ -147,5 +153,4 @@
 	$('#cancel_button_receipt', '#aviso_receipt').click (function () {
 		($.magnificPopup.instance).close();
 	});
-
 </script>

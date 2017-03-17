@@ -73,7 +73,7 @@
 			<input type="hidden" id="data_line" name="data_line" value="">
 			<input type="hidden" name="aviso_status_old" value="{$data.aviso_status_old}">
 
-			<div class="table-row">
+			<div style="display: table; clear: left;">
 				<div class="table-cell-label">{#aviso_status#}</div>
 				<div class="table-cell">
 					<input id="aviso_status_old" class="text10 readonly" type="text" value="{$data.aviso_status_old}" readonly>
@@ -88,7 +88,7 @@
 					<textarea id="aviso_reject_reason" class="textarea" maxlength="{$data.field_width.aviso_reject_reason}" name="aviso_reject_reason">{$data.aviso_reject_reason}</textarea>
 				</div>
 			</div>
-			<div>
+			<div style="display: table; clear: left;">
 				<div class="table-cell-label">{#aviso_start_exec#}</div>
 				<div class="table-cell">
 					<input class="datetime readonly" data-type="Date" type="text" value="{$data.aviso_start_exec}" readonly>

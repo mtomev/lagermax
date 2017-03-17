@@ -109,12 +109,22 @@
 				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', className: "td-no-padding",
 					render: function ( data, type, row ) {
 						if (type !== 'display') return data;
-						data = aviso_status(data, type);
-						/*{if $smarty.session.userdata.grants.aviso_reception_edit == '1' || $smarty.session.userdata.grants.aviso_reception_view == '1'}*/
-						return '<a href="/aviso/aviso_edt_complete/'+row.aviso_id+'" rel="edit_'+row.aviso_id+'" title="{#aviso_complete#}">'+displayDIV100(data)+'</a>';
-						/*{else}*/
-						return displayDIV100(data);
-						/*{/if}*/
+						var status = aviso_status(data, type);
+						if (data == 0) {
+							/*{if $smarty.session.userdata.grants.aviso_reception == '1'}*/
+							return '<a href="javascript:;" url="/aviso/aviso_edit_receipt/'+row.aviso_id+'" class="aviso_edit_receipt" title="{#menu_aviso_reception#}">'+displayDIV100(status)+'</a>';
+							/*{else}*/
+							return displayDIV100(status);
+							/*{/if}*/
+						}
+						else
+						{
+							/*{if $smarty.session.userdata.grants.aviso_reception_edit == '1' || $smarty.session.userdata.grants.aviso_reception_view == '1'}*/
+							return '<a href="/aviso/aviso_edt_complete/'+row.aviso_id+'" rel="edit_'+row.aviso_id+'" title="{#aviso_complete#}">'+displayDIV100(status)+'</a>';
+							/*{else}*/
+							return displayDIV100(status);
+							/*{/if}*/
+						}
 					}
 				},
 
@@ -178,6 +188,29 @@
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
 				oTable.rows().deselect();
 			});
+
+			$("#table_id tbody tr").on('click', 'a.aviso_edit_receipt', function(event) {
+				//event.preventDefault();
+				//event.stopImmediatePropagation();
+				is_edit_child = false;
+
+				$this = $(this);
+
+				var url = $this.attr("url");
+				if (!url)
+					url = $this.attr("href");
+				var a_rel = $this.attr("rel");
+
+				// Дали е нов елемент, който после се добавя в таблицата
+				var edit_tr = $(this).parents("tr");
+				edit_row = oTable.row(edit_tr);
+				edit_id = edit_row.data().id;
+
+				edit_delete = false;
+				edit_add_new = false;
+				if (url === '') return;
+				showMFP(url, { }, '#aviso_id');
+			});
 		}
 
 		this.LoadData = function(resetPaging) {
@@ -191,6 +224,7 @@
 		datatable_add_btn_excel();
 
 		commonInitMFP();
+
 	} // InitTable
 
 	var vTable;

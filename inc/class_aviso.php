@@ -633,10 +633,17 @@
 			// aviso_id
 			$id = intVal($_REQUEST['p1']);
 
+			/*
 			$data = _base::nomen_list_edit('aviso', $id, true);
 			$data['aviso_status_old'] = $data['aviso_status'];
 			if ($data['aviso_id'] and $data['aviso_status_old'] < '3')
 				$data['aviso_status'] = '3';
+			*/
+			$data = _base::nomen_list_edit('aviso', 0, true);
+			if ($id) {
+				$data['aviso_id'] = $id;
+				$_SESSION['aviso_id'] = $id;
+			}
 
 			// Списъци за избор
 			//_base::get_select_aviso_status(null, true);
