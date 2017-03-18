@@ -85,6 +85,22 @@
 					</div>
 
 				</div>
+
+				{* Свободни интервали за следващия ден *}
+				<div style="float: left; padding-left: 40px;">
+					<div class="">
+						Свободни за
+					</div>
+					<div class="">
+						<select id="free_slots-aviso_date" class="text10"> 
+							{html_options options=$free_slots.select_aviso_date selected=$free_slots.aviso_date}
+						</select>
+					</div>
+				</div>
+				<div style="float: left; padding-left: 10px;">
+					<div id="free_slots" style="max-height:170px; overflow-y:auto; width:130px; border: 1px solid transparent;border-color: #ccc;padding-left: 10px;">
+					</div>
+				</div>
 			</div>
 
 
@@ -116,6 +132,22 @@
 		{/if}
 		</div>
 		{include file='main_menu/status_line.tpl'}
+
+		{* Пояснителни текстове *}
+		<div style="float:left;margin-top:10px;margin-bottom:20px;max-width: 800px;">
+			<p style="float:left;margin-top:10px;">
+			За PAXD, за един Метро магазин може да има максимум 3 реда – храни, нехрани, метро собствени марки.
+			</p>
+			<p style="float:left;margin-top:10px;">
+			Не могат под един Метро код на доставчик да се въвеждат повече от 1 ред за един Метро магазин.<br>
+			Т.е. ако има 2 или повече реда за магазин, Метро кода на доставчика трябва да е различен.
+			</p>
+			<p style="float:left;margin-top:10px;">
+			Когато в 1 ред се въвеждат данни за повече от една Поръчка, то в колоната "Номер на поръчка" се записва<br>
+			само един единствен Номер на поръчка - по Ваш избор.<br>
+			Това е официалното становище от "Метро кеш енд кери ЕООД".
+			</p>
+		</div>
 	</div>
 </div>
 
@@ -188,32 +220,26 @@
 				// qty_pallet
 				{ title: "{#qty_pallet#}", name: 'qty_pallet', data: 'qty_pallet', className: "dt-right sum_footer_cnt",
 					render: function ( data, type, row ) {
-						data = EsCon.formatCount(data, type);
-						if (!data) data = '';
+						data = !data ? '':EsCon.formatCount(data, type);
 						// Ако е въведено qty_pack, то това е забранено за попълване
 						if (parseInt(row.qty_pack))
 							var h_class = 'class="number-small readonly hidden" readonly';
 						else
 							var h_class = 'class="number-small mandatory"';
-						var shtml  = '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" ';
-						shtml += 'name="qty_pallet" value="'+data+'">';
-						return shtml;
+						return '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" name="qty_pallet" value="'+data+'">';
 					}
 				},
 				/*{if $data.warehouse_type != '1'}*/
 				// qty_pack
 				{ title: "{#qty_pack#}", name: 'qty_pack', data: 'qty_pack', className: "dt-right sum_footer_cnt",
 					render: function ( data, type, row ) {
-						data = EsCon.formatCount(data, type);
-						if (!data) data = '';
+						data = !data ? '':EsCon.formatCount(data, type);
 						// Ако е въведено qty_pallet, то това е забранено за попълване
 						if (parseInt(row.qty_pallet))
 							var h_class = 'class="number-small readonly hidden" readonly';
 						else
 							var h_class = 'class="number-small mandatory"';
-						var shtml  = '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" ';
-						shtml += 'name="qty_pack" value="'+data+'">';
-						return shtml;
+						return '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" name="qty_pack" value="'+data+'">';
 					}
 				},
 				/*{/if}*/
@@ -222,11 +248,8 @@
 				// weight
 				{ title: "{#weight#}", name: 'weight', data: 'weight', className: "dt-right sum_footer_qty",
 					render: function ( data, type, row ) {
-						data = EsCon.formatQuantity3(data, type);
-						if (!data) data = '';
-						var shtml  = '<input type="text" class="number mandatory" data-type="Quantity3" row_id="'+row.id+'" ';
-						shtml += 'name="weight" value="'+data+'">';
-						return shtml;
+						data = !data ? '':EsCon.formatQuantity3HideZero(data, type);
+						return '<input type="text" class="number mandatory" data-type="Quantity3" data-hide_zero="true" row_id="'+row.id+'" name="weight" value="'+data+'">';
 					}
 				},
 				/*{/if}*/
@@ -234,11 +257,8 @@
 				// volume
 				{ title: "{#volume#}", name: 'volume', data: 'volume', className: "dt-right sum_footer_qty",
 					render: function ( data, type, row ) {
-						data = EsCon.formatQuantity3(data, type);
-						if (!data) data = '';
-						var shtml  = '<input type="text" class="number mandatory" data-type="Quantity3" row_id="'+row.id+'" ';
-						shtml += 'name="volume" value="'+data+'">';
-						return shtml;
+						data = !data ? '':EsCon.formatQuantity3HideZero(data, type);
+						return '<input type="text" class="number mandatory" data-type="Quantity3" data-hide_zero="true" row_id="'+row.id+'" name="volume" value="'+data+'">';
 					}
 				},
 				/*{/if}*/
@@ -252,6 +272,12 @@
 				},
 
 			],
+
+			drawCallback: function( settings ) {
+				$(".mandatory:not([placeholder])", '#table_line tbody').each(function (idx, el) {
+					EsCon.set_mandatory($(el));
+				});
+			},
 
 			footerCallback: function (tfoot, data, start, end, display) {
 				var api = this.api();
@@ -278,17 +304,6 @@
 		} // Config
 
 
-		this.localAfterRowAppend = function(edit_row) {
-		// След инициализиране на таблицата, както и след добавяне на нов ред
-			if (!edit_row)
-				var element = '#table_line';
-			else
-				var element = edit_row.node();
-
-			EsCon.set_mandatory($('.mandatory', element));
-		} // localAfterRowAppend
-
-
 		this.TableFinit = function() {
 			$('#table_line tfoot').on('click', '#btn_addLine', function () {
 				// !!! Трябва да се прави extend с {}, за да стане като Object, а не Array
@@ -301,8 +316,8 @@
 
 				data.qty_pallet = '0';
 				data.qty_pack = '0';
-				data.weight = '0';
-				data.volume = '0';
+				//data.weight = '0';
+				//data.volume = '0';
 				
 				// Ако има само един метро код на Доставчки
 				if (_self.org_metro_list.length == 2)
@@ -312,7 +327,6 @@
 				var edit_row = _self.oTableLine.row.add( data )
 				_self.oTableLine.rows().deselect();
 				edit_row.draw().select();
-				_self.localAfterRowAppend(edit_row);
 				
 				return false;
 			});
@@ -322,7 +336,6 @@
 			$('#btn_addLine', '#aviso_edit').trigger('click');
 			/*{/if}*/
 
-			_self.localAfterRowAppend();
 
 			$('#table_line tbody').on("click", "input, select, textarea", function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
@@ -371,6 +384,16 @@
 					_self.oTableLine.cell( $row, 'qty_pack:name' ).invalidate();
 				if (name == 'qty_pack')
 					_self.oTableLine.cell( $row, 'qty_pallet:name' ).invalidate();
+
+				// Записвам null вместо 0
+				if (name == 'weight' || name == 'volume') {
+					if (!Number(value)) {
+						data[name] = null;
+						//_self.oTableLine.row( $row ).invalidate();
+						//_self.oTableLine.cell( $row, name+':name' ).invalidate();
+					}
+				}
+
 				if (name == 'qty_pallet' || name == 'qty_pack' || name == 'weight' || name == 'volume') {
 					_self.oTableLine.draw(false);
 				}
@@ -472,6 +495,48 @@
 	} // table_line
   // end Редовете от Авизото
 
+	// При смяна на Авизо датата, да изтегля свободните слотове за новата дата
+	// warehouse_id, aviso_date, aviso_time, брой палети
+	$('#free_slots-aviso_date', '#aviso_edit').change(function () {
+		var data = {
+			aviso_id: {$data.id},
+			warehouse_id: EsCon.getParsedVal($('#warehouse_id', '#aviso_edit')),
+			warehouse_type: EsCon.getParsedVal($('#warehouse_type', '#aviso_edit')),
+			aviso_date: EsCon.getParsedVal($('#free_slots-aviso_date', '#aviso_edit')),
+			aviso_time: EsCon.getParsedVal($('#aviso_time', '#aviso_edit')),
+			//qty_pallet_calc: EsCon.getParsedVal($('#qty_pallet_calc', '#aviso_edit')),
+		};
+		$.ajax({
+			url: "/aviso/get_aviso_timeslot/{$data.id}",
+			method: "POST",
+			data: data,
+			success: function (result) {
+				try {
+					var data = JSON.parse(result)
+				}
+				catch(err) {
+					console.log(err);
+					fnShowErrorMessage('', result);
+					return false;
+				}
+//console.log(result);
+				try {
+					var timeslots = '';
+					for (var key in data) {
+						if (key != '0')
+							timeslots += data[key]+'<br>';
+					}
+					$('#free_slots', '#aviso_edit').html(timeslots);
+				}
+				catch(err) {
+					console.log(result);
+					fnShowErrorMessage('', err);
+					return false;
+				}
+			} // success
+		});
+	});
+
 	var vLocalTable;
 	$(document).ready( function () {
 	// Група от общи
@@ -490,6 +555,8 @@
 		$('#aviso_status', '#aviso_edit').val(aviso_status($('#aviso_status', '#aviso_edit').val()));
 
 		vLocalTable = new table_line;
+
+		$('#free_slots-aviso_date', '#aviso_edit').trigger('change');
 	});
 
 	$('#save_button_aviso', '#aviso_edit').click (function () {

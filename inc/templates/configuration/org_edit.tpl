@@ -76,14 +76,14 @@
 
   // Банкови сметки и другите events по общите данни
 	function table_org_metro (org_data, org_data_line) {
-		var self = this;
+		var _self = this;
 		this.mainTable = $("#table_org_metro");
 
 		this.org_data = org_data;
 		// Съхраняваме data_line, за сравняване на въведените данни - дали има промяна
 		// data_line е json_encode Array [ Object, ... ]
 		this.data_line = org_data_line;
-		this.data_line_old = jQuery.extend(true, [], self.data_line);
+		this.data_line_old = jQuery.extend(true, [], _self.data_line);
 		this.deleted_line = {};
 		this.oTableLine;
 		
@@ -94,7 +94,7 @@
 			"bSort": false,
 			searching: false,
 			fixedHeader: false,
-			data: self.data_line,
+			data: _self.data_line,
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center" },
 
@@ -102,7 +102,7 @@
 					render: function ( data, type, row ) {
 						if (!data) data = '';
 						var shtml = '<input class="text30" type="text" row_id="'+row.id+'" ';
-						shtml += 'maxlength="'+self.empty_line.field_width.org_metro_code+'" name="org_metro_code" value="'+data+'">';
+						shtml += 'maxlength="'+_self.empty_line.field_width.org_metro_code+'" name="org_metro_code" value="'+data+'">';
 						return shtml;
 					}
 				},
@@ -125,31 +125,27 @@
 		} // Config
 
 		// Добавяне на tfoot
-		self.mainTable.append("<tfoot>" + '<tr>' + config.columns.map(function () { return "<td></td>"; }).join("") + '</tr>' + "</tfoot>");
-		self.oTableLine = self.mainTable.DataTable(config);
+		_self.mainTable.append("<tfoot>" + '<tr>' + config.columns.map(function () { return "<td></td>"; }).join("") + '</tr>' + "</tfoot>");
+		_self.oTableLine = _self.mainTable.DataTable(config);
 
-		$('#table_org_metro tbody').on("focus", "td input, td select, td textarea", function(event) {
-			// Ако текущия ред не е selected
-			var edit_row = $(event.target).closest('tr');
-			if (!$(edit_row).hasClass('selected')) {
-				self.oTableLine.rows().deselect();
-				self.oTableLine.row(edit_row).select();
-			}
+		$('#table_org_metro tbody').on("click", "input, select, textarea", function(event) {
+			// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
+			_self.oTableLine.rows().deselect();
 		});
 
 		$('#table_org_metro tfoot').on('click', '#org_metro_btn_addLine', function () {
 			// !!! Трябва да се прави extend с {}, за да стане като Object, а не Array
-			var data = jQuery.extend(true, {}, self.empty_line);
-			self.counter--;
+			var data = jQuery.extend(true, {}, _self.empty_line);
+			_self.counter--;
 			
-			data.id = self.counter.toString();
+			data.id = _self.counter.toString();
 			data.org_metro_id = data.id;
 			data.real_id = 0;
-			self.data_line.push(data);
-			var edit_row = self.oTableLine.row.add( data )
-			self.oTableLine.rows().deselect();
+			_self.data_line.push(data);
+			var edit_row = _self.oTableLine.row.add( data )
+			_self.oTableLine.rows().deselect();
 			edit_row.draw().select();
-			self.localAfterRowAppend(edit_row);
+			_self.localAfterRowAppend(edit_row);
 			
 			// Фокусиране на org_metro_code
 			edit_row.$('input[name=org_metro_code]').focus();
@@ -169,24 +165,24 @@
 			if (!edit_row)
 				$('#table_org_metro tbody tr').on("click", "td input, td select, td textarea", function() {
 					// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-					self.oTableLine.rows().deselect();
+					_self.oTableLine.rows().deselect();
 				});
 			else
 				$(element).on("click", "td input, td select, td textarea", function() {
 					// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-					self.oTableLine.rows().deselect();
+					_self.oTableLine.rows().deselect();
 				});
 
 		} // localAfterRowAppend
 
-		self.localAfterRowAppend();
+		_self.localAfterRowAppend();
 
 		$('#table_org_metro tbody', '#nomedit').on('click', '.delete-line', function () {
-			var row = self.oTableLine.row($(this).parents("tr"));
+			var row = _self.oTableLine.row($(this).parents("tr"));
 			// Ако текущия ред не е selected
 			if (!$(row).hasClass('selected')) {
-				self.oTableLine.rows().deselect();
-				self.oTableLine.row(row).select();
+				_self.oTableLine.rows().deselect();
+				_self.oTableLine.row(row).select();
 			}
 			fnModalDialog('{#Confirm#}', '{#btn_removeLine#}', 
 				function (row) {
@@ -194,12 +190,12 @@
 
 					// Ако е стар запис, добавяме в списъка от deleted_line
 					if (parseInt(data.real_id))
-						self.deleted_line[data.real_id] = data.real_id;
+						_self.deleted_line[data.real_id] = data.real_id;
 
-					self.data_line = self.data_line.filter(function( obj ) {
+					_self.data_line = _self.data_line.filter(function( obj ) {
 						return obj.id !== data.id;
 					});
-					self.data_line_old = self.data_line_old.filter(function( obj ) {
+					_self.data_line_old = _self.data_line_old.filter(function( obj ) {
 						return obj.id !== data.id;
 					});
 
@@ -216,20 +212,20 @@
 			if ($element.is(":checkbox"))
 				value = $element.prop('checked') ? '1':'0';
 			var name = $element.attr('name');
-			var data = self.oTableLine.row($element.parents("tr")).data();
+			var data = _self.oTableLine.row($element.parents("tr")).data();
 			data[name] = value;
 		});
 
 
 		this.prepareToSave = function() {
 			var data = {};
-			for (var i = 0, len = self.data_line.length; i < len; i++) {
+			for (var i = 0, len = _self.data_line.length; i < len; i++) {
 				// Ако е чисто нов, направо се включва
-				if (self.data_line[i].real_id == 0)
-					data[self.data_line[i].id] = self.data_line[i];
+				if (_self.data_line[i].real_id == 0)
+					data[_self.data_line[i].id] = _self.data_line[i];
 				else
-				if ( !linesIsEquals(self.data_line[i], self.data_line_old[i]) )
-					data[self.data_line[i].id] = self.data_line[i];
+				if ( !linesIsEquals(_self.data_line[i], _self.data_line_old[i]) )
+					data[_self.data_line[i].id] = _self.data_line[i];
 			}
 			// Само ако има редове, записваме JSON във data_line. Иначе го оставяме празно
 			if (!jQuery.isEmptyObject( data ))
@@ -237,8 +233,8 @@
 			else
 				$('#org_metro', '#nomedit').val("");
 
-			if (!jQuery.isEmptyObject( self.deleted_line ))
-				$('#deleted_org_metro', '#nomedit').val(JSON.stringify(self.deleted_line));
+			if (!jQuery.isEmptyObject( _self.deleted_line ))
+				$('#deleted_org_metro', '#nomedit').val(JSON.stringify(_self.deleted_line));
 			else
 				$('#deleted_org_metro', '#nomedit').val("");
 

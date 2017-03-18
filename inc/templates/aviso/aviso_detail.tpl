@@ -188,7 +188,7 @@
 
 
 			// Заради Иконата за Upload
-			$("#table_id tbody tr").on("click", 'td input, td select, td a', function() {
+			$("#table_id tbody").on("click", 'input, select, a', function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
 				oTable.rows().deselect();
 			});

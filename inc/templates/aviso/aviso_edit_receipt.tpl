@@ -62,6 +62,9 @@
 	<div class="row-button">
 		<button class="save_button" id="save_button_receipt"><span>{#btn_Save#}</span></button>
 		<button class="cancel_button" id="cancel_button_receipt"><span>{#btn_Cancel#}</span></button>
+		<a id="print_button_receipt" class="hidden" href="" target="_blank" title="" style="margin-left: 40px;">
+			<img style="vertical-align: middle;" src="/images/pdf.png" alt="" border="0">
+		</a>
 	</div>
 
 </div>
@@ -102,6 +105,16 @@
 						$('#aviso_status', '#aviso_receipt').val('0');
 					else
 						$('#aviso_status', '#aviso_receipt').val(data.aviso_status);
+					// Печат
+					if (data.aviso_id) {
+						$('#print_button_receipt', '#aviso_receipt')
+							.attr('href', '/aviso/aviso_display/'+data.aviso_id+'/'+data.scan_doc)
+							.attr('title', data.scan_doc)
+							.removeClass('hidden');
+					} else {
+						$('#print_button_receipt', '#aviso_receipt')
+							.addClass('hidden');
+					}
 				}
 				catch(err) {
 					console.log(result);

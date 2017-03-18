@@ -310,6 +310,15 @@
 			$this->smarty->assign('select_shop', json_encode(_base::get_select_list_ajax('shop', 'shop_name', "where is_active = '1'", 'shop_name')));
 
 			$this->smarty->assign ('callback_url', "$_SERVER[HTTP_REFERER]");
+			
+			// Наличните слотове
+			//$aviso_id = $_POST['aviso_id'];
+			$_POST['warehouse_id'] = $data['warehouse_id'];
+			$_POST['aviso_date'] = $data['aviso_date'];
+			$_POST['warehouse_type'] = $data['warehouse_type'];
+			$_POST['qty_pallet_calc'] = 0;
+//print nl2br2 (print_r($timeslots, true) . PHP_EOL);
+			$this->smarty->assign('free_slots', $this->aviso_select_timeslot($id));
 
 			$_SESSION['aviso_id'] = $id;
 			$_SESSION['table_edit'] = 'aviso';
@@ -440,9 +449,12 @@
 		}
 
 
-		function aviso_select_timeslot () {
+		function aviso_select_timeslot ($aviso_id = null) {
 			// aviso_id
-			$id = intVal($_REQUEST['p1']);
+			if (!isset($aviso_id))
+				$id = intVal($_REQUEST['p1']);
+			else
+				$id = $aviso_id;
 
 			// Ако текущия час е > от config_aviso_until_time, то започваме от по-следващия работен ден
 			$config_aviso_until_time = _base::get_config('config_aviso_until_time');
@@ -500,18 +512,18 @@
 
 				// select_aviso_time
 				$select_aviso_time = $this->free_timeslot($_POST);
-				/*
-				if (!array_key_exists($_POST['aviso_time'], $select_aviso_time))
-					$select_aviso_time[$_POST['aviso_time']] = $_POST['aviso_time'];
-				ksort($select_aviso_time);
-				*/
 			}
 
 			$_POST['id'] = $id;
-			$this->smarty->assign ('data', $_POST);
-			$this->smarty->assign('select_aviso_date', $select_aviso_date);
-			$this->smarty->assign('select_aviso_time', $select_aviso_time);
-			$this->smarty->assign('working_days', $this->working_days);
+			if (!isset($aviso_id)) {
+				$this->smarty->assign ('data', $_POST);
+				$this->smarty->assign('select_aviso_date', $select_aviso_date);
+				$this->smarty->assign('select_aviso_time', $select_aviso_time);
+				$this->smarty->assign('working_days', $this->working_days);
+			} else {
+				unset($select_aviso_date[0]);
+				return array('aviso_date' => $_POST['aviso_date'], 'select_aviso_date' => $select_aviso_date, 'select_aviso_time' => $select_aviso_time);
+			}
 		}
 
 		// Тази функция се вика само като ajax, след смяна на Авизо Дата, за да даде свободните слотове за новата дата
@@ -520,14 +532,6 @@
 			$id = intVal($_REQUEST['p1']);
 
 			$select_aviso_time = $this->free_timeslot($_POST);
-			/*
-			if ($id) {
-				// Ако е корекция на старо Авизо
-				if (!array_key_exists($_POST['aviso_time'], $select_aviso_time))
-					$select_aviso_time[$_POST['aviso_time']] = $_POST['aviso_time'];
-			}
-			ksort($select_aviso_time);
-			*/
 
 			echo json_encode($select_aviso_time);
 		}
@@ -927,6 +931,8 @@
 			$pdf->AddFont('Calibri','B','calibrib.php');
 			$pdf->AddFont('Calibri','BI','calibribi.php');
 			$pdf->AddFont('Calibri','I','calibrii.php');
+			// SetAutoPageBreak(boolean auto [, float margin])
+			$pdf->SetAutoPageBreak(true, 10);
 			$pdf->AddPage();
 
 			/*  
@@ -1165,6 +1171,336 @@
 			$pdf->MultiCell(190,5, iconv('UTF-8', 'windows-1251', $s), 0, 'L');
 			$s = '* Неавизирани доставки няма да бъдат приемани.';
 			$pdf->MultiCell(190,5, iconv('UTF-8', 'windows-1251', $s), 0, 'L');
+
+
+			// I - направо се отваря в прозореца
+			// D - download
+			$pdf->Output('I', $aviso['scan_doc']);
+			_base::put_sys_oper(__METHOD__, 'pdf', 'aviso', $aviso_id);
+		}
+
+		function aviso_ppp_display () {
+			// aviso_id
+			$aviso_id = $_REQUEST['p1'];
+			// $_REQUEST['p2'] = thumb
+			$thumb = ($_REQUEST['p2'] == 'thumb');
+			$small_thumb = ($_REQUEST['p2'] == 'small_thumb');
+
+			// Ако се иска thumb
+			if ($thumb || $small_thumb) {
+				_base::display_file('0.pdf', $thumb, $small_thumb);
+				return ;
+			}
+
+
+			// Генериране на PDF
+
+			// Данните от заглавния ред
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
+			$aviso = _base::sql_fetch_assoc($query_result);
+			_base::sql_free_result($query_result);
+			$warehouse_type = $aviso['warehouse_type'];
+
+			// Данните от редовете
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
+			while ($query_data = _base::sql_fetch_assoc($query_result))
+				$aviso_line[] = $query_data;
+			_base::sql_free_result($query_result);
+
+			// Данните за Доставчика
+			$query_result = _base::get_query_result("SELECT * FROM view_org WHERE org_id = {$aviso['org_id']}");
+			$org = _base::sql_fetch_assoc($query_result);
+			_base::sql_free_result($query_result);
+
+			// Данните за warehouse
+			$query_result = _base::get_query_result("SELECT * FROM view_warehouse WHERE warehouse_id = {$aviso['warehouse_id']}");
+			$warehouse = _base::sql_fetch_assoc($query_result);
+			_base::sql_free_result($query_result);
+
+			// Същинско генериране на файла
+			$pdf = new aviso_PDF();
+			$pdf->AddFont('Calibri','','calibri.php');
+			$pdf->AddFont('Calibri','B','calibrib.php');
+			$pdf->AddFont('Calibri','BI','calibribi.php');
+			$pdf->AddFont('Calibri','I','calibrii.php');
+			// SetAutoPageBreak(boolean auto [, float margin])
+			$pdf->SetAutoPageBreak(true, 10);
+
+			/*  
+				Cell(float w [, float h [, string txt [, mixed border [, int ln [, string align [, boolean fill [, mixed link]]]]]]]) 
+				Мярката е мм.
+				
+				mixed border
+					0: no border
+					1: frame
+					cobined string
+					L: left
+					T: top
+					R: right
+					B: bottom
+
+				int ln
+					0: to the right
+					1: to the beginning of the next line
+					2: below
+			*/
+
+		for($orig_copy = 1; $orig_copy <= 2; $orig_copy++) {
+			$pdf->AddPage();
+			// 210 - 10 - 10 = 190
+			$pdf->SetLeftMargin(10);
+			$pdf->SetRightMargin(10);
+			
+			$pdf->Image(INC_DIR.'/lagermax_logo.png',10,10,45);
+
+			// 190-45 = 145
+			$pdf->SetX(55);
+			$pdf->SetFont('Calibri','BI',16);
+			$pdf->Cell(145, 8, iconv('UTF-8', 'windows-1251', '„Лагермакс Спедицио България“ ЕООД'), 0, 1, 'R');
+
+			//$pdf->SetXY(55, 18);
+			$pdf->SetFont('Calibri','',10);
+			$pdf->SetX(55);
+			$pdf->Cell(145, 4, iconv('UTF-8', 'windows-1251', $warehouse['w_group_address']), 0, 1, 'R');
+			$pdf->SetX(55);
+			$pdf->Cell(145, 4, iconv('UTF-8', 'windows-1251', 'тел.: (+359) 2/996 22 13, ЕИК 131526370'), 0, 1, 'R');
+			
+			$pdf->SetFont('Calibri','B',16);
+			$pdf->SetX(10);
+			$pdf->Cell(150, 10, iconv('UTF-8', 'windows-1251', 'ПРИЕМНО - ПРЕДАВАТЕЛЕН ПРОТОКОЛ'), 'LTB', 0, 'C');
+
+			// ОРИГИНАЛ / КОПИЕ
+			if ($orig_copy == 1)
+				$pdf->Cell(40,10, iconv('UTF-8', 'windows-1251', 'ОРИГИНАЛ'), 'TRB', 1, 'C');
+			else {
+				$pdf->SetTextColor(192);
+				$pdf->Cell(40,10, iconv('UTF-8', 'windows-1251', 'КОПИЕ'), 'TRB', 1, 'C');
+				$pdf->SetTextColor(0);
+			}
+
+
+			// Barcode 70, Дата 60, Час 60
+			$pdf->SetFont('Calibri','',12);
+			$pdf->SetX(10);
+			$y = $pdf->GetY();
+			$barcode_width = 80;
+			$pdf->Cell($barcode_width, 20, '', 1, 0, 'L');
+			/*
+			$pdf->Cell(40, 10, iconv('UTF-8', 'windows-1251', 'Дата: ' . _base::MySqlDate2Str($aviso['aviso_date'])), 1, 0, 'C');
+			$pdf->Cell(25, 10, iconv('UTF-8', 'windows-1251', 'Час: ' . substr($aviso['aviso_time'],0,5)), 1, 0, 'C');
+			$pdf->Cell(190-65-$barcode_width, 10, iconv('UTF-8', 'windows-1251', $aviso['warehouse_code']), 1, 1, 'C');
+			*/
+			$pdf->SetFont('Calibri','B',16);
+			$pdf->Cell(35, 8, iconv('UTF-8', 'windows-1251', _base::MySqlDate2Str($aviso['aviso_date'])), 1, 0, 'C');
+			$pdf->Cell(25, 8, iconv('UTF-8', 'windows-1251', substr($aviso['aviso_time'],0,5)), 1, 0, 'C');
+			$pdf->Cell(190-60-$barcode_width, 8, iconv('UTF-8', 'windows-1251', $aviso['warehouse_code']), 1, 1, 'C');
+
+			// Доставчик:, платформа: warehouse_code
+			$y1 = $pdf->GetY();
+			$pdf->SetX(10+$barcode_width);
+			$pdf->SetFont('Calibri','B',11);
+			$pdf->Cell(190-$barcode_width, 6, iconv('UTF-8', 'windows-1251', $aviso['org_name']), 0, 0, 'L');
+			$pdf->SetXY(10+$barcode_width, $y1+5);
+			$pdf->SetFont('Calibri','',10);
+			$pdf->Cell(190-$barcode_width, 7, iconv('UTF-8', 'windows-1251', $aviso['aviso_truck_no']), 0, 0, 'L');
+			$pdf->SetXY(10+$barcode_width, $y1+5);
+			$pdf->Cell(190-$barcode_width, 3, iconv('UTF-8', 'windows-1251', $aviso['aviso_driver_name']), 0, 0, 'R');
+			$pdf->SetXY(10+$barcode_width, $y1+8);
+			$pdf->Cell(190-$barcode_width, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_driver_phone']), 0, 0, 'R');
+			//$pdf->MultiCell(190-$barcode_width, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_driver_name'] . "\n" . $aviso['aviso_driver_phone']), 0, 'R');
+			$pdf->SetXY(10+$barcode_width, $y1);
+			$pdf->Cell(190-$barcode_width, 12, '', 1, 0, 'L');
+
+
+			// Сега се събират до 13 цифри при 0.5 мащабиране
+			$pdf->SetFont('Calibri','B',14);
+			$pdf->Code128(20,$y+2,$aviso['aviso_id'],$barcode_width-10, 12);
+			$pdf->SetXY(20,$y+15);
+			$pdf->Write(5, $aviso['aviso_id']);
+
+
+			// таблица с редовете от aviso_line
+			$pdf->SetFont('Calibri','B',11);
+			$pdf->Ln();
+			// Метро магазин, Доставчик Номер, Поръчка, ПАЛЕТИ Бр., Кг, куб. м.,  КОЛЕТИ Бр., Кг, куб. м.
+			// Метро магазин - само за '3' PAXD
+			if ($warehouse_type == '3') {
+				$w = array(50, 20, 36, 20,20, 20,20);
+			} else {
+				$w = array(50, 20, 36, 20,20, 20,20);
+			}
+			$i = 0;
+			// Заглавен ред на таблицата
+			$y = $pdf->GetY();
+			if ($warehouse_type == '3')
+				$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', "Метро магазин"), 1, 0, 'C');
+			else
+				$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', ""), 1, 0, 'C');
+			$pdf->Cell($w[1],5, iconv('UTF-8', 'windows-1251', "Доставчик"), 'TR', 2, 'C');
+			$pdf->Cell($w[1],5, iconv('UTF-8', 'windows-1251', "Номер"), 'BR', 0, 'C');
+
+			$pdf->SetXY($pdf->GetX(), $y);
+			$pdf->Cell($w[2],10, iconv('UTF-8', 'windows-1251', "Поръчка"), 1, 0, 'C');
+
+			$pdf->Cell($w[3]+$w[4],5, iconv('UTF-8', 'windows-1251', "ПАЛЕТИ"), 1, 2, 'C');
+			$pdf->Cell($w[3],5, iconv('UTF-8', 'windows-1251', "Заявено"), 1, 0, 'C');
+			$pdf->Cell($w[4],5, iconv('UTF-8', 'windows-1251', "Прието"), 1, 0, 'C');
+
+			$pdf->SetXY($pdf->GetX(), $y);
+			$pdf->Cell($w[5]+$w[6],5, iconv('UTF-8', 'windows-1251', "КОЛЕТИ"), 1, 2, 'C');
+			$pdf->Cell($w[5],5, iconv('UTF-8', 'windows-1251', "Заявено"), 1, 0, 'C');
+			$pdf->Cell($w[6],5, iconv('UTF-8', 'windows-1251', "Прието"), 1, 0, 'C');
+
+			// Детайлни редове
+			$pdf->SetFont('Calibri','',11);
+			$pdf->Ln();
+			$h = 8;
+			$i = 0;
+			// $aviso_line
+			$x0 = $x = $pdf->GetX();
+			$y = $pdf->GetY();
+			$table_top = $pdf->GetY();
+			// В $yH ще остане най-голямата височина на редовете
+			$yH = $h;
+			$pdf->SetXY($x0, $y);
+			$last_shop_id = '';
+			$qty_pallet_rcvd = 0;
+			$qty_pack_rcvd = 0;
+			if ($aviso_line) {
+				foreach($aviso_line as $line) {
+
+					if ($last_shop_id != $line['shop_id'])
+						$pdf->MultiCell($w[0],$h, iconv('UTF-8', 'windows-1251', $line['shop_name']), 'LRT', 'L');
+					else
+						$pdf->MultiCell($w[0],$h, '', 'LR', 'L');
+					$last_shop_id = $line['shop_id'];
+					$x = $x + $w[0];
+					$yH = max($yH, $pdf->GetY() - $y);
+
+					$pdf->SetXY($x, $y);
+					$pdf->MultiCell($w[1],$h, iconv('UTF-8', 'windows-1251', $line['org_metro_code']), 'LR', 'L');
+					$x = $x + $w[1];
+					$yH = max($yH, $pdf->GetY() - $y);
+
+					$pdf->SetXY($x, $y);
+					$pdf->MultiCell($w[2],$h, iconv('UTF-8', 'windows-1251', $line['metro_request_no']), 'LR', 'L');
+					$x = $x + $w[2];
+					$yH = max($yH, $pdf->GetY() - $y);
+
+					// ПАЛЕТИ Заявено, Прието
+					if ($line['qty_pallet'] != $line['qty_pallet_rcvd'])
+						$pdf->SetFont('Calibri','B');
+					$pdf->SetXY($x, $y);
+					$pdf->MultiCell($w[3],$h, $line['qty_pallet'] ? $line['qty_pallet'] : '', 'LR', 'R');
+					$x = $x + $w[3];
+					$yH = max($yH, $pdf->GetY() - $y);
+
+					$pdf->SetXY($x, $y);
+					$pdf->MultiCell($w[4],$h, $line['qty_pallet_rcvd'] ? $line['qty_pallet_rcvd'] : '', 'LR', 'R');
+					$x = $x + $w[4];
+					$yH = max($yH, $pdf->GetY() - $y);
+
+					$pdf->SetFont('Calibri','');
+
+
+					// КОЛЕТИ Заявено, Прието
+					if ($line['qty_pack'] != $line['qty_pack_rcvd'])
+						$pdf->SetFont('Calibri','B');
+					$pdf->SetXY($x, $y);
+					$pdf->MultiCell($w[5],$h, $line['qty_pack'] ? $line['qty_pack'] : '', 'LR', 'R');
+					$x = $x + $w[5];
+					$yH = max($yH, $pdf->GetY() - $y);
+
+					$pdf->SetXY($x, $y);
+					$pdf->MultiCell($w[6],$h, $line['qty_pack_rcvd'] ? $line['qty_pack_rcvd'] : '', 'LR', 'R');
+					$x = $x + $w[6];
+					$yH = max($yH, $pdf->GetY() - $y);
+
+					$pdf->SetFont('Calibri','');
+
+					if ($line['qty_pallet'] != $line['qty_pallet_rcvd'] or $line['qty_pack'] != $line['qty_pack_rcvd']) {
+						$pdf->SetXY($x, $y);
+						$pdf->MultiCell(4,$h, '*', '', 'C');
+						$x = $x + 4;
+						$yH = max($yH, $pdf->GetY() - $y);
+					}
+
+					$qty_pallet_rcvd += $line['qty_pallet_rcvd'];
+					$qty_pack_rcvd += $line['qty_pack_rcvd'];
+
+					// Изчертаване на линиите, започвайки от втората колона
+					$x = $x0;
+					for($j = 0; $j < count($w) ; $j++) {
+						$pdf->SetXY($x, $y);
+						if ($j == 0)
+							$pdf->Cell($w[$j], $yH, "", 'LR',0,'');
+						else
+							$pdf->Cell($w[$j], $yH, "", 'LRB',0,'');
+						$x = $x + $w[$j];
+					}
+
+					$y = $y + $yH; //move to next row
+					$yH = $h;
+					$x = $x0; //start from first column
+					$pdf->SetXY($x0, $y);
+				}
+				// Черта най-отдолу, ама само ако не чертая за всеки ред
+				$pdf->Cell(190-4,0, '', 'T');
+			}
+
+			$pdf->Ln();
+
+			// ТОТАЛ
+			$pdf->SetFont('Calibri','B',11);
+			//  Cell(float w [, float h [, string txt [, mixed border [, int ln [, string align [, boolean fill [, mixed link]]]]]]]) 
+			$pdf->Cell($w[0],$h, iconv('UTF-8', 'windows-1251', "ТОТАЛ"), 1, 0, 'R');
+			$pdf->Cell($w[1],$h, '', 1, 0);
+			$pdf->Cell($w[2],$h, '', 1, 0);
+			$pdf->Cell($w[3],$h, $aviso['qty_pallet'], 1, 0, 'R');
+			$pdf->Cell($w[4],$h, $qty_pallet_rcvd, 1, 0, 'R');
+			$pdf->Cell($w[5],$h, $aviso['qty_pack'], 1, 0, 'R');
+			$pdf->Cell($w[6],$h, $qty_pack_rcvd, 1, 0, 'R');
+
+			/*
+			// ОРИГИНАЛ
+			$table_bottom = $pdf->GetY();
+			$table_height = $table_bottom - $table_top;
+			$pdf->SetXY(10, $table_top + ($table_height-10-$h) / 2);
+			$pdf->SetFont('Calibri','B',36);
+			$pdf->SetTextColor(192);
+			if ($orig_copy == 1)
+				$pdf->Cell(190,10+$h, iconv('UTF-8', 'windows-1251', 'ОРИГИНАЛ'), 0, 0, 'C');
+			else
+				$pdf->Cell(190,10+$h, iconv('UTF-8', 'windows-1251', 'КОПИЕ'), 0, 0, 'C');
+			$pdf->SetTextColor(0);
+			$pdf->SetXY(10, $table_bottom);
+			*/
+
+			// Общи приказки
+			$pdf->Ln(10);
+			$pdf->SetFont('Calibri','I',11);
+			$s = '* Фирма Лагермакс Спедицио България ЕООД не носи отговорност за съдържанието на оригинално запечатани палети и колети.';
+			$pdf->MultiCell(190,5, iconv('UTF-8', 'windows-1251', $s), 0, 'L');
+
+			// Започнато на, Приключено на
+			$pdf->Ln(3);
+			$pdf->SetFont('Calibri','',11);
+			$pdf->Cell(190, 4, iconv('UTF-8', 'windows-1251', 'Започнато на ' . substr(_base::MySqlDate2Str($aviso['aviso_start_exec']),0,16) .
+				',  Приключено на ' . substr(_base::MySqlDate2Str($aviso['aviso_end_exec']),0,16) ), 0, 1, 'L');
+
+			// Предал / Приел
+			$pdf->Ln(10);
+			$pdf->SetFont('Calibri','',11);
+			$pdf->Cell(95, 5, iconv('UTF-8', 'windows-1251', 'Предал:...................................................................'), 0, 0, 'C');
+			$pdf->Cell(95, 5, iconv('UTF-8', 'windows-1251', 'Приел:...................................................................'), 0, 1, 'C');
+
+			$pdf->SetFont('Calibri','I',10);
+			$pdf->Cell(95, 4, iconv('UTF-8', 'windows-1251', '/Име и подпис/'), 0, 0, 'C');
+			$pdf->Cell(95, 4, iconv('UTF-8', 'windows-1251', '/Име, подпис и печат/'), 0, 1, 'C');
+
+			$pdf->Cell(95, 4, iconv('UTF-8', 'windows-1251', $aviso['org_name']), 0, 0, 'C');
+			$pdf->Cell(95, 4, iconv('UTF-8', 'windows-1251', 'Лагермакс Спедицио България ЕООД'), 0, 1, 'C');
+		}
 
 
 			// I - направо се отваря в прозореца

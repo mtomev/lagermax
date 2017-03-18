@@ -138,6 +138,8 @@
 				{ title: "{#aviso_start_exec#}", data: 'aviso_start_exec', className: "",	render: EsCon.formatDate },
 				{ title: "{#aviso_end_exec#}", data: 'aviso_end_exec', className: "",	render: EsCon.formatDate },
 				{ title: "{#note#}", data: 'aviso_reject_reason', className: "ellipsis" , render: displayEllipses },
+
+				{ title: "# lines", data: 'cnt_lines', className: "dt-right sum_footer_cnt", render: EsCon.formatCountHideZero },
 			],
 
 			"footerCallback": function( tfoot, data, start, end, display ) {
@@ -184,14 +186,12 @@
 //console.log('oTable.rows().every '+(Date.now() - local_start));
 
 			// Заради Иконата за Upload
-			$("#table_id tbody tr").on("click", 'td input, td select, td a', function() {
+			$("#table_id tbody").on("click", 'input, select, a', function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
 				oTable.rows().deselect();
 			});
 
-			$("#table_id tbody tr").on('click', 'a.aviso_edit_receipt', function(event) {
-				//event.preventDefault();
-				//event.stopImmediatePropagation();
+			$("#table_id tbody").on('click', 'a.aviso_edit_receipt', function(event) {
 				is_edit_child = false;
 
 				$this = $(this);

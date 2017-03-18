@@ -107,6 +107,9 @@
 		{/if}
 			<span>id:{$data.id}</span>
 			<button class="cancel_button" id="cancel_button_aviso"><span>{#btn_Cancel#}</span></button>
+			<a id="print_button_aviso_ppp" href="/aviso/aviso_ppp_display/{$data.id}/PPP_Aviso_{$data.id}.pdf" target="_blank" title="PPP_Aviso_{$data.id}.pdf" style="margin-left: 40px;">
+				<img style="vertical-align: middle;" src="/images/pdf.png" alt="" border="0">
+			</a>
 		</div>
 		{include file='main_menu/status_line.tpl'}
 	</div>
@@ -315,6 +318,7 @@
 		
 		$.ajax({
 			type: 'POST',
+			async: false,
 			url: '/aviso/aviso_save_complete/{$data.id}',
 			data: EsCon.serialize($('#aviso_edit :input').not('#table_line :input')),
 			success: function (result) {
@@ -323,6 +327,7 @@
 					fnShowErrorMessage('', result);
 				}
 				else {
+					clickOpenFile('/aviso/aviso_ppp_display/'+result+'/PPP_Aviso_'+result+'.pdf');
 					window.location.href = callback_url;
 				}
 			},

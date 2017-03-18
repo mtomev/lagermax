@@ -11,6 +11,7 @@ var EsCon = {
 		change: function(e) {
 			var $this = $(this);
 			var format = $this.attr('data-type');
+			var hide_zero = $this.attr('data-hide_zero');
 
 			if (format == 'Date') {
 				var value = $this.val();
@@ -48,6 +49,9 @@ var EsCon = {
 				} else {
 					$this.removeClass('isnan');
 
+					if (hide_zero && !parseFloat(value))
+						$this.val('');
+					else
 					if (format == 'Currency')
 						$this.val(EsCon.formatCurrency(value));
 					else
