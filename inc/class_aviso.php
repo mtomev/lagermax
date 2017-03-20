@@ -1193,7 +1193,7 @@
 			}
 
 
-			// Генериране на PDF
+			// Генериране на ПРИЕМНО - ПРЕДАВАТЕЛЕН ПРОТОКОЛ
 
 			// Данните от заглавния ред
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
@@ -1505,8 +1505,111 @@
 
 			// I - направо се отваря в прозореца
 			// D - download
-			$pdf->Output('I', $aviso['scan_doc']);
+			$pdf->Output('I', $aviso['ppp_doc']);
 			_base::put_sys_oper(__METHOD__, 'pdf', 'aviso', $aviso_id);
+		}
+
+		function aviso_lables_display () {
+			// aviso_id
+			$aviso_id = $_REQUEST['p1'];
+			// $_REQUEST['p2'] = thumb
+			$thumb = ($_REQUEST['p2'] == 'thumb');
+			$small_thumb = ($_REQUEST['p2'] == 'small_thumb');
+
+			// Ако се иска thumb
+			if ($thumb || $small_thumb) {
+				_base::display_file('0.pdf', $thumb, $small_thumb);
+				return ;
+			}
+
+
+			// Генериране на Етикети по Палети и Колети
+
+			// Данните от заглавния ред
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
+			$aviso = _base::sql_fetch_assoc($query_result);
+			_base::sql_free_result($query_result);
+			$warehouse_type = $aviso['warehouse_type'];
+
+			// Данните от редовете
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
+			while ($query_data = _base::sql_fetch_assoc($query_result))
+				$aviso_line[] = $query_data;
+			_base::sql_free_result($query_result);
+
+			// Същинско генериране на файла
+			$pdf = new aviso_PDF('L', 'mm', array(107, 80));
+			$pdf->AddFont('Calibri','','calibri.php');
+			$pdf->AddFont('Calibri','B','calibrib.php');
+			$pdf->AddFont('Calibri','BI','calibribi.php');
+			$pdf->AddFont('Calibri','I','calibrii.php');
+			// SetAutoPageBreak(boolean auto [, float margin])
+			$pdf->SetAutoPageBreak(true, 5);
+			// 107 - 5 - 5 = 97
+			$pdf->SetMargins(5,5,5);
+
+			if ($aviso_line) {
+				foreach($aviso_line as $line) {
+					// Цикъл по броя на Палетите / Колетите
+					if ($line['qty_pallet']) {
+						$count = $line['qty_pallet'];
+						$pallet_text = 'ПАЛЕТ';
+					} else {
+						$count = $line['qty_pack'];
+						$pallet_text = 'колет';
+					}
+					for($i = 1; $i <= $count; $i++) {
+						$pdf->AddPage();
+
+						// Сега се събират до 13 цифри при 0.5 мащабиране
+						// org_metro_code metro_request_no
+
+						$pdf->Code128(5,$pdf->GetY(),$line['org_metro_code'].' '.$line['metro_request_no'],97, 12, 0.4);
+						$pdf->SetXY(10,$pdf->GetY()+12);
+						$pdf->SetFont('Calibri','B',12);
+						$pdf->Write(5, $line['org_metro_code'].' '.$line['metro_request_no']);
+
+						$pdf->Ln();
+
+						$pdf->SetFont('Calibri','',12);
+						$pdf->Cell(28, 8, iconv('UTF-8', 'windows-1251', 'Nr Доставчик:'), 'LTB', 0, 'L');
+						$pdf->SetFont('Calibri','B',14);
+						$pdf->Cell(50-28, 8, iconv('UTF-8', 'windows-1251', $line['org_metro_code']), 'RTB', 0, 'L');
+
+						$pdf->SetFont('Calibri','',12);
+						$pdf->Cell(15, 8, iconv('UTF-8', 'windows-1251', 'Дата:'), 'LTB', 0, 'L');
+						$pdf->SetFont('Calibri','B',14);
+						$pdf->Cell(47-15, 8, iconv('UTF-8', 'windows-1251', _base::MySqlDate2Str($aviso['aviso_date'])), 'RTB', 1, 'L');
+
+						$pdf->SetFont('Calibri','B',12);
+						$pdf->Cell(97, 8, iconv('UTF-8', 'windows-1251', $aviso['org_name']), 1, 1, 'L');
+
+						$pdf->SetFont('Calibri','',12);
+						$pdf->Cell(28, 8, iconv('UTF-8', 'windows-1251', 'Nr Поръчка:'), 'LTB', 0, 'L');
+						$pdf->SetFont('Calibri','B',14);
+						$pdf->Cell(97-28, 8, iconv('UTF-8', 'windows-1251', $line['metro_request_no']), 'RTB', 1, 'L');
+
+						$pdf->SetFont('Calibri','',12);
+						$pdf->Cell(28, 8, iconv('UTF-8', 'windows-1251', 'Магазин:'), 'LTB', 0, 'L');
+						$pdf->SetFont('Calibri','B',14);
+						$pdf->Cell(97-28, 8, iconv('UTF-8', 'windows-1251', $line['shop_name']), 'RTB', 1, 'L');
+
+						$y = $pdf->GetY();
+						$pdf->Image(INC_DIR.'/lagermax_logo.png',5,$pdf->GetY()+2,45);
+						$pdf->SetXY(55, $pdf->GetY()+2);
+						$pdf->SetFont('Calibri','',10);
+						$pdf->Cell(45, 5, iconv('UTF-8', 'windows-1251', 'Авизо '.$aviso['aviso_id']), 0, 1, 'R');
+						$pdf->SetXY(55, $pdf->GetY());
+						$pdf->SetFont('Calibri','B',14);
+						$pdf->Cell(45, 10, iconv('UTF-8', 'windows-1251', $pallet_text.' '.$i.'/'.$count), 0, 1, 'R');
+					}
+				}
+
+				// I - направо се отваря в прозореца
+				// D - download
+				$pdf->Output('I', 'MP_Lables_'.$aviso_id.'.pdf');
+				_base::put_sys_oper(__METHOD__, 'pdf', 'aviso', $aviso_id);
+			}
 		}
 
 	}

@@ -107,9 +107,8 @@
 		{/if}
 			<span>id:{$data.id}</span>
 			<button class="cancel_button" id="cancel_button_aviso"><span>{#btn_Cancel#}</span></button>
-			<a id="print_button_aviso_ppp" href="/aviso/aviso_ppp_display/{$data.id}/PPP_Aviso_{$data.id}.pdf" target="_blank" title="PPP_Aviso_{$data.id}.pdf" style="margin-left: 40px;">
-				<img style="vertical-align: middle;" src="/images/pdf.png" alt="" border="0">
-			</a>
+			<button class="save_button" id="print_button_aviso_ppp" style="margin-left: 40px;"><span>{#btn_Print_ppp#}</span></button>
+			<button class="save_button" id="print_labels_button_aviso"><span>{#btn_Print_labels#}</span></button>
 		</div>
 		{include file='main_menu/status_line.tpl'}
 	</div>
@@ -309,6 +308,13 @@
 		vLocalTable = new table_line;
 	});
 
+	$('#print_button_aviso_ppp', '#aviso_edit').click (function () {
+		clickOpenFile('/aviso/aviso_ppp_display/{$data.id}/{$data.ppp_doc}');
+	});
+	$('#print_labels_button_aviso', '#aviso_edit').click (function () {
+		clickOpenFile('/aviso/aviso_lables_display/{$data.id}/MP_Lables_{$data.id}.pdf');
+	});
+
 	$('#save_button_aviso', '#aviso_edit').click (function () {
 		$('#aviso_status_new', '#aviso_edit').val('7');
 		if (!EsCon.check_mandatory($('#aviso_edit .mandatory').not('#table_line .mandatory'))) return false;
@@ -327,7 +333,7 @@
 					fnShowErrorMessage('', result);
 				}
 				else {
-					clickOpenFile('/aviso/aviso_ppp_display/'+result+'/PPP_Aviso_'+result+'.pdf');
+					clickOpenFile('/aviso/aviso_ppp_display/'+result+'/{$data.ppp_doc}');
 					window.location.href = callback_url;
 				}
 			},

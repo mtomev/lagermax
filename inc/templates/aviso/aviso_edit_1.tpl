@@ -199,7 +199,8 @@
 					render: function ( data, type, row ) {
 						if (!data) data = '';
 						var shtml = '<input type="text" class="text30 mandatory" row_id="'+row.id+'" ';
-						shtml += 'maxlength="'+_self.empty_line.field_width.metro_request_no+'" name="metro_request_no" value="'+data+'">';
+						{*shtml += 'maxlength="'+_self.empty_line.field_width.metro_request_no+'" name="metro_request_no" value="'+data+'">';*}
+						shtml += 'maxlength="15" name="metro_request_no" value="'+data+'">';
 						return shtml;
 					}
 				},
@@ -223,10 +224,9 @@
 						data = !data ? '':EsCon.formatCount(data, type);
 						// Ако е въведено qty_pack, то това е забранено за попълване
 						if (parseInt(row.qty_pack))
-							var h_class = 'class="number-small readonly hidden" readonly';
+							return '';
 						else
-							var h_class = 'class="number-small mandatory"';
-						return '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" name="qty_pallet" value="'+data+'">';
+							return '<input type="text" class="number-small mandatory" data-type="Count" row_id="'+row.id+'" name="qty_pallet" value="'+data+'">';
 					}
 				},
 				/*{if $data.warehouse_type != '1'}*/
@@ -236,10 +236,10 @@
 						data = !data ? '':EsCon.formatCount(data, type);
 						// Ако е въведено qty_pallet, то това е забранено за попълване
 						if (parseInt(row.qty_pallet))
-							var h_class = 'class="number-small readonly hidden" readonly';
-						else
-							var h_class = 'class="number-small mandatory"';
-						return '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" name="qty_pack" value="'+data+'">';
+							return '';
+						else {
+							return '<input type="text" class="number-small mandatory" data-type="Count" row_id="'+row.id+'" name="qty_pack" value="'+data+'">';
+						}
 					}
 				},
 				/*{/if}*/
@@ -274,7 +274,7 @@
 			],
 
 			drawCallback: function( settings ) {
-				$(".mandatory:not([placeholder])", '#table_line tbody').each(function (idx, el) {
+				$(".mandatory:not(.hasMandatory)", '#table_line tbody').each(function (idx, el) {
 					EsCon.set_mandatory($(el));
 				});
 			},
@@ -370,6 +370,15 @@
 				return false;
 			});
 
+			$('#table_line tbody').on('keydown', "input[name='qty_pallet']", function (e) {
+				var keyCode = e.keyCode || e.which; 
+				if (keyCode == 9 && !e.shiftKey) {
+					e.preventDefault();
+					$(this).change();
+					$(this).parent().nextAll().find(':input:first')[0].focus();
+				}
+			});
+
 			// Запис на въведената стойност в масива
 			$('#table_line tbody').on('change', 'input, select, textarea', function () {
 				var $element = $(this);
@@ -380,22 +389,32 @@
 				var $row = $element.parents('tr');
 				var data = _self.oTableLine.row($row).data();
 				data[name] = value;
-				if (name == 'qty_pallet')
+				// Да запазим фокуса
+				var $focused = null;
+				// Ако не излизам от това поле
+				if (document.activeElement == this)
+					$focused = $(this);
+					
+				
+				if (name == 'qty_pallet') {
 					_self.oTableLine.cell( $row, 'qty_pack:name' ).invalidate();
-				if (name == 'qty_pack')
+				}
+				if (name == 'qty_pack') {
 					_self.oTableLine.cell( $row, 'qty_pallet:name' ).invalidate();
+				}
 
 				// Записвам null вместо 0
 				if (name == 'weight' || name == 'volume') {
 					if (!Number(value)) {
 						data[name] = null;
-						//_self.oTableLine.row( $row ).invalidate();
 						//_self.oTableLine.cell( $row, name+':name' ).invalidate();
 					}
 				}
 
 				if (name == 'qty_pallet' || name == 'qty_pack' || name == 'weight' || name == 'volume') {
 					_self.oTableLine.draw(false);
+					if ($focused)
+						$focused.focus();
 				}
 			});
 		}

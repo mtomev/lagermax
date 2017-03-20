@@ -430,21 +430,23 @@ var EsCon = {
 
 	// Да сложим attr placeholder на всички с .mandatory
 	set_mandatory: function($elements) {
-		$elements.each( function() {
+		$elements.not('.hasMandatory').each( function() {
+			$this = $(this);
+			$this.addClass("hasMandatory");
 			if (this.nodeName.toLowerCase() === 'select') {
 				// Да сложим текст за option value="0"
 				// Ма само ако нямам -1
-				$('option[value="0"]', $(this)).attr('disabled', true).html("{#placeholder_required#}");
-				$('option[value=""]', $(this)).attr('disabled', true).html("{#placeholder_required#}");
-				$(this).change(function () {
+				$('option[value="0"]', $this).attr('disabled', true).html("{#placeholder_required#}");
+				$('option[value=""]', $this).attr('disabled', true).html("{#placeholder_required#}");
+				$this.change(function () {
 					if (Number($(this).val()) == 0)
-						$(this).addClass("mandatory-empty");
+						$this.addClass("mandatory-empty");
 					else
-						$(this).removeClass("mandatory-empty")
+						$this.removeClass("mandatory-empty")
 				});
-				$(this).trigger('change');
+				$this.trigger('change');
 			} else
-				$(this).attr('placeholder', "{#placeholder_required#}");
+				$this.attr('placeholder', "{#placeholder_required#}");
 		});
 	},
 

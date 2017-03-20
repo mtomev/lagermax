@@ -62,9 +62,8 @@
 	<div class="row-button">
 		<button class="save_button" id="save_button_receipt"><span>{#btn_Save#}</span></button>
 		<button class="cancel_button" id="cancel_button_receipt"><span>{#btn_Cancel#}</span></button>
-		<a id="print_button_receipt" class="hidden" href="" target="_blank" title="" style="margin-left: 40px;">
-			<img style="vertical-align: middle;" src="/images/pdf.png" alt="" border="0">
-		</a>
+		<button class="save_button hidden" id="print_button_receipt" style="margin-left: 40px;"><span>{#btn_Print_aviso#}</span></button>
+		<button class="save_button hidden" id="print_labels_button_receipt"><span>{#btn_Print_labels#}</span></button>
 	</div>
 
 </div>
@@ -108,11 +107,14 @@
 					// Печат
 					if (data.aviso_id) {
 						$('#print_button_receipt', '#aviso_receipt')
-							.attr('href', '/aviso/aviso_display/'+data.aviso_id+'/'+data.scan_doc)
-							.attr('title', data.scan_doc)
+							.attr('scan_doc', data.scan_doc)
+							.removeClass('hidden');
+						$('#print_labels_button_receipt', '#aviso_receipt')
 							.removeClass('hidden');
 					} else {
 						$('#print_button_receipt', '#aviso_receipt')
+							.addClass('hidden');
+						$('#print_labels_button_receipt', '#aviso_receipt')
 							.addClass('hidden');
 					}
 				}
@@ -133,6 +135,18 @@
 		$('#aviso_id', '#aviso_receipt').val({$data.aviso_id});
 		$('#aviso_id', '#aviso_receipt').trigger("change");
 		/*{/if}*/
+	});
+
+	$('#print_button_receipt', '#aviso_receipt').click (function () {
+		var aviso_id = Number(EsCon.getParsedVal($('#aviso_id', '#aviso_receipt')));
+		if (!aviso_id) return;
+		var scan_doc = $(this).attr('scan_doc');
+		clickOpenFile('/aviso/aviso_display/'+aviso_id+'/'+scan_doc);
+	});
+	$('#print_labels_button_receipt', '#aviso_receipt').click (function () {
+		var aviso_id = Number(EsCon.getParsedVal($('#aviso_id', '#aviso_receipt')));
+		if (!aviso_id) return;
+		clickOpenFile('/aviso/aviso_lables_display/'+aviso_id+'/MP_Lables_'+aviso_id+'.pdf');
 	});
 
 	$('#save_button_receipt').click (function () {
