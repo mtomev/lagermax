@@ -67,6 +67,9 @@
 		EsCon.set_mandatory($('#aviso_receipt .mandatory'));
 	});
 
+	$('#aviso_id', '#aviso_receipt').on('input', function () {
+		$('[name=aviso_id]', '#aviso_receipt').val(0);
+	});
 	$('#aviso_id', '#aviso_receipt').change(function () {
 		var aviso_id = Number(EsCon.getParsedVal($('#aviso_id', '#aviso_receipt')));
 		if (!aviso_id) return;

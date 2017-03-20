@@ -71,6 +71,13 @@
 <script type="text/javascript">
 	var callback_url = "{$callback_url}" || document.referer;
 
+	$('#aviso_id', '#aviso_receipt').on('input', function () {
+		$('[name=aviso_id]', '#aviso_receipt').val(0);
+		$('#print_button_receipt', '#aviso_receipt')
+			.addClass('hidden');
+		$('#print_labels_button_receipt', '#aviso_receipt')
+			.addClass('hidden');
+	});
 	$('#aviso_id', '#aviso_receipt').change(function () {
 		var aviso_id = Number(EsCon.getParsedVal($('#aviso_id', '#aviso_receipt')));
 		if (!aviso_id) aviso_id = -1;
@@ -138,13 +145,13 @@
 	});
 
 	$('#print_button_receipt', '#aviso_receipt').click (function () {
-		var aviso_id = Number(EsCon.getParsedVal($('#aviso_id', '#aviso_receipt')));
+		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
 		if (!aviso_id) return;
 		var scan_doc = $(this).attr('scan_doc');
 		clickOpenFile('/aviso/aviso_display/'+aviso_id+'/'+scan_doc);
 	});
 	$('#print_labels_button_receipt', '#aviso_receipt').click (function () {
-		var aviso_id = Number(EsCon.getParsedVal($('#aviso_id', '#aviso_receipt')));
+		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
 		if (!aviso_id) return;
 		clickOpenFile('/aviso/aviso_lables_display/'+aviso_id+'/MP_Lables_'+aviso_id+'.pdf');
 	});

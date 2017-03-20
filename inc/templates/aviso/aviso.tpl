@@ -5,15 +5,15 @@
 	<div class="headerrow" id="headerrow">
 		<span class="ellipsis">
 			{#org_name#}
-			<select class="select2chosen" id="org_id" name="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
+			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
 			</select>
 		</span>
 		<span class="">&nbsp;&nbsp;</span>
 
 		{#aviso_date#}
-		<input name="from_date" id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
-		<input name="to_date" id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
+		<input id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
+		<input id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
 		<span class="">&nbsp;&nbsp;</span>
 
 		<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>

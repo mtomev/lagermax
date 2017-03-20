@@ -972,3 +972,5 @@
 		//beforeSend: function () { waitingDialog({ }) },
 		//complete: function () { closeWaitingDialog() },
 	});
+
+	$(window).unload(function(){});

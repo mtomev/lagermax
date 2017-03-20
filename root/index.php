@@ -1,5 +1,9 @@
 <?php
-	header ('Content-Type: text/html; charset=utf-8');
+	//header('Cache-Control: must-revalidate, max-age=0, no-cache, no-store');
+	header('Cache-Control: no-cache, no-store');
+	header('Pragma: no-cache');
+	header("Expires: " . gmdate("D, d M Y H:i:s", time()) . " GMT");
+	header('Content-Type: text/html; charset=utf-8');
 
 	ini_set('session.name', 'LagermaxSesID');
 

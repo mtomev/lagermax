@@ -391,6 +391,7 @@ var EsCon = {
 		if (typeof(context)==='undefined') context = '#edit';
 		$(selector, context).not('.hasDatepicker').each(function() {
 			var d = EsCon.formatDate($(this).val());
+//console.log($(this).val(), d);
 			$(this).val(d);
 			if (!$(this).hasClass('readonly'))
 				$(this).datepicker();
