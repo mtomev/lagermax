@@ -973,4 +973,4 @@
 		//complete: function () { closeWaitingDialog() },
 	});
 
-	$(window).unload(function(){});
+	//$(window).unload(function(){});

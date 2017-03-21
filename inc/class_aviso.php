@@ -2,20 +2,15 @@
 	require_once(COMPS_DIR.'/fpdf181/code128.php');
 	class aviso_PDF extends PDF_Code128 {
 		public $footers = array();
+		public $header_text = false;
+		public $page_shift = 0;
 		// Page header
 		function Header() {
-			/*
-			// Logo
-			$this->Image('logo.png',10,6,30);
-			// Arial bold 15
-			$this->SetFont('Arial','B',15);
-			// Move to the right
-			$this->Cell(80);
-			// Title
-			$this->Cell(30,10,'Title',1,0,'C');
-			// Line break
-			$this->Ln(20);
-			*/
+			$page = $this->PageNo() - $this->page_shift;
+			if ($this->header_text and $page > 1) {
+				$this->SetFont($this->FontFamily,'',11);
+				$this->Cell($this->GetPageWidth()-$this->lMargin-$this->rMargin,5, iconv('UTF-8', 'windows-1251', $this->header_text.' / стр.'.$page), 0, 1, 'R');
+			}
 		}
 
 		// Page footer
@@ -27,6 +22,53 @@
 			foreach($this->footers as $footer)
 				$this->Cell(0,3, iconv('UTF-8', 'windows-1252', $footer), 0, 1, 'C');
 			*/
+		}
+
+		//Computes the number of lines a MultiCell of width w will take
+		function NbLines($w,$txt) {
+			$cw=&$this->CurrentFont['cw'];
+			if($w==0)
+				$w=$this->w-$this->rMargin-$this->x;
+			$wmax=($w-2*$this->cMargin)*1000/$this->FontSize;
+			$s=str_replace("\r",'',$txt);
+			$nb=strlen($s);
+			if($nb>0 and $s[$nb-1]=="\n")
+				$nb--;
+			$sep=-1;
+			$i=0;
+			$j=0;
+			$l=0;
+			$nl=1;
+			while($i<$nb) {
+				$c=$s[$i];
+				if($c=="\n")
+				{
+					$i++;
+					$sep=-1;
+					$j=$i;
+					$l=0;
+					$nl++;
+					continue;
+				}
+				if($c==' ')
+					$sep=$i;
+				$l+=$cw[$c];
+				if($l>$wmax) {
+					if($sep==-1) {
+						if($i==$j)
+							$i++;
+					}
+					else
+						$i=$sep+1;
+					$sep=-1;
+					$j=$i;
+					$l=0;
+					$nl++;
+				}
+				else
+					$i++;
+			}
+			return $nl;
 		}
 	}
 
@@ -932,7 +974,13 @@
 			$pdf->AddFont('Calibri','BI','calibribi.php');
 			$pdf->AddFont('Calibri','I','calibrii.php');
 			// SetAutoPageBreak(boolean auto [, float margin])
-			$pdf->SetAutoPageBreak(true, 10);
+			$pdf->SetAutoPageBreak(false, 10);
+			// 210 - 10 - 10 = 190
+			$pdf->SetLeftMargin(10);
+			$pdf->SetRightMargin(10);
+			
+			$pdf->header_text = 'Авизо '.$aviso['aviso_id'];
+
 			$pdf->AddPage();
 
 			/*  
@@ -953,10 +1001,6 @@
 					1: to the beginning of the next line
 					2: below
 			*/
-			
-			// 210 - 10 - 10 = 190
-			$pdf->SetLeftMargin(10);
-			$pdf->SetRightMargin(10);
 			
 			$pdf->Image(INC_DIR.'/lagermax_logo.png',10,10,45);
 
@@ -1061,6 +1105,37 @@
 			$pack_volume = 0;
 			if ($aviso_line) {
 				foreach($aviso_line as $line) {
+					// Ако оставащато място до края на страницата не стига, да сложа PageBreak
+					$nl = $pdf->NbLines($w[2], $line['metro_request_no']);
+					if ($y+$nl*$h > $pdf->GetPageHeight()-10) {
+						// Черта най-отдолу, ама само ако не чертая за всеки ред
+						$pdf->Cell(190,0, '', 'T');
+						$pdf->AddPage();
+
+						$y = $pdf->GetY();
+						$pdf->SetFont('Calibri','B',11);
+						if ($warehouse_type == '3')
+							$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', "Метро магазин"), 1, 0, 'C');
+						else
+							$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', ""), 1, 0, 'C');
+						$pdf->Cell($w[1],5, iconv('UTF-8', 'windows-1251', "Доставчик"), 'TR', 2, 'C');
+						$pdf->Cell($w[1],5, iconv('UTF-8', 'windows-1251', "Номер"), 'BR', 0, 'C');
+						$pdf->SetXY($pdf->GetX(), $y);
+						$pdf->Cell($w[2],10, iconv('UTF-8', 'windows-1251', "Поръчка"), 1, 0, 'C');
+						$pdf->Cell($w[3]+$w[4]+$w[5],5, iconv('UTF-8', 'windows-1251', "ПАЛЕТИ"), 1, 2, 'C');
+						$pdf->Cell($w[3],5, iconv('UTF-8', 'windows-1251', "Бр."), 1, 0, 'C');
+						$pdf->Cell($w[4],5, iconv('UTF-8', 'windows-1251', "Кг"), 1, 0, 'C');
+						$pdf->Cell($w[5],5, iconv('UTF-8', 'windows-1251', "куб. м."), 1, 0, 'C');
+						$pdf->SetXY($pdf->GetX(), $y);
+						$pdf->Cell($w[6]+$w[7]+$w[8],5, iconv('UTF-8', 'windows-1251', "КОЛЕТИ"), 1, 2, 'C');
+						$pdf->Cell($w[6],5, iconv('UTF-8', 'windows-1251', "Бр."), 1, 0, 'C');
+						$pdf->Cell($w[7],5, iconv('UTF-8', 'windows-1251', "Кг"), 1, 0, 'C');
+						$pdf->Cell($w[8],5, iconv('UTF-8', 'windows-1251', "куб. м."), 1, 0, 'C');
+
+						$pdf->SetFont('Calibri','',11);
+						$pdf->Ln();
+						$y = $pdf->GetY();
+					}
 
 					if ($last_shop_id != $line['shop_id'])
 						$pdf->MultiCell($w[0],$h, iconv('UTF-8', 'windows-1251', $line['shop_name']), 'LRT', 'L');
@@ -1071,47 +1146,47 @@
 					$yH = max($yH, $pdf->GetY() - $y);
 
 					$pdf->SetXY($x, $y);
-					$pdf->MultiCell($w[1],$h, iconv('UTF-8', 'windows-1251', $line['org_metro_code']), 'LR', 'L');
+					$pdf->MultiCell($w[1],$h, iconv('UTF-8', 'windows-1251', $line['org_metro_code']), 'LRT', 'L');
 					$x = $x + $w[1];
 					$yH = max($yH, $pdf->GetY() - $y);
 
 					$pdf->SetXY($x, $y);
-					$pdf->MultiCell($w[2],$h, iconv('UTF-8', 'windows-1251', $line['metro_request_no']), 'LR', 'L');
+					$pdf->MultiCell($w[2],$h, iconv('UTF-8', 'windows-1251', $line['metro_request_no']), 'LRT', 'L');
 					$x = $x + $w[2];
 					$yH = max($yH, $pdf->GetY() - $y);
 
 					// ПАЛЕТИ Бр., Кг, куб. м.
 					$pdf->SetXY($x, $y);
-					$pdf->MultiCell($w[3],$h, $line['qty_pallet'] ? $line['qty_pallet'] : '', 'LR', 'R');
+					$pdf->MultiCell($w[3],$h, $line['qty_pallet'] ? $line['qty_pallet'] : '', 'LRT', 'R');
 					$x = $x + $w[3];
 					$yH = max($yH, $pdf->GetY() - $y);
 
 					$pdf->SetXY($x, $y);
-					//$pdf->MultiCell($w[4],$h, $line['qty_pallet'] ? number_format($line['weight'], 3, '.', '') : '', 'LR', 'R');
-					$pdf->MultiCell($w[4],$h, $line['qty_pallet'] ? floatVal($line['weight']) : '', 'LR', 'R');
+					//$pdf->MultiCell($w[4],$h, $line['qty_pallet'] ? number_format($line['weight'], 3, '.', '') : '', 'LRT', 'R');
+					$pdf->MultiCell($w[4],$h, $line['qty_pallet'] ? floatVal($line['weight']) : '', 'LRT', 'R');
 					$x = $x + $w[4];
 					$yH = max($yH, $pdf->GetY() - $y);
 
 					$pdf->SetXY($x, $y);
-					//$pdf->MultiCell($w[5],$h, $line['qty_pallet'] ? number_format($line['volume'], 3, '.', '') : '', 'LR', 'R');
-					$pdf->MultiCell($w[5],$h, $line['qty_pallet'] ? floatVal($line['volume']) : '', 'LR', 'R');
+					//$pdf->MultiCell($w[5],$h, $line['qty_pallet'] ? number_format($line['volume'], 3, '.', '') : '', 'LRT', 'R');
+					$pdf->MultiCell($w[5],$h, $line['qty_pallet'] ? floatVal($line['volume']) : '', 'LRT', 'R');
 					$x = $x + $w[5];
 					$yH = max($yH, $pdf->GetY() - $y);
 
 
 					// КОЛЕТИ Бр., Кг, куб. м.
 					$pdf->SetXY($x, $y);
-					$pdf->MultiCell($w[6],$h, $line['qty_pack'] ? $line['qty_pack'] : '', 'LR', 'R');
+					$pdf->MultiCell($w[6],$h, $line['qty_pack'] ? $line['qty_pack'] : '', 'LRT', 'R');
 					$x = $x + $w[6];
 					$yH = max($yH, $pdf->GetY() - $y);
 
 					$pdf->SetXY($x, $y);
-					$pdf->MultiCell($w[7],$h, $line['qty_pack'] ? floatVal($line['weight']) : '', 'LR', 'R');
+					$pdf->MultiCell($w[7],$h, $line['qty_pack'] ? floatVal($line['weight']) : '', 'LRT', 'R');
 					$x = $x + $w[7];
 					$yH = max($yH, $pdf->GetY() - $y);
 
 					$pdf->SetXY($x, $y);
-					$pdf->MultiCell($w[8],$h, $line['qty_pack'] ? floatVal($line['volume']) : '', 'LR', 'R');
+					$pdf->MultiCell($w[8],$h, $line['qty_pack'] ? floatVal($line['volume']) : '', 'LRT', 'R');
 					$x = $x + $w[8];
 					$yH = max($yH, $pdf->GetY() - $y);
 
@@ -1142,6 +1217,7 @@
 				// Черта най-отдолу, ама само ако не чертая за всеки ред
 				$pdf->Cell(190,0, '', 'T');
 			}
+			$pdf->SetAutoPageBreak(true, 10);
 
 			$pdf->Ln();
 
@@ -1223,34 +1299,15 @@
 			$pdf->AddFont('Calibri','B','calibrib.php');
 			$pdf->AddFont('Calibri','BI','calibribi.php');
 			$pdf->AddFont('Calibri','I','calibrii.php');
-			// SetAutoPageBreak(boolean auto [, float margin])
-			$pdf->SetAutoPageBreak(true, 10);
 
-			/*  
-				Cell(float w [, float h [, string txt [, mixed border [, int ln [, string align [, boolean fill [, mixed link]]]]]]]) 
-				Мярката е мм.
-				
-				mixed border
-					0: no border
-					1: frame
-					cobined string
-					L: left
-					T: top
-					R: right
-					B: bottom
-
-				int ln
-					0: to the right
-					1: to the beginning of the next line
-					2: below
-			*/
-
-		for($orig_copy = 1; $orig_copy <= 2; $orig_copy++) {
-			$pdf->AddPage();
 			// 210 - 10 - 10 = 190
 			$pdf->SetLeftMargin(10);
 			$pdf->SetRightMargin(10);
 			
+			$pdf->header_text = 'Приемно-предавателен протокол '.$aviso['aviso_id'];
+
+		for($orig_copy = 1; $orig_copy <= 2; $orig_copy++) {
+			$pdf->AddPage();
 			$pdf->Image(INC_DIR.'/lagermax_logo.png',10,10,45);
 
 			// 190-45 = 145
@@ -1285,11 +1342,7 @@
 			$y = $pdf->GetY();
 			$barcode_width = 80;
 			$pdf->Cell($barcode_width, 20, '', 1, 0, 'L');
-			/*
-			$pdf->Cell(40, 10, iconv('UTF-8', 'windows-1251', 'Дата: ' . _base::MySqlDate2Str($aviso['aviso_date'])), 1, 0, 'C');
-			$pdf->Cell(25, 10, iconv('UTF-8', 'windows-1251', 'Час: ' . substr($aviso['aviso_time'],0,5)), 1, 0, 'C');
-			$pdf->Cell(190-65-$barcode_width, 10, iconv('UTF-8', 'windows-1251', $aviso['warehouse_code']), 1, 1, 'C');
-			*/
+
 			$pdf->SetFont('Calibri','B',16);
 			$pdf->Cell(35, 8, iconv('UTF-8', 'windows-1251', _base::MySqlDate2Str($aviso['aviso_date'])), 1, 0, 'C');
 			$pdf->Cell(25, 8, iconv('UTF-8', 'windows-1251', substr($aviso['aviso_time'],0,5)), 1, 0, 'C');
@@ -1352,6 +1405,7 @@
 			$pdf->Cell($w[6],5, iconv('UTF-8', 'windows-1251', "Прието"), 1, 0, 'C');
 
 			// Детайлни редове
+			$pdf->SetAutoPageBreak(false, 10);
 			$pdf->SetFont('Calibri','',11);
 			$pdf->Ln();
 			$h = 8;
@@ -1368,6 +1422,38 @@
 			$qty_pack_rcvd = 0;
 			if ($aviso_line) {
 				foreach($aviso_line as $line) {
+					// Ако оставащато място до края на страницата не стига, да сложа PageBreak
+					$nl = $pdf->NbLines($w[2], $line['metro_request_no']);
+					if ($y+$nl*$h > $pdf->GetPageHeight()-10) {
+						// Черта най-отдолу, ама само ако не чертая за всеки ред
+						$pdf->Cell(190-4,0, '', 'T');
+						$pdf->AddPage();
+
+						$y = $pdf->GetY();
+						$pdf->SetFont('Calibri','B',11);
+						if ($warehouse_type == '3')
+							$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', "Метро магазин"), 1, 0, 'C');
+						else
+							$pdf->Cell($w[0],10, iconv('UTF-8', 'windows-1251', ""), 1, 0, 'C');
+						$pdf->Cell($w[1],5, iconv('UTF-8', 'windows-1251', "Доставчик"), 'TR', 2, 'C');
+						$pdf->Cell($w[1],5, iconv('UTF-8', 'windows-1251', "Номер"), 'BR', 0, 'C');
+
+						$pdf->SetXY($pdf->GetX(), $y);
+						$pdf->Cell($w[2],10, iconv('UTF-8', 'windows-1251', "Поръчка"), 1, 0, 'C');
+
+						$pdf->Cell($w[3]+$w[4],5, iconv('UTF-8', 'windows-1251', "ПАЛЕТИ"), 1, 2, 'C');
+						$pdf->Cell($w[3],5, iconv('UTF-8', 'windows-1251', "Заявено"), 1, 0, 'C');
+						$pdf->Cell($w[4],5, iconv('UTF-8', 'windows-1251', "Прието"), 1, 0, 'C');
+
+						$pdf->SetXY($pdf->GetX(), $y);
+						$pdf->Cell($w[5]+$w[6],5, iconv('UTF-8', 'windows-1251', "КОЛЕТИ"), 1, 2, 'C');
+						$pdf->Cell($w[5],5, iconv('UTF-8', 'windows-1251', "Заявено"), 1, 0, 'C');
+						$pdf->Cell($w[6],5, iconv('UTF-8', 'windows-1251', "Прието"), 1, 0, 'C');
+
+						$pdf->SetFont('Calibri','',11);
+						$pdf->Ln();
+						$y = $pdf->GetY();
+					}
 
 					if ($last_shop_id != $line['shop_id'])
 						$pdf->MultiCell($w[0],$h, iconv('UTF-8', 'windows-1251', $line['shop_name']), 'LRT', 'L');
@@ -1447,6 +1533,7 @@
 				// Черта най-отдолу, ама само ако не чертая за всеки ред
 				$pdf->Cell(190-4,0, '', 'T');
 			}
+			$pdf->SetAutoPageBreak(true, 10);
 
 			$pdf->Ln();
 
@@ -1500,6 +1587,8 @@
 
 			$pdf->Cell(95, 4, iconv('UTF-8', 'windows-1251', $aviso['org_name']), 0, 0, 'C');
 			$pdf->Cell(95, 4, iconv('UTF-8', 'windows-1251', 'Лагермакс Спедицио България ЕООД'), 0, 1, 'C');
+
+			$pdf->page_shift = $pdf->PageNo();
 		}
 
 

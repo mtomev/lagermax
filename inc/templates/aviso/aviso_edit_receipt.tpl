@@ -62,8 +62,9 @@
 	<div class="row-button">
 		<button class="save_button" id="save_button_receipt"><span>{#btn_Save#}</span></button>
 		<button class="cancel_button" id="cancel_button_receipt"><span>{#btn_Cancel#}</span></button>
-		<button class="save_button hidden" id="print_button_receipt" style="margin-left: 40px;"><span>{#btn_Print_aviso#}</span></button>
-		<button class="save_button hidden" id="print_labels_button_receipt"><span>{#btn_Print_labels#}</span></button>
+		<button class="save_button hidden hide_show" id="print_button_receipt" style="margin-left: 40px;"><span>{#btn_Print_aviso#}</span></button>
+		<button class="save_button hidden hide_show" id="print_labels_button_receipt"><span>{#btn_Print_labels#}</span></button>
+		<button class="save_button hidden hide_show" id="edit_button_receipt"><span>{#Edit#} {#table_aviso#}</span></button>
 	</div>
 
 </div>
@@ -73,9 +74,7 @@
 
 	$('#aviso_id', '#aviso_receipt').on('input', function () {
 		$('[name=aviso_id]', '#aviso_receipt').val(0);
-		$('#print_button_receipt', '#aviso_receipt')
-			.addClass('hidden');
-		$('#print_labels_button_receipt', '#aviso_receipt')
+		$('.row-button .hide_show', '#aviso_receipt')
 			.addClass('hidden');
 	});
 	$('#aviso_id', '#aviso_receipt').change(function () {
@@ -114,14 +113,11 @@
 					// Печат
 					if (data.aviso_id) {
 						$('#print_button_receipt', '#aviso_receipt')
-							.attr('scan_doc', data.scan_doc)
-							.removeClass('hidden');
-						$('#print_labels_button_receipt', '#aviso_receipt')
+							.attr('scan_doc', data.scan_doc);
+						$('.row-button .hide_show', '#aviso_receipt')
 							.removeClass('hidden');
 					} else {
-						$('#print_button_receipt', '#aviso_receipt')
-							.addClass('hidden');
-						$('#print_labels_button_receipt', '#aviso_receipt')
+						$('.row-button .hide_show', '#aviso_receipt')
 							.addClass('hidden');
 					}
 				}
@@ -144,16 +140,21 @@
 		/*{/if}*/
 	});
 
-	$('#print_button_receipt', '#aviso_receipt').click (function () {
+	$('#print_button_receipt', '#aviso_receipt').click(function () {
 		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
 		if (!aviso_id) return;
 		var scan_doc = $(this).attr('scan_doc');
 		clickOpenFile('/aviso/aviso_display/'+aviso_id+'/'+scan_doc);
 	});
-	$('#print_labels_button_receipt', '#aviso_receipt').click (function () {
+	$('#print_labels_button_receipt', '#aviso_receipt').click(function () {
 		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
 		if (!aviso_id) return;
 		clickOpenFile('/aviso/aviso_lables_display/'+aviso_id+'/MP_Lables_'+aviso_id+'.pdf');
+	});
+	$('#edit_button_receipt', '#aviso_receipt').click(function () {
+		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
+		if (!aviso_id) return;
+		window.open('/aviso/aviso_edit/'+aviso_id);
 	});
 
 	$('#save_button_receipt').click (function () {

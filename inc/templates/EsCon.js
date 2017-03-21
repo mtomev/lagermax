@@ -386,12 +386,15 @@ var EsCon = {
 	},
 
 
+	// Това се прилага само за показаните със smarty променливи стойности в #edit, но не и за показаните с рендер функции в таблиците
 	set_datepicker: function(selector, context) {
 		if (typeof(selector)==='undefined') selector = 'input.date';
 		if (typeof(context)==='undefined') context = '#edit';
 		$(selector, context).not('.hasDatepicker').each(function() {
-			var d = EsCon.formatDate($(this).val());
-//console.log($(this).val(), d);
+			// Заради WebKit Browsers and Back / Forward
+			//var d = EsCon.formatDate($(this).val());
+			var d = EsCon.formatDate($(this).attr('value'));
+//console.log($(this).attr('value'), $(this).val(), d);
 			$(this).val(d);
 			if (!$(this).hasClass('readonly'))
 				$(this).datepicker();
@@ -403,29 +406,31 @@ var EsCon = {
 		$elements.each(function() {
 			var $this = $(this);
 			var format = $this.attr('data-type');
+			//var value = $this.val();
+			var value = $this.attr('value');
 			if (format == 'Currency')
-				$this.val(EsCon.formatCurrency($this.val()));
+				$this.val(EsCon.formatCurrency(value));
 			else
 			if (format == 'CurrencyBig')
-				$this.val(EsCon.formatCurrencyBig($this.val()));
+				$this.val(EsCon.formatCurrencyBig(value));
 			else
 			if (format == 'Quantity')
-				$this.val(EsCon.formatQuantity($this.val()));
+				$this.val(EsCon.formatQuantity(value));
 			else
 			if (format == 'Percent')
-				$this.val(EsCon.formatPercent($this.val()));
+				$this.val(EsCon.formatPercent(value));
 			else
 			if (format == 'Quantity3')
-				$this.val(EsCon.formatQuantity3($this.val()));
+				$this.val(EsCon.formatQuantity3(value));
 			else
 			if (format == 'Percent3')
-				$this.val(EsCon.formatPercent3($this.val()));
+				$this.val(EsCon.formatPercent3(value));
 			else
 			if (format == 'Count')
-				$this.val(EsCon.formatCount($this.val()));
+				$this.val(EsCon.formatCount(value));
 			else
 			if (format == 'Time')
-				$this.val(EsCon.formatTime($this.val()));
+				$this.val(EsCon.formatTime(value));
 		});
 	},
 
