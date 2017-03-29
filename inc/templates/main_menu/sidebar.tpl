@@ -15,12 +15,14 @@
 				{if $smarty.session.userdata.grants.aviso_detail == '1'}
 				<li><a sub_menu="aviso_detail" href="/aviso/aviso_detail">{#menu_aviso_detail#}</a></li>
 				{/if}
+				{*
 				{if $smarty.session.userdata.grants.aviso_reception == '1'}
 				<li><a id="aviso_edit_receipt" sub_menu="aviso_reception" href="/aviso/aviso_edit_receipt">{#menu_aviso_reception#}</a></li>
 				{/if}
 				{if $smarty.session.userdata.grants.aviso_reception == '1'}
 				<li><a id="aviso_select_for_complete" sub_menu="aviso_reception" href="/aviso/aviso_select_for_complete">{#aviso_complete#}</a></li>
 				{/if}
+				*}
 			</ul>
 			</li>
 
@@ -106,6 +108,16 @@
 		<button id="temp_button" class="submit_button"><span>gen user passw</span></button>
 		{/if*}
 	</div>
+
+	<div style="padding-left:10px;padding-right:10px;">
+		{if $smarty.session.userdata.grants.aviso_reception == '1'}
+		<br>
+		<button id="aviso_edit_receipt_button" class="green_button" href="/aviso/aviso_edit_receipt"><span>{#menu_aviso_reception#}</span></button>
+		<br>
+		<br>
+		<button id="aviso_select_for_complete_button" class="green_button" href="/aviso/aviso_select_for_complete"><span>{#aviso_complete#}</span></button>
+		{/if}
+	</div>
 	{/if}
 
 <script type="text/javascript">
@@ -149,7 +161,7 @@
 		});
 	});
 
-	$('#aviso_edit_receipt, #aviso_select_for_complete', '#sidemenu').on('click', function(event) {
+	$('#sidemenu #aviso_edit_receipt, #sidemenu #aviso_select_for_complete, #aviso_edit_receipt_button, #aviso_select_for_complete_button').on('click', function(event) {
 		event.preventDefault();
 		event.stopImmediatePropagation();
 		is_edit_child = false;

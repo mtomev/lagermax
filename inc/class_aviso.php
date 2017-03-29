@@ -82,6 +82,10 @@
 		function __destruct () {}
 
 
+		function deflt () {
+			$this->aviso();
+		}
+
 		function aviso ($where_add = '') {
 		 	if (!_base::CheckAccess('aviso')) return;
 			$_SESSION['main_menu'] = 'aviso';
@@ -406,6 +410,13 @@
 
 			$query->AddParam('aviso_date', 'd');
 			$query->AddParam('aviso_time', 't');
+
+			$query->AddParam('aviso_plt_eur', 'n', 0);
+			$query->AddParam('aviso_plt_chep', 'n', 0);
+			$query->AddParam('aviso_plt_other', 'n', 0);
+			$query->AddParam('aviso_ret_plt_eur', 'n', 0);
+			$query->AddParam('aviso_ret_plt_chep', 'n', 0);
+			$query->AddParam('aviso_ret_plt_other', 'n', 0);
 
 			if ($id != 0) {
 				$query->update(["aviso_id" => $id]);

@@ -37,6 +37,11 @@
 				{ title: "{#contact#}", data: 'org_contact' },
 				{ title: "{#phone#}", data: 'org_phone',	className: "ellipsis", render: displayEllipses },
 				{ title: "{#email#}", data: 'org_email',	className: "ellipsis", render: displayEllipses },
+
+				{ title: "{#org_ns_plt_eur#}", data: 'org_ns_plt_eur', className: "dt-right", render: EsCon.formatCountHideZero },
+				{ title: "{#org_ns_plt_chep#}", data: 'org_ns_plt_chep', className: "dt-right", render: EsCon.formatCountHideZero },
+				{ title: "{#org_ns_plt_other#}", data: 'org_ns_plt_other', className: "dt-right", render: EsCon.formatCountHideZero },
+
 				{ title: "{#note#}", data: 'org_note', className: "ellipsis", render: displayEllipses },
 
 				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding",

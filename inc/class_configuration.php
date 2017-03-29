@@ -326,6 +326,9 @@
 			$query->AddParam('org_phone');
 			$query->AddParam('org_email');
 			$query->AddParam('org_note');
+			$query->AddParam('org_ns_plt_eur', 'n', 0);
+			$query->AddParam('org_ns_plt_chep', 'n', 0);
+			$query->AddParam('org_ns_plt_other', 'n', 0);
 			$query->AddParam('is_active', 'c');
 			if ($id != 0) {
 				$query->update([$table."_id" => $id]);
