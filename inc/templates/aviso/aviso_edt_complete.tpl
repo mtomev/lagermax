@@ -79,19 +79,19 @@
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_plt_eur#}</div>
 						<div class="table-cell">
-							<input class="number-small" data-type="Count" type="text" name="aviso_plt_eur" value="{$data.aviso_plt_eur}">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_plt_eur" value="{$data.aviso_plt_eur}">
 						</div>
 					</div>
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_plt_chep#}</div>
 						<div class="table-cell">
-							<input class="number-small" data-type="Count" type="text" name="aviso_plt_chep" value="{$data.aviso_plt_chep}">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_plt_chep" value="{$data.aviso_plt_chep}">
 						</div>
 					</div>
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_plt_other#}</div>
 						<div class="table-cell">
-							<input class="number-small" data-type="Count" type="text" name="aviso_plt_other" value="{$data.aviso_plt_other}">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_plt_other" value="{$data.aviso_plt_other}">
 						</div>
 					</div>
 				</div>
@@ -99,19 +99,19 @@
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_ret_plt_eur#}</div>
 						<div class="table-cell">
-							<input class="number-small" data-type="Count" type="text" name="aviso_ret_plt_eur" value="{$data.aviso_ret_plt_eur}">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_ret_plt_eur" value="{$data.aviso_ret_plt_eur}">
 						</div>
 					</div>
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_ret_plt_chep#}</div>
 						<div class="table-cell">
-							<input class="number-small" data-type="Count" type="text" name="aviso_ret_plt_chep" value="{$data.aviso_ret_plt_chep}">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_ret_plt_chep" value="{$data.aviso_ret_plt_chep}">
 						</div>
 					</div>
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_ret_plt_other#}</div>
 						<div class="table-cell">
-							<input class="number-small" data-type="Count" type="text" name="aviso_ret_plt_other" value="{$data.aviso_ret_plt_other}">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_ret_plt_other" value="{$data.aviso_ret_plt_other}">
 						</div>
 					</div>
 				</div>
@@ -205,47 +205,47 @@
 				/*{/if}*/
 
 				// qty_pallet
-				{ title: "{#qty_pallet#}", name: 'qty_pallet', data: 'qty_pallet', className: "dt-right sum_footer_cnt", render: EsCon.formatCountHideZero },
+				{ title: "{#qty_pallet#}", name: 'qty_pallet', data: 'qty_pallet', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				/*{if $data.warehouse_type != '1'}*/
 				// qty_pack
-				{ title: "{#qty_pack#}", name: 'qty_pack', data: 'qty_pack', className: "dt-right sum_footer_cnt", render: EsCon.formatCountHideZero },
+				{ title: "{#qty_pack#}", name: 'qty_pack', data: 'qty_pack', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				/*{/if}*/
 
 				/*{if $data.warehouse_type != '1'}*/
 				// weight
-				{ title: "{#weight#}", name: 'weight', data: 'weight', className: "dt-right sum_footer_qty", render: EsCon.formatQuantity3 },
+				{ title: "{#weight#}", name: 'weight', data: 'weight', className: "dt-right sum_footer_3", render: EsCon.format3 },
 				/*{/if}*/
 				/*{if $data.warehouse_type != '1'}*/
 				// volume
-				{ title: "{#volume#}", name: 'volume', data: 'volume', className: "dt-right sum_footer_qty", render: EsCon.formatQuantity3 },
+				{ title: "{#volume#}", name: 'volume', data: 'volume', className: "dt-right sum_footer_3", render: EsCon.format3 },
 				/*{/if}*/
 
-				{ title: "{#qty_pallet_rcvd#}", name: 'qty_pallet_rcvd', data: 'qty_pallet_rcvd', className: "dt-right sum_footer_cnt",
+				{ title: "{#qty_pallet_rcvd#}", name: 'qty_pallet_rcvd', data: 'qty_pallet_rcvd', className: "dt-right sum_footer_0",
 					render: function ( data, type, row ) {
-						data = EsCon.formatCount(data, type);
+						data = EsCon.format0(data, type);
 						if (!data) data = '';
 						// Ако е въведено qty_pack_rcvd, то това е забранено за попълване
 						if (parseInt(row.qty_pack_rcvd))
 							var h_class = 'class="number-small readonly hidden" readonly';
 						else
 							var h_class = 'class="number-small '+(row.qty_pallet_rcvd!=row.qty_pallet?'isAttention':'')+'"';
-						var shtml  = '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" ';
+						var shtml  = '<input type="text" '+h_class+' data-type="Number0" row_id="'+row.id+'" ';
 						shtml += 'name="qty_pallet_rcvd" value="'+data+'">';
 						return shtml;
 					}
 				},
 				/*{if $data.warehouse_type != '1'}*/
 				// qty_pack_rcvd
-				{ title: "{#qty_pack_rcvd#}", name: 'qty_pack_rcvd', data: 'qty_pack_rcvd', className: "dt-right sum_footer_cnt",
+				{ title: "{#qty_pack_rcvd#}", name: 'qty_pack_rcvd', data: 'qty_pack_rcvd', className: "dt-right sum_footer_0",
 					render: function ( data, type, row ) {
-						data = EsCon.formatCount(data, type);
+						data = EsCon.format0(data, type);
 						if (!data) data = '';
 						// Ако е въведено qty_pallet_rcvd, то това е забранено за попълване
 						if (parseInt(row.qty_pallet_rcvd))
 							var h_class = 'class="number-small readonly hidden" readonly';
 						else
 							var h_class = 'class="number-small '+(row.qty_pack_rcvd!=row.qty_pack?'isAttention':'')+'"';
-						var shtml  = '<input type="text" '+h_class+' data-type="Count" row_id="'+row.id+'" ';
+						var shtml  = '<input type="text" '+h_class+' data-type="Number0" row_id="'+row.id+'" ';
 						shtml += 'name="qty_pack_rcvd" value="'+data+'">';
 						return shtml;
 					}
@@ -262,11 +262,11 @@
 			footerCallback: function (tfoot, data, start, end, display) {
 				var api = this.api();
 				footer_row = {};
-				api.columns('.sum_footer_cnt').every(function (index) {
-					datatable_set_footer(this, EsCon.formatCount);
+				api.columns('.sum_footer_0').every(function (index) {
+					datatable_set_footer(this, EsCon.format0);
 				});
-				api.columns('.sum_footer_qty').every(function (index) {
-					datatable_set_footer(this, EsCon.formatQuantity3);
+				api.columns('.sum_footer_3').every(function (index) {
+					datatable_set_footer(this, EsCon.format3);
 				});
 
 				var qty_pallet_calc = datatable_get_footer_value(api, 'qty_pallet')

@@ -219,26 +219,26 @@
 				/*{/if}*/
 
 				// qty_pallet
-				{ title: "{#qty_pallet#}", name: 'qty_pallet', data: 'qty_pallet', className: "dt-right sum_footer_cnt",
+				{ title: "{#qty_pallet#}", name: 'qty_pallet', data: 'qty_pallet', className: "dt-right sum_footer_0",
 					render: function ( data, type, row ) {
-						data = !data ? '':EsCon.formatCount(data, type);
+						data = !data ? '':EsCon.format0(data, type);
 						// Ако е въведено qty_pack, то това е забранено за попълване
 						if (parseInt(row.qty_pack))
 							return '';
 						else
-							return '<input type="text" class="number-small mandatory" data-type="Count" row_id="'+row.id+'" name="qty_pallet" value="'+data+'">';
+							return '<input type="text" class="number-small mandatory" data-type="Number0" row_id="'+row.id+'" name="qty_pallet" value="'+data+'">';
 					}
 				},
 				/*{if $data.warehouse_type != '1'}*/
 				// qty_pack
-				{ title: "{#qty_pack#}", name: 'qty_pack', data: 'qty_pack', className: "dt-right sum_footer_cnt",
+				{ title: "{#qty_pack#}", name: 'qty_pack', data: 'qty_pack', className: "dt-right sum_footer_0",
 					render: function ( data, type, row ) {
-						data = !data ? '':EsCon.formatCount(data, type);
+						data = !data ? '':EsCon.format0(data, type);
 						// Ако е въведено qty_pallet, то това е забранено за попълване
 						if (parseInt(row.qty_pallet))
 							return '';
 						else {
-							return '<input type="text" class="number-small mandatory" data-type="Count" row_id="'+row.id+'" name="qty_pack" value="'+data+'">';
+							return '<input type="text" class="number-small mandatory" data-type="Number0" row_id="'+row.id+'" name="qty_pack" value="'+data+'">';
 						}
 					}
 				},
@@ -246,19 +246,19 @@
 
 				/*{if $data.warehouse_type != '1'}*/
 				// weight
-				{ title: "{#weight#}", name: 'weight', data: 'weight', className: "dt-right sum_footer_qty",
+				{ title: "{#weight#}", name: 'weight', data: 'weight', className: "dt-right sum_footer_3",
 					render: function ( data, type, row ) {
-						data = !data ? '':EsCon.formatQuantity3HideZero(data, type);
-						return '<input type="text" class="number mandatory" data-type="Quantity3" data-hide_zero="true" row_id="'+row.id+'" name="weight" value="'+data+'">';
+						data = !data ? '':EsCon.format3HideZero(data, type);
+						return '<input type="text" class="number mandatory" data-type="Number3" data-hide_zero="true" row_id="'+row.id+'" name="weight" value="'+data+'">';
 					}
 				},
 				/*{/if}*/
 				/*{if $data.warehouse_type != '1'}*/
 				// volume
-				{ title: "{#volume#}", name: 'volume', data: 'volume', className: "dt-right sum_footer_qty",
+				{ title: "{#volume#}", name: 'volume', data: 'volume', className: "dt-right sum_footer_3",
 					render: function ( data, type, row ) {
-						data = !data ? '':EsCon.formatQuantity3HideZero(data, type);
-						return '<input type="text" class="number mandatory" data-type="Quantity3" data-hide_zero="true" row_id="'+row.id+'" name="volume" value="'+data+'">';
+						data = !data ? '':EsCon.format3HideZero(data, type);
+						return '<input type="text" class="number mandatory" data-type="Number3" data-hide_zero="true" row_id="'+row.id+'" name="volume" value="'+data+'">';
 					}
 				},
 				/*{/if}*/
@@ -282,11 +282,11 @@
 			footerCallback: function (tfoot, data, start, end, display) {
 				var api = this.api();
 				footer_row = {};
-				api.columns('.sum_footer_cnt').every(function (index) {
-					datatable_set_footer(this, EsCon.formatCount);
+				api.columns('.sum_footer_0').every(function (index) {
+					datatable_set_footer(this, EsCon.format0);
 				});
-				api.columns('.sum_footer_qty').every(function (index) {
-					datatable_set_footer(this, EsCon.formatQuantity3);
+				api.columns('.sum_footer_3').every(function (index) {
+					datatable_set_footer(this, EsCon.format3);
 				});
 
 				var $footer = $( api.column('org_metro_code:name').footer() );

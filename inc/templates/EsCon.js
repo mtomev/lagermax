@@ -27,8 +27,8 @@ var EsCon = {
 						$this.removeClass('isnan');
 					$this.val(EsCon.formatDate(value));
 				}
-			} else
-			if (format == 'Time') {
+			}
+			else if (format == 'Time') {
 				var value = $this.val();
 				// Ако е празно, просто записваме null
 				if (!value)
@@ -42,7 +42,8 @@ var EsCon = {
 						$this.removeClass('isnan');
 					$this.val(EsCon.formatTime(value));
 				}
-			} else {
+			}
+			else {
 				var value = EsCon.getFloatVal($this);
 				if (isNaN(value)) {
 					$this.addClass('isnan');
@@ -58,20 +59,20 @@ var EsCon = {
 					if (format == 'CurrencyBig')
 						$this.val(EsCon.formatCurrencyBig(value));
 					else
-					if (format == 'Quantity')
-						$this.val(EsCon.formatQuantity(value));
-					else
 					if (format == 'Percent')
 						$this.val(EsCon.formatPercent(value));
-					else
-					if (format == 'Quantity3')
-						$this.val(EsCon.formatQuantity3(value));
 					else
 					if (format == 'Percent3')
 						$this.val(EsCon.formatPercent3(value));
 					else
-					if (format == 'Count')
-						$this.val(EsCon.formatCount(value));
+					if (format == 'Number0')
+						$this.val(EsCon.format0(value));
+					else
+					if (format == 'Number2')
+						$this.val(EsCon.format2(value));
+					else
+					if (format == 'Number3')
+						$this.val(EsCon.format3(value));
 				}
 			}
 		},
@@ -144,25 +145,55 @@ var EsCon = {
 		return EsCon.formatInternal(data, type, '%', 3, true);
 	},
 
-	formatQuantity: function(data, type) {
+	format0: function(data, type) {
+		return EsCon.formatInternal(data, type, '', 0, false);
+	},
+	format0HideZero: function(data, type) {
+		return EsCon.formatInternal(data, type, '', 0, true);
+	},
+	format1: function(data, type) {
+		return EsCon.formatInternal(data, type, '', 1, false);
+	},
+	format1HideZero: function(data, type) {
+		return EsCon.formatInternal(data, type, '', 1, true);
+	},
+	format2: function(data, type) {
 		return EsCon.formatInternal(data, type, '', 2, false);
 	},
-	formatQuantityHideZero: function(data, type) {
+	format2HideZero: function(data, type) {
 		return EsCon.formatInternal(data, type, '', 2, true);
 	},
-	formatQuantity3: function(data, type) {
+	format3: function(data, type) {
 		return EsCon.formatInternal(data, type, '', 3, false);
 	},
-	formatQuantity3HideZero: function(data, type) {
+	format3HideZero: function(data, type) {
 		return EsCon.formatInternal(data, type, '', 3, true);
 	},
 
-	formatCount: function(data, type) {
-		return EsCon.formatInternal(data, type, '', 0, false);
+	formatInteger: function(data, type) {
+		if (typeof(type) === 'undefined') type = 'display';
+		if (type !== 'display') return data;
+		if (typeof(data) === 'number') {
+			if (isNaN(data)) return '';
+			data = data.toFixed(0);
+		}
+		else {
+			data = parseFloat(data);
+			if (isNaN(data)) return '';
+			data = data.toFixed(0);
+		}
+		return data;
 	},
-	formatCountHideZero: function(data, type) {
-		return EsCon.formatInternal(data, type, '', 0, true);
+	formatIntegerHideZero: function(data, type) {
+		if (typeof(type) === 'undefined') type = 'display';
+		if (type !== 'display') return data;
+		data = EsCon.formatInteger(data, type);
+		if (parseInt(data))
+			return data;
+		else
+			return '';
 	},
+
 
 	// От форматирания string да направим нормално число
 	// Предполага се че само в input Currency има допълнителен символ. В останалите input Number няма допълнително добавени символи
@@ -344,8 +375,8 @@ var EsCon = {
 					value = '';
 			} else
 				value = EsCon.parseDate(value);
-		} else
-		if (format == 'Time') {
+		}
+		else if (format == 'Time') {
 			// Ако е празно, просто записваме null
 			if (!value) {
 				if (typeof(keep_null_in_date) === 'undefined') keep_null_in_date = true;
@@ -355,8 +386,8 @@ var EsCon = {
 					value = '';
 			} else
 				value = EsCon.parseTime(value);
-		} else
-		if (format) {
+		}
+		else if (format) {
 			value = EsCon.parseNumber(value);
 			value = parseFloat(value);
 			if (isNaN(value))
@@ -365,20 +396,20 @@ var EsCon = {
 			if (format == 'Currency')
 				value = value.toFixed(2);
 			else
-			if (format == 'Quantity')
-				value = value.toFixed(2);
-			else
 			if (format == 'Percent')
 				value = value.toFixed(2);
-			else
-			if (format == 'Quantity3')
-				value = value.toFixed(3);
 			else
 			if (format == 'Percent3')
 				value = value.toFixed(3);
 			else
-			if (format == 'Count')
+			if (format == 'Number0')
 				value = value.toFixed(0);
+			else
+			if (format == 'Number2')
+				value = value.toFixed(2);
+			else
+			if (format == 'Number3')
+				value = value.toFixed(3);
 			else
 				value = value.toFixed(0);
 		}
@@ -414,20 +445,20 @@ var EsCon = {
 			if (format == 'CurrencyBig')
 				$this.val(EsCon.formatCurrencyBig(value));
 			else
-			if (format == 'Quantity')
-				$this.val(EsCon.formatQuantity(value));
-			else
 			if (format == 'Percent')
 				$this.val(EsCon.formatPercent(value));
-			else
-			if (format == 'Quantity3')
-				$this.val(EsCon.formatQuantity3(value));
 			else
 			if (format == 'Percent3')
 				$this.val(EsCon.formatPercent3(value));
 			else
-			if (format == 'Count')
-				$this.val(EsCon.formatCount(value));
+			if (format == 'Number0')
+				$this.val(EsCon.format0(value));
+			else
+			if (format == 'Number2')
+				$this.val(EsCon.format2(value));
+			else
+			if (format == 'Number3')
+				$this.val(EsCon.format3(value));
 			else
 			if (format == 'Time')
 				$this.val(EsCon.formatTime(value));

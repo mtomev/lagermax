@@ -74,12 +74,12 @@
 									html += '<tr>';
 								html += 
 									 '<td class="dt-center">'+timeslot+'</td>'
-									+'<td class="dt-right">'+EsCon.formatCountHideZero(result[warehouse_code][working_day][timeslot].cnt_aviso)+'</td>'
-									+'<td class="dt-right">'+EsCon.formatCountHideZero(result[warehouse_code][working_day][timeslot].qty_pallet)+'</td>'
-									+'<td class="dt-right">'+EsCon.formatCountHideZero(result[warehouse_code][working_day][timeslot].qty_pack)+'</td>'
-									+'<td class="dt-right">'+EsCon.formatCountHideZero(result[warehouse_code][working_day][timeslot].weight)+'</td>'
-									+'<td class="dt-right">'+EsCon.formatQuantity3HideZero(result[warehouse_code][working_day][timeslot].volume)+'</td>'
-									+'<td class="dt-right">'+EsCon.formatQuantityHideZero(result[warehouse_code][working_day][timeslot].qty_pallet_calc)+'</td>'
+									+'<td class="dt-right">'+EsCon.formatIntegerHideZero(result[warehouse_code][working_day][timeslot].cnt_aviso)+'</td>'
+									+'<td class="dt-right">'+EsCon.formatIntegerHideZero(result[warehouse_code][working_day][timeslot].qty_pallet)+'</td>'
+									+'<td class="dt-right">'+EsCon.formatIntegerHideZero(result[warehouse_code][working_day][timeslot].qty_pack)+'</td>'
+									+'<td class="dt-right">'+EsCon.formatIntegerHideZero(result[warehouse_code][working_day][timeslot].weight)+'</td>'
+									+'<td class="dt-right">'+EsCon.formatIntegerHideZero(result[warehouse_code][working_day][timeslot].volume)+'</td>'
+									+'<td class="dt-right">'+EsCon.formatIntegerHideZero(result[warehouse_code][working_day][timeslot].qty_pallet_calc)+'</td>'
 								+'</tr>';
 							}
 							//html += "<tfoot>" + '<tr><td colspan="7" style="padding:0px;"></td>'+'</tr>' + "</tfoot>";

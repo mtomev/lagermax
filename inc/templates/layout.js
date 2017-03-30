@@ -661,7 +661,7 @@
 		if (render) {
 			$footer.html( render( sum, 'display', 0, null, true )+hidden);
 		} else {
-			$footer.html( EsCon.formatQuantity(sum) + hidden);
+			$footer.html( EsCon.format2(sum) + hidden);
 		}
 	}
 	function datatable_set_cnt_footer (col) {
@@ -670,7 +670,7 @@
 		var sum = col.data().reduce(cnt_footer, 0);
 		footer_row[col.index()] = sum;
 		var hidden = '';
-		$footer.html( EsCon.formatCount(sum)+hidden);
+		$footer.html( EsCon.format0(sum)+hidden);
 	}
 	function datatable_set_rate_footer (col) {
 		// Среден Rating. Не се включват rate == 0

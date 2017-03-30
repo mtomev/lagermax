@@ -55,7 +55,7 @@
 			data: data,
 			columns: [
 				{ title: "{#table_user#}", data: 'user_name' },
-				{ title: "{#cnt_oper#}", name: 'cnt_oper', data: 'cnt_oper', className: "sum_footer_cnt dt-right", render: EsCon.formatCountHideZero },
+				{ title: "{#cnt_oper#}", name: 'cnt_oper', data: 'cnt_oper', className: "sum_footer_0 dt-right", render: EsCon.format0HideZero },
 			],
 		{else}
 			paging: true,

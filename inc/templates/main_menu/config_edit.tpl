@@ -8,7 +8,7 @@
 			<div class="table-row">
 				<div class="table-cell-label">{#config_aviso_days_forecast#}</div>
 				<div class="table-cell">
-					<input id="config_aviso_days_forecast" class="number-small mandatory" data-type="Count" type="text" name="config_aviso_days_forecast" value="{$data.config_aviso_days_forecast}">
+					<input id="config_aviso_days_forecast" class="number-small mandatory" data-type="Number0" type="text" name="config_aviso_days_forecast" value="{$data.config_aviso_days_forecast}">
 				</div>
 			</div>
 

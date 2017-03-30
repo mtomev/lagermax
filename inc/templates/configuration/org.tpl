@@ -38,9 +38,9 @@
 				{ title: "{#phone#}", data: 'org_phone',	className: "ellipsis", render: displayEllipses },
 				{ title: "{#email#}", data: 'org_email',	className: "ellipsis", render: displayEllipses },
 
-				{ title: "{#org_ns_plt_eur#}", data: 'org_ns_plt_eur', className: "dt-right", render: EsCon.formatCountHideZero },
-				{ title: "{#org_ns_plt_chep#}", data: 'org_ns_plt_chep', className: "dt-right", render: EsCon.formatCountHideZero },
-				{ title: "{#org_ns_plt_other#}", data: 'org_ns_plt_other', className: "dt-right", render: EsCon.formatCountHideZero },
+				{ title: "{#org_ns_plt_eur#}", data: 'org_ns_plt_eur', className: "dt-right", render: EsCon.format0HideZero },
+				{ title: "{#org_ns_plt_chep#}", data: 'org_ns_plt_chep', className: "dt-right", render: EsCon.format0HideZero },
+				{ title: "{#org_ns_plt_other#}", data: 'org_ns_plt_other', className: "dt-right", render: EsCon.format0HideZero },
 
 				{ title: "{#note#}", data: 'org_note', className: "ellipsis", render: displayEllipses },
 

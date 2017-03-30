@@ -45,19 +45,19 @@
 		<div class="table-row">
 			<div class="table-cell-label">{#org_ns_plt_eur#}</div>
 			<div class="table-cell">
-				<input id="org_ns_plt_eur" class="number-small" data-type="Count" type="text" name="org_ns_plt_eur" value="{$data.org_ns_plt_eur}">
+				<input id="org_ns_plt_eur" class="number-small" data-type="Number0" type="text" name="org_ns_plt_eur" value="{$data.org_ns_plt_eur}">
 			</div>
 		</div>
 		<div class="table-row">
 			<div class="table-cell-label">{#org_ns_plt_chep#}</div>
 			<div class="table-cell">
-				<input id="org_ns_plt_chep" class="number-small" data-type="Count" type="text" name="org_ns_plt_chep" value="{$data.org_ns_plt_chep}">
+				<input id="org_ns_plt_chep" class="number-small" data-type="Number0" type="text" name="org_ns_plt_chep" value="{$data.org_ns_plt_chep}">
 			</div>
 		</div>
 		<div class="table-row">
 			<div class="table-cell-label">{#org_ns_plt_other#}</div>
 			<div class="table-cell">
-				<input id="org_ns_plt_other" class="number-small" data-type="Count" type="text" name="org_ns_plt_other" value="{$data.org_ns_plt_other}">
+				<input id="org_ns_plt_other" class="number-small" data-type="Number0" type="text" name="org_ns_plt_other" value="{$data.org_ns_plt_other}">
 			</div>
 		</div>
 

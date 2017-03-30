@@ -141,16 +141,16 @@
 				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis" , render: displayEllipses },
 
 
-				{ title: "{#qty_pallet#}", data: 'qty_pallet', className: "dt-right sum_footer_cnt",	render: EsCon.formatCountHideZero },
-				{ title: "{#qty_pack#}", data: 'qty_pack', className: "dt-right sum_footer_cnt",	render: EsCon.formatCountHideZero },
-				{ title: "{#weight#}", data: 'weight', className: "dt-right sum_footer_qty3",	render: EsCon.formatQuantity3HideZero },
-				{ title: "{#volume#}", data: 'volume', className: "dt-right sum_footer_qty3",	render: EsCon.formatQuantity3HideZero },
+				{ title: "{#qty_pallet#}", data: 'qty_pallet', className: "dt-right sum_footer_0",	render: EsCon.format0HideZero },
+				{ title: "{#qty_pack#}", data: 'qty_pack', className: "dt-right sum_footer_0",	render: EsCon.format0HideZero },
+				{ title: "{#weight#}", data: 'weight', className: "dt-right sum_footer_3", render: EsCon.format3HideZero },
+				{ title: "{#volume#}", data: 'volume', className: "dt-right sum_footer_3", render: EsCon.format3HideZero },
 
-				{ title: "{#qty_pallet_calc#}", data: 'qty_pallet_calc', className: "dt-right sum_footer_qty",	render: EsCon.formatQuantityHideZero },
+				{ title: "{#qty_pallet_calc#}", data: 'qty_pallet_calc', className: "dt-right sum_footer_2",	render: EsCon.format2HideZero },
 
-				{ title: "{#qty_pallet_rcvd#}", data: 'qty_pallet_rcvd', className: "dt-right sum_footer_cnt",	render: EsCon.formatCountHideZero },
-				{ title: "{#qty_pack_rcvd#}", data: 'qty_pack_rcvd', className: "dt-right sum_footer_cnt",	render: EsCon.formatCountHideZero },
-				{ title: "{#qty_pallet_rcvd_calc#}", data: 'qty_pallet_rcvd_calc', className: "dt-right sum_footer_qty",	render: EsCon.formatQuantityHideZero },
+				{ title: "{#qty_pallet_rcvd#}", data: 'qty_pallet_rcvd', className: "dt-right sum_footer_0",	render: EsCon.format0HideZero },
+				{ title: "{#qty_pack_rcvd#}", data: 'qty_pack_rcvd', className: "dt-right sum_footer_0",	render: EsCon.format0HideZero },
+				{ title: "{#qty_pallet_rcvd_calc#}", data: 'qty_pallet_rcvd_calc', className: "dt-right sum_footer_2",	render: EsCon.format2HideZero },
 
 				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', render: aviso_status },
 
@@ -161,14 +161,14 @@
 			"footerCallback": function( tfoot, data, start, end, display ) {
 				var api = this.api();
 
-				api.columns('.sum_footer_cnt', { 'search': 'applied' }).every(function (index) {
-					datatable_set_footer(this, EsCon.formatCount);
+				api.columns('.sum_footer_0', { 'search': 'applied' }).every(function (index) {
+					datatable_set_footer(this, EsCon.format0);
 				});
-				api.columns('.sum_footer_qty', { 'search': 'applied' }).every(function (index) {
-					datatable_set_footer(this, EsCon.formatQuantity);
+				api.columns('.sum_footer_2', { 'search': 'applied' }).every(function (index) {
+					datatable_set_footer(this, EsCon.format2);
 				});
-				api.columns('.sum_footer_qty3', { 'search': 'applied' }).every(function (index) {
-					datatable_set_footer(this, EsCon.formatQuantity3);
+				api.columns('.sum_footer_3', { 'search': 'applied' }).every(function (index) {
+					datatable_set_footer(this, EsCon.format3);
 				});
 			},
 

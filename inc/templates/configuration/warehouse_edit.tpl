@@ -44,27 +44,27 @@
 		<div class="table-row">
 			<div class="table-cell-label">{#w_interval#}</div>
 			<div class="table-cell">
-				<input id="w_interval" class="number-small mandatory calc_timeslots" data-type="Count" type="text" name="w_interval" value="{$data.w_interval}">
+				<input id="w_interval" class="number-small mandatory calc_timeslots" data-type="Number0" type="text" name="w_interval" value="{$data.w_interval}">
 			</div>
 		</div>
 		{*
 		<div class="table-row">
 			<div class="table-cell-label">{#w_count#}</div>
 			<div class="table-cell">
-				<input id="w_count" class="number-small mandatory" data-type="Count" type="text" name="w_count" value="{$data.w_count}">
+				<input id="w_count" class="number-small mandatory" data-type="Number0" type="text" name="w_count" value="{$data.w_count}">
 			</div>
 		</div>
 		*}
 		<div class="table-row">
 			<div class="table-cell-label">{#w_max_pallet#}</div>
 			<div class="table-cell">
-				<input id="w_max_pallet" class="number-small mandatory" data-type="Count" type="text" name="w_max_pallet" value="{$data.w_max_pallet}">
+				<input id="w_max_pallet" class="number-small mandatory" data-type="Number0" type="text" name="w_max_pallet" value="{$data.w_max_pallet}">
 			</div>
 		</div>
 		<div class="table-row">
 			<div class="table-cell-label">{#w_pack2pallet#}</div>
 			<div class="table-cell">
-				<input id="w_pack2pallet" class="number-small mandatory" data-type="Count" type="text" name="w_pack2pallet" value="{$data.w_pack2pallet}">
+				<input id="w_pack2pallet" class="number-small mandatory" data-type="Number0" type="text" name="w_pack2pallet" value="{$data.w_pack2pallet}">
 			</div>
 		</div>
 	</div>
