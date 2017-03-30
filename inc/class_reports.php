@@ -13,16 +13,19 @@
 		 	if (!_base::CheckAccess('aviso')) return;
 			$_SESSION['main_menu'] = 'reports';
 			$_SESSION['sub_menu'] = 'timeslot';
-			_base::readFilterToSESSION_new($_SESSION['sub_menu']);
+			$sub_menu = $_SESSION['sub_menu'];
+			_base::readFilterToSESSION_new($sub_menu);
 			$this->smarty->assign ('current_url', '/reports/timeslot');
 
-			if (!isset($_SESSION[$_SESSION['sub_menu']]['from_date']) or !$_SESSION[$_SESSION['sub_menu']]['from_date'])
+			if (!isset($_SESSION[$sub_menu]['from_date']) or !$_SESSION[$sub_menu]['from_date'])
 				// Днешна дата
-				$_SESSION[$_SESSION['sub_menu']]['from_date'] = date('Y-m-d');
+				$_SESSION[$sub_menu]['from_date'] = date('Y-m-d');
 
+			if (!isset($_SESSION[$sub_menu]['w_group_id']))
+				$_SESSION[$sub_menu]['w_group_id'] = $_SESSION['userdata']['w_group_id'];
 			_base::get_select_list('w_group');
 			
-			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
+			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
 		}
 
 		// Тази функция се вика само като ajax
@@ -52,7 +55,7 @@
 			$from_date = $curr_date = $this->working_days[1];
 			$to_date = $this->working_days[$config_aviso_days_forecast-1];
 
-			$warehouse = _base::select_sql("select warehouse_id, warehouse_code, w_start_time, w_end_time, w_interval, w_max_pallet from warehouse $where_warehouse order by warehouse_code");
+			$warehouse = _base::select_sql_multiline("select warehouse_id, warehouse_code, w_start_time, w_end_time, w_interval, w_max_pallet from warehouse $where_warehouse order by warehouse_code");
 			$data = array();
 			if ($warehouse)
 				foreach($warehouse as $line) {

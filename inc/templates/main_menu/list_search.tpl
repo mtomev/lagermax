@@ -1,5 +1,4 @@
-		<span class="">&nbsp;&nbsp;</span>
-		<span class="searchbox">
+		<span class="searchbox" style="padding-left: 10px;">
 			<input class="" type="text" id="searchbox" placeholder="search">
 			<span class="clear-input" id="searchbox_clear" title="Clear search">×</span>
 		</span>

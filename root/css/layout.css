@@ -86,11 +86,11 @@ hr {
 }
 
 #main .headerrow {
-	padding-top: 10px;
-	padding-bottom: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
 	padding-left: 10px;
 	padding-right: 10px;
-	background-color: #F0F0F0;
+	background-color: #F8F8F8;
 	/* Да стоят на един ред елементите в този div */
 	white-space: nowrap;
 	/* Този div да е толкова широк, че да обхване всичките му елементи */
@@ -206,11 +206,6 @@ td.ellipsis, .ellipsis select  {
 	line-height: 22px;
 	clear: left;
 	font-size: 17px;
-	/* 
-	background-color: #F0F0F0;
-	padding-left: 10px;
-	padding-right: 10px;
-	*/
 }
 .sub-header {
 	margin-top: -15px;
@@ -442,20 +437,18 @@ button:hover {
 .clear-input {
 	font-family: Arial,Baskerville,monospace;
 	font-size: 22px;
-	width: 16px;
-	height: 16px;
 	line-height: 16px;
 	vertical-align: middle;
-	padding: 5px 5px 5px 10px;
+	padding: 0px 5px 0px 5px;
+	margin-left: -5px;
 	cursor: pointer;
 }
 .clear-input:hover {
 	background-color: #E6E6E6 !important;
 	color: #000 !important;
 }
-.clear-input {
-	padding: 5px 5px 5px 5px;
-	margin-left: -5px;
+.searchbox input::-ms-clear {
+	display: none;
 }
 .delete-line {
 	font-family: Arial,Baskerville,monospace;

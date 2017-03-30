@@ -108,6 +108,16 @@
 				//$_SESSION[$sub_menu]['from_date'] = date('Y-m-d', strtotime(date("Y-m-d"). ' - 7 days'));
 				$_SESSION[$sub_menu]['from_date'] = date('Y-m-d');
 
+			if (!isset($_SESSION[$sub_menu]['w_group_id']))
+				$_SESSION[$sub_menu]['w_group_id'] = $_SESSION['userdata']['w_group_id'];
+
+			_base::get_select_list('w_group');
+			if ($_SESSION[$sub_menu]['w_group_id'])
+				$where_warehouse .= ' where (w_group_id = '.intVal($_SESSION[$sub_menu]['w_group_id']).')';
+			else
+				$where_warehouse = '';
+			_base::get_select_list('warehouse', null, 'warehouse_code', $where_warehouse, 'warehouse_code');
+
 			_base::get_select_list('org', null, 'org_name');
 
 			_base::set_table_edit_AccessRights('aviso');
@@ -173,8 +183,16 @@
 				//$_SESSION[$sub_menu]['aviso_status'] = '37';
 				$_SESSION[$sub_menu]['aviso_status'] = -1;
 
+			if (!isset($_SESSION[$sub_menu]['w_group_id']))
+				$_SESSION[$sub_menu]['w_group_id'] = $_SESSION['userdata']['w_group_id'];
+
+			_base::get_select_list('w_group');
+			if ($_SESSION[$sub_menu]['w_group_id'])
+				$where_warehouse .= ' where (w_group_id = '.intVal($_SESSION[$sub_menu]['w_group_id']).')';
+			else
+				$where_warehouse = '';
+			_base::get_select_list('warehouse', null, 'warehouse_code', $where_warehouse, 'warehouse_code');
 			_base::get_select_list('org', null, 'org_name');
-			_base::get_select_list('warehouse', null, 'warehouse_code', null, 'warehouse_code');
 			_base::get_select_aviso_status();
 
 			_base::set_table_edit_AccessRights('aviso');
@@ -189,10 +207,13 @@
 			_base::readFilterToSESSION_new($sub_menu);
 			$where = "WHERE (1=1)";
 
+			if ($_SESSION[$sub_menu]['w_group_id']) {
+				$where .= ' and (w_group_id = '.intVal($_SESSION[$sub_menu]['w_group_id']).')';
+			}
 			if ($_SESSION[$sub_menu]['warehouse_id'])
-				$where .= " and (warehouse_id = {$_SESSION[$sub_menu]['warehouse_id']})";
+				$where .= ' and (warehouse_id = '.intVal($_SESSION[$sub_menu]['warehouse_id']).')';
 			if ($_SESSION[$sub_menu]['org_id'])
-				$where .= " and (org_id = {$_SESSION[$sub_menu]['org_id']})";
+				$where .= ' and (org_id = '.intVal($_SESSION[$sub_menu]['org_id']).')';
 
 			$from_date = $_SESSION[$sub_menu]['from_date'];
 			$to_date = $_SESSION[$sub_menu]['to_date'];
@@ -245,10 +266,17 @@
 
 		// Тази функция се вика само като ajax, след смяна на w_group_id, за да даде списъка от warehouse за избрания w_group_id
 		function get_w_group_id_warehouse () {
-			// w_group_id
+			// w_group_id/име_на_полето_за_връщане
 			$id = intVal($_REQUEST['p1']);
+			$field_name = $_REQUEST['p2'];
+			if (!$field_name)
+				$field_name = 'warehouse_name';
 
-			$data = _base::get_select_list_ajax('warehouse', 'warehouse_name', "where w_group_id = $id");
+			if ($id)
+				$where = "where w_group_id = $id";
+			else
+				$where = '';
+			$data = _base::get_select_list_ajax('warehouse', $field_name, $where, $field_name);
 
 			echo json_encode($data);
 		}
@@ -268,7 +296,7 @@
 				if (!_base::CheckAccess('aviso_add')) return;
 				$data['warehouse_id'] = $warehouse_id;
 				// Дефиницията на склада
-				$warehouse = _base::select_sql("select * from warehouse where warehouse_id = $warehouse_id");
+				$warehouse = _base::select_sql("select warehouse_template, w_pack2pallet, warehouse_type from warehouse where warehouse_id = $warehouse_id");
 				$data['warehouse_template'] = $warehouse['warehouse_template'];
 				$data['w_pack2pallet'] = $warehouse['w_pack2pallet'];
 				$data['warehouse_type'] = $warehouse['warehouse_type'];
@@ -600,7 +628,7 @@
 			$qty_pallet_calc = $array_param['qty_pallet_calc'];
 
 			// Дефиницията на склада
-			$warehouse = _base::select_sql("select * from warehouse where warehouse_id = $warehouse_id");
+			$warehouse = _base::select_sql("select w_start_time, w_end_time, w_interval, w_max_pallet from warehouse where warehouse_id = $warehouse_id");
 			// w_start_time - w_end_time, w_interval, w_count, w_max_pallet
 			$result[0] = '';
 			if (!$warehouse['w_interval']) return $result;
@@ -885,6 +913,13 @@
 			$query->AddParam('aviso_status', 'c');
 			$query->AddParam('aviso_reject_reason');
 
+			$query->AddParam('aviso_plt_eur', 'n', 0);
+			$query->AddParam('aviso_plt_chep', 'n', 0);
+			$query->AddParam('aviso_plt_other', 'n', 0);
+			$query->AddParam('aviso_ret_plt_eur', 'n', 0);
+			$query->AddParam('aviso_ret_plt_chep', 'n', 0);
+			$query->AddParam('aviso_ret_plt_other', 'n', 0);
+
 			//Попълва се в момента на сетване на статус от 0 на 3/7/9 или от 3 на 9
 			//- изчиства се при сетване на статус от 3/7/9 на 0
 			if ($aviso_status_old === '0' and $aviso_status >= '3')
@@ -940,9 +975,10 @@
 
 
 
+		// Генериране на PDF
 		function aviso_display () {
 			// aviso_id
-			$aviso_id = $_REQUEST['p1'];
+			$aviso_id = intVal($_REQUEST['p1']);
 			// $_REQUEST['p2'] = thumb
 			$thumb = ($_REQUEST['p2'] == 'thumb');
 			$small_thumb = ($_REQUEST['p2'] == 'small_thumb');
@@ -952,9 +988,6 @@
 				_base::display_file('0.pdf', $thumb, $small_thumb);
 				return ;
 			}
-
-
-			// Генериране на PDF
 
 			// Данните от заглавния ред
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
@@ -1266,9 +1299,10 @@
 			_base::put_sys_oper(__METHOD__, 'pdf', 'aviso', $aviso_id);
 		}
 
+		// Генериране на ПРИЕМНО - ПРЕДАВАТЕЛЕН ПРОТОКОЛ
 		function aviso_ppp_display () {
 			// aviso_id
-			$aviso_id = $_REQUEST['p1'];
+			$aviso_id = intVal($_REQUEST['p1']);
 			// $_REQUEST['p2'] = thumb
 			$thumb = ($_REQUEST['p2'] == 'thumb');
 			$small_thumb = ($_REQUEST['p2'] == 'small_thumb');
@@ -1278,9 +1312,6 @@
 				_base::display_file('0.pdf', $thumb, $small_thumb);
 				return ;
 			}
-
-
-			// Генериране на ПРИЕМНО - ПРЕДАВАТЕЛЕН ПРОТОКОЛ
 
 			// Данните от заглавния ред
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
@@ -1578,14 +1609,48 @@
 			$pdf->Ln(10);
 			$pdf->SetFont('Calibri','I',11);
 			$s = '* Фирма Лагермакс Спедицио България ЕООД не носи отговорност за съдържанието на оригинално запечатани палети и колети.';
-			$pdf->MultiCell(190,5, iconv('UTF-8', 'windows-1251', $s), 0, 'L');
+			$pdf->MultiCell(190,4, iconv('UTF-8', 'windows-1251', $s), 0, 'L');
 
 			// Започнато на, Приключено на
-			$pdf->Ln(3);
-			$pdf->SetFont('Calibri','',11);
+			$pdf->Ln(1);
+			$pdf->SetFont('Calibri','',10);
 			$pdf->Cell(190, 4, iconv('UTF-8', 'windows-1251', 'Започнато на ' . substr(_base::MySqlDate2Str($aviso['aviso_start_exec']),0,16) .
 				',  Приключено на ' . substr(_base::MySqlDate2Str($aviso['aviso_end_exec']),0,16) ), 0, 1, 'L');
 
+			// Ако има Забележка
+			$s = $aviso['aviso_reject_reason'];
+			if ($s) {
+				$pdf->Ln(1);
+				$pdf->SetFont('Calibri','B',10);
+				$pdf->MultiCell(190,4, iconv('UTF-8', 'windows-1251', 'Забележка:'), 0, 'L');
+				$pdf->SetFont('Calibri','',10);
+				$pdf->MultiCell(190,4, iconv('UTF-8', 'windows-1251', $s), 0, 'L');
+			}
+			
+			// Амбалаж
+			$pdf->Ln(5);
+			$pdf->SetFont('Calibri','B',11);
+			$pdf->MultiCell(190,4, iconv('UTF-8', 'windows-1251', 'Амбалаж:'), 0, 'L');
+			$pdf->SetFont('Calibri','',11);
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Доставени EUR:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_plt_eur']), 0, 0, 'R');
+			$pdf->Cell(20, 4, '', 0, 0, '');
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Върнати EUR:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_eur']), 0, 1, 'R');
+
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Доставени CHEP:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_plt_chep']), 0, 0, 'R');
+			$pdf->Cell(20, 4, '', 0, 0, '');
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Върнати CHEP:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_chep']), 0, 1, 'R');
+
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Доставени скари:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_plt_other']), 0, 0, 'R');
+			$pdf->Cell(20, 4, '', 0, 0, '');
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Върнати скари:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_other']), 0, 1, 'R');
+
+			
 			// Предал / Приел
 			$pdf->Ln(10);
 			$pdf->SetFont('Calibri','',11);
@@ -1609,65 +1674,39 @@
 			_base::put_sys_oper(__METHOD__, 'pdf', 'aviso', $aviso_id);
 		}
 
-		function aviso_lables_display () {
-			// aviso_id
-			$aviso_id = $_REQUEST['p1'];
-			// $_REQUEST['p2'] = thumb
-			$thumb = ($_REQUEST['p2'] == 'thumb');
-			$small_thumb = ($_REQUEST['p2'] == 'small_thumb');
-
-			// Ако се иска thumb
-			if ($thumb || $small_thumb) {
-				_base::display_file('0.pdf', $thumb, $small_thumb);
-				return ;
-			}
-
-
-			// Генериране на Етикети по Палети и Колети
-
-			// Данните от заглавния ред
-			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
-			$aviso = _base::sql_fetch_assoc($query_result);
-			_base::sql_free_result($query_result);
-			$warehouse_type = $aviso['warehouse_type'];
-
-			// Данните от редовете
-			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
-			while ($query_data = _base::sql_fetch_assoc($query_result))
-				$aviso_line[] = $query_data;
-			_base::sql_free_result($query_result);
-
-			// Същинско генериране на файла
-			$pdf = new aviso_PDF('L', 'mm', array(107, 80));
-			$pdf->AddFont('Calibri','','calibri.php');
-			$pdf->AddFont('Calibri','B','calibrib.php');
-			$pdf->AddFont('Calibri','BI','calibribi.php');
-			$pdf->AddFont('Calibri','I','calibrii.php');
-			// SetAutoPageBreak(boolean auto [, float margin])
-			$pdf->SetAutoPageBreak(true, 5);
-			// 107 - 5 - 5 = 97
-			$pdf->SetMargins(5,5,5);
-
-			if ($aviso_line) {
-				foreach($aviso_line as $line) {
+		private function genLabelForOneRow (&$pdf, &$aviso, &$line) {
 					// Цикъл по броя на Палетите / Колетите
-					if ($line['qty_pallet']) {
-						$count = $line['qty_pallet'];
-						$pallet_text = 'ПАЛЕТ';
+					// Ако е 7-приключено Авизото, то се работи с приетите количества
+					if ($aviso['aviso_status'] == '7') {
+						if ($line['qty_pallet_rcvd']) {
+							$count = $line['qty_pallet_rcvd'];
+							$pallet_text = 'ПАЛЕТ';
+						} else {
+							$count = $line['qty_pack_rcvd'];
+							$pallet_text = 'колет';
+						}
 					} else {
-						$count = $line['qty_pack'];
-						$pallet_text = 'колет';
+						if ($line['qty_pallet']) {
+							$count = $line['qty_pallet'];
+							$pallet_text = 'ПАЛЕТ';
+						} else {
+							$count = $line['qty_pack'];
+							$pallet_text = 'колет';
+						}
 					}
 					for($i = 1; $i <= $count; $i++) {
 						$pdf->AddPage();
 
 						// Сега се събират до 13 цифри при 0.5 мащабиране
 						// org_metro_code metro_request_no
+						//$barcode = $line['org_metro_code'].' '.$line['metro_request_no'];
 
-						$pdf->Code128(5,$pdf->GetY(),$line['org_metro_code'].' '.$line['metro_request_no'],97, 12, 0.4);
+						// aviso_id aviso_line_id пореден_номер_на_палет
+						$barcode = $line['aviso_id'].' '.$line['aviso_line_id'].' '.$i;
+						$pdf->Code128(5,$pdf->GetY(),$barcode,97, 12, 0.4);
 						$pdf->SetXY(10,$pdf->GetY()+12);
 						$pdf->SetFont('Calibri','B',12);
-						$pdf->Write(5, $line['org_metro_code'].' '.$line['metro_request_no']);
+						$pdf->Write(5, $barcode);
 
 						$pdf->Ln();
 
@@ -1698,11 +1737,44 @@
 						$pdf->Image(INC_DIR.'/lagermax_logo.png',5,$pdf->GetY()+2,45);
 						$pdf->SetXY(55, $pdf->GetY()+2);
 						$pdf->SetFont('Calibri','',10);
-						$pdf->Cell(45, 5, iconv('UTF-8', 'windows-1251', 'Авизо '.$aviso['aviso_id']), 0, 1, 'R');
+						$pdf->Cell(45, 5, iconv('UTF-8', 'windows-1251', 'Авизо '.$line['aviso_id']), 0, 1, 'R');
 						$pdf->SetXY(55, $pdf->GetY());
 						$pdf->SetFont('Calibri','B',14);
 						$pdf->Cell(45, 10, iconv('UTF-8', 'windows-1251', $pallet_text.' '.$i.'/'.$count), 0, 1, 'R');
 					}
+		}
+		
+		// Генериране на Етикети по Палети и Колети по Авизо
+		function aviso_lables_display () {
+			// aviso_id
+			$aviso_id = intVal($_REQUEST['p1']);
+
+			// Данните от заглавния ред
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
+			$aviso = _base::sql_fetch_assoc($query_result);
+			_base::sql_free_result($query_result);
+			$warehouse_type = $aviso['warehouse_type'];
+
+			// Данните от редовете
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
+			while ($query_data = _base::sql_fetch_assoc($query_result))
+				$aviso_line[] = $query_data;
+			_base::sql_free_result($query_result);
+
+			// Същинско генериране на файла
+			$pdf = new aviso_PDF('L', 'mm', array(107, 80));
+			$pdf->AddFont('Calibri','','calibri.php');
+			$pdf->AddFont('Calibri','B','calibrib.php');
+			$pdf->AddFont('Calibri','BI','calibribi.php');
+			$pdf->AddFont('Calibri','I','calibrii.php');
+			// SetAutoPageBreak(boolean auto [, float margin])
+			$pdf->SetAutoPageBreak(true, 5);
+			// 107 - 5 - 5 = 97
+			$pdf->SetMargins(5,5,5);
+
+			if ($aviso_line) {
+				foreach($aviso_line as $line) {
+					$this->genLabelForOneRow ($pdf, $aviso, $line);
 				}
 
 				// I - направо се отваря в прозореца
@@ -1712,5 +1784,48 @@
 			}
 		}
 
+		// Генериране на етикети по един ред от Авизо
+		function aviso_row_lables_display () {
+			// aviso_id / aviso_line_id
+			// В $_POST трябва да са подадени aviso_status, qty_pallet_rcvd и qty_pack_rcvd
+			$aviso_id = intVal($_REQUEST['p1']);
+			$aviso_line_id = intVal($_REQUEST['p2']);
+
+//print nl2br2 (print_r($_POST, true) . PHP_EOL);
+//return;
+			// Данните от заглавния ред
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso WHERE aviso_id = $aviso_id");
+			$aviso = _base::sql_fetch_assoc($query_result);
+			_base::sql_free_result($query_result);
+			$warehouse_type = $aviso['warehouse_type'];
+
+			// Данните от реда
+			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id and aviso_line_id = $aviso_line_id");
+			$aviso_line = _base::sql_fetch_assoc($query_result);
+			_base::sql_free_result($query_result);
+
+			// Същинско генериране на файла
+			$pdf = new aviso_PDF('L', 'mm', array(107, 80));
+			$pdf->AddFont('Calibri','','calibri.php');
+			$pdf->AddFont('Calibri','B','calibrib.php');
+			$pdf->AddFont('Calibri','BI','calibribi.php');
+			$pdf->AddFont('Calibri','I','calibrii.php');
+			// SetAutoPageBreak(boolean auto [, float margin])
+			$pdf->SetAutoPageBreak(true, 5);
+			// 107 - 5 - 5 = 97
+			$pdf->SetMargins(5,5,5);
+
+			if ($aviso_line) {
+				$aviso['aviso_status'] = $_POST['aviso_status'];
+				$aviso_line['qty_pallet_rcvd'] = $_POST['qty_pallet_rcvd'];
+				$aviso_line['qty_pack_rcvd'] = $_POST['qty_pack_rcvd'];
+				$this->genLabelForOneRow ($pdf, $aviso, $aviso_line);
+
+				// I - направо се отваря в прозореца
+				// D - download
+				$pdf->Output('I', 'MP_Lables_'.$aviso_id.'_'.$aviso_line_id.'.pdf');
+				_base::put_sys_oper(__METHOD__, 'pdf', 'aviso', $aviso_id);
+			}
+		}
 	}
 ?>

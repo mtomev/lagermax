@@ -23,7 +23,7 @@
 			order: [[4, 'asc'], [1, 'asc']],
 			//data: { },
 			ajax: {
-				url: '/configuration/ajax_list/user',
+				url: '/configuration/user_ajax',
 				type: "POST",
 				dataSrc: function (result) {
 					oTable.clear().columns().search('');

@@ -8,19 +8,23 @@
 			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
 			</select>
+			<span class="clear-input" id="org_id_clear">×</span>
 		</span>
-		<span class="">&nbsp;&nbsp;</span>
 
-		{#aviso_date#}
-		<input id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
-		<input id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
-		<span class="">&nbsp;&nbsp;</span>
+		<span class="" style="padding-left: 10px;">
+			{#aviso_date#}
+			<input id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
+			<input id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
+		</span>
 
-		<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
+		<span class="" style="padding-left: 10px;">
+			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
+		</span>
 
 		{if $smarty.session.userdata.grants.aviso_add == '1'}
-		<span class="">&nbsp;&nbsp;</span>
-		<button class="add_button" url="/aviso/aviso_select_warehouse" rel="edit-0" edit_add_new="{$smarty.session.table_edit}" title="{#Add#} {#table_aviso#}"><span>{#add#}</span></button>
+		<span class="" style="padding-left: 10px;">
+			<button class="add_button" url="/aviso/aviso_select_warehouse" rel="edit-0" edit_add_new="{$smarty.session.table_edit}" title="{#Add#} {#table_aviso#}"><span>{#add#}</span></button>
+		</span>
 		{/if}
 
 		{include file='main_menu/list_search.tpl'}
@@ -243,6 +247,10 @@
 		vTable = new InitTable;
 	}); // $(document).ready
 
+	$("#org_id_clear", '#headerrow').on("click", function() {
+		$('#org_id', '#headerrow').val(0).change();
+		$('#org_id', '#headerrow').trigger("chosen:updated");
+	});
 
 	$('#submit_button', '#headerrow').click( function () {
 		vTable.SetParams();

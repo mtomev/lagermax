@@ -17,7 +17,7 @@
 			paging: true,
 			//data: { },
 			ajax: {
-				url: '/configuration/ajax_list/org',
+				url: '/configuration/org_ajax',
 				type: "POST",
 			},
 			columns: [

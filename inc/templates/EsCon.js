@@ -446,9 +446,9 @@ var EsCon = {
 				$('option[value=""]', $this).attr('disabled', true).html("{#placeholder_required#}");
 				$this.change(function () {
 					if (Number($(this).val()) == 0)
-						$this.addClass("mandatory-empty");
+						$(this).addClass("mandatory-empty");
 					else
-						$this.removeClass("mandatory-empty")
+						$(this).removeClass("mandatory-empty")
 				});
 				$this.trigger('change');
 			} else

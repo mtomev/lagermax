@@ -59,14 +59,9 @@
 			echo json_encode($data);
 		}
 
-		function ajax_list () {
-			// $table/$order_by
-			$table = $_REQUEST['p1'];
-			$order_by = $_REQUEST['p2'];
-
+		private function ajax_list ($table, $order_by = '') {
 			$is_view = _base::is_view_exists($table);
 			$data = $this->nomen_list($table, $is_view, $order_by);
-			// echo json_encode($data);
 			echo json_encode(array('data' => $data));
 		}
 
@@ -281,6 +276,13 @@
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 
+		function org_ajax () {
+		 	if (!_base::CheckAccess('org')) return;
+			// $order_by
+			$order_by = $_REQUEST['p1'];
+			$this->ajax_list('org', $order_by);
+		}
+
 		function org_edit () {
 		 	if (!_base::CheckGrant('org_view'))
 				if (!_base::CheckAccess('org_edit')) return;
@@ -488,6 +490,12 @@
 			//$this->nomen_list('user', true, 'user_name');
 			_base::set_table_edit_AccessRights('user');
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
+		}
+		function user_ajax () {
+		 	if (!_base::CheckAccess('user')) return;
+			// $order_by
+			$order_by = $_REQUEST['p1'];
+			$this->ajax_list('user', $order_by);
 		}
 
 		function user_edit () {

@@ -7,7 +7,7 @@
 		<div class="table-row">
 			<div class="table-cell-label">{#table_w_group#}</div>
 			<div class="table-cell">
-				<select id="w_group_id" name="w_group_id" class="text"> 
+				<select id="w_group_id" name="w_group_id" class="text mandatory"> 
 					{html_options options=$select_w_group selected=$data.w_group_id}
 				</select>
 			</div>
@@ -23,7 +23,7 @@
 		<div class="table-row">
 			<div class="table-cell-label">{#warehouse_code#}</div>
 			<div class="table-cell">
-				<input id="warehouse_code" class="text10" type="text" maxlength="{$data.field_width.warehouse_code}" name="warehouse_code" value="{$data.warehouse_code}">
+				<input id="warehouse_code" class="text10 mandatory" type="text" maxlength="{$data.field_width.warehouse_code}" name="warehouse_code" value="{$data.warehouse_code}">
 			</div>
 		</div>
 		

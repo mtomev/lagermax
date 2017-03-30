@@ -568,28 +568,7 @@
 		else
 			return '';
 	}
-	function displayGenPDF ( data, rel ) {
-		return '<a rel="' +rel+'/'+data+ '" onclick="clickOpenFile(this.rel)" style="cursor: pointer;" title="' +data+ '">'
-						+ displayDIV100('Gen PDF')
-					+ '</a>'
-	}
 
-
-	function displayMB( data, type, row, meta, show_zero ) {
-		if (typeof(type)==='undefined') type = 'display';
-		if (typeof(show_zero)==='undefined') show_zero = false;
-		if ( type ==='display' ) {
-			var bytes = parseInt(data);
-			if(bytes == 0) return 'x B';
-			var k = 1024;
-			var dm = 2;
-			var sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-			var i = Math.floor(Math.log(bytes) / Math.log(k));
-			return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-		}
-		else
-			return data;
-	}
 
 	function displayEllipses( data, type, row, meta ) {
 		if (typeof(type)==='undefined') type = 'display';
@@ -712,7 +691,7 @@
 		return footer_row[col.index()];
 	}
 
-	function datatable_add_btn_excel () {
+	function datatable_add_btn_excel ($appendTo) {
 		var frmtHeader = function(data, col, node) {
 			// Ако има auto filter - <select ... </select>
 			var n = data.indexOf("<select");
@@ -729,7 +708,8 @@
 			new $.fn.dataTable.Buttons( oTable, {
 				buttons: [ { extend: 'excel', footer: false, filename: current_menu_text,  exportOptions: { format: { header: frmtHeader } } } ],
 			});
-		oTable.buttons().container().appendTo('#headerrow');
+		if (typeof($appendTo)==='undefined') $appendTo = $('#headerrow');
+		oTable.buttons().container().appendTo($appendTo);
 	}
 
 	function datatable_auto_filter (api, in_header) {

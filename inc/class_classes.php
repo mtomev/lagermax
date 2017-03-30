@@ -601,21 +601,20 @@
 		}
 
 		// Връща подадената select заявка като assoc array - за едноредови резултати
-		public static function select_sql($sql_query) {
+		public static function select_sql($sql_query, $do_htmlspecialchars = false) {
 			$query_result = _base::get_query_result($sql_query);
-			//$query_data = _base::sql_fetch_assoc($query_result);
+			$query_data = _base::sql_fetch_assoc($query_result, $do_htmlspecialchars);
+			_base::sql_free_result($query_result);
+			return $query_data;
+		}
+		public static function select_sql_multiline($sql_query, $do_htmlspecialchars = false) {
+			$query_result = _base::get_query_result($sql_query);
 			$data = array();
-			while ($query_data = _base::sql_fetch_assoc($query_result)) {
+			while ($query_data = _base::sql_fetch_assoc($query_result, $do_htmlspecialchars)) {
 				$data[] = $query_data;
 			}
 			_base::sql_free_result($query_result);
-			if (count($data) > 1)
-				return $data;
-			else
-			if (count($data) == 1)
-				return $data[0];
-			else
-				return $query_data;
+			return $data;
 		}
 
 

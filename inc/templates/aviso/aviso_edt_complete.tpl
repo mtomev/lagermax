@@ -43,7 +43,7 @@
 				</div>
 
 				{* Time Slot *}
-				<div id="time_slot" {*class="hidden"*} style="float: left; padding-left: 40px;">
+				<div id="time_slot" style="float: left; padding-left: 40px;">
 					<div class="table-row">
 						<div class="table-cell-label">{#aviso_date#}</div>
 						<div class="table-cell">
@@ -73,6 +73,51 @@
 			<input type="hidden" id="data_line" name="data_line" value="">
 			<input type="hidden" name="aviso_status_old" value="{$data.aviso_status_old}">
 
+			{* Амбалаж *}
+			<div style="display: table; clear: left;">
+				<div style="float: left;">
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_plt_eur#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Count" type="text" name="aviso_plt_eur" value="{$data.aviso_plt_eur}">
+						</div>
+					</div>
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_plt_chep#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Count" type="text" name="aviso_plt_chep" value="{$data.aviso_plt_chep}">
+						</div>
+					</div>
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_plt_other#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Count" type="text" name="aviso_plt_other" value="{$data.aviso_plt_other}">
+						</div>
+					</div>
+				</div>
+				<div style="float: left; padding-left: 40px;">
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_ret_plt_eur#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Count" type="text" name="aviso_ret_plt_eur" value="{$data.aviso_ret_plt_eur}">
+						</div>
+					</div>
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_ret_plt_chep#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Count" type="text" name="aviso_ret_plt_chep" value="{$data.aviso_ret_plt_chep}">
+						</div>
+					</div>
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_ret_plt_other#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Count" type="text" name="aviso_ret_plt_other" value="{$data.aviso_ret_plt_other}">
+						</div>
+					</div>
+				</div>
+			</div>
+			<hr>
+
 			<div style="display: table; clear: left;">
 				<div class="table-cell-label">{#aviso_status#}</div>
 				<div class="table-cell">
@@ -98,6 +143,7 @@
 					<input class="datetime readonly" data-type="Date" type="text" value="{$data.aviso_end_exec}" readonly>
 				</div>
 			</div>
+			<hr>
 		</div>
 
 
@@ -206,6 +252,11 @@
 				},
 				/*{/if}*/
 
+				{ title: "{#btn_Print_labels#}", data: null, className: "",
+					render: function ( data, type, row ) {
+						return '<button class="submit_button print_labels_for_1row" row_id="'+row.id+'"><span>{#btn_Print_labels#}</span></button>';
+					}
+				},
 			],
 
 			footerCallback: function (tfoot, data, start, end, display) {
@@ -238,7 +289,7 @@
 
 
 		this.TableFinit = function() {
-			$('#table_line tbody').on("click", "input, select, textarea", function() {
+			$('#table_line tbody').on("click", "input, select, textarea, button", function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
 				_self.oTableLine.rows().deselect();
 			});
@@ -257,6 +308,45 @@
 				_self.oTableLine.cell( $row, 'qty_pack_rcvd:name' ).invalidate();
 				_self.oTableLine.cell( $row, 'qty_pallet_rcvd:name' ).invalidate();
 				_self.oTableLine.draw(false);
+			});
+			
+			// Печат на етикети за един ред
+			$('#table_line tbody').on("click", "button.print_labels_for_1row", function() {
+				// aviso_id / aviso_line_id
+				//clickOpenFile('/aviso/aviso_row_lables_display/{$data.id}/MP_Lables_{$data.id}.pdf');
+				var aviso_line_id = $(this).attr('row_id');
+				//var aviso_line_id = 8;
+				var $row = $(this).parents('tr');
+				var data = _self.oTableLine.row($row).data();
+
+				var form = document.createElement("form");
+				form.target = "_blank";
+				form.setAttribute("method", 'POST');
+				form.setAttribute("action", '/aviso/aviso_row_lables_display/{$data.id}/'+aviso_line_id+'/MP_Lables_{$data.id}_'+aviso_line_id+'.pdf');
+
+				// aviso_status, qty_pallet_rcvd и qty_pack_rcvd
+				var hiddenField = document.createElement("input");
+				hiddenField.setAttribute("type", "hidden");
+				hiddenField.setAttribute("name", 'aviso_status');
+				//hiddenField.setAttribute("value", $('#aviso_status', '#aviso_edit').val());
+				hiddenField.value = $('#aviso_status', '#aviso_edit').val();
+				form.appendChild(hiddenField);
+
+				var hiddenField = document.createElement("input");
+				hiddenField.setAttribute("type", "hidden");
+				hiddenField.setAttribute("name", 'qty_pallet_rcvd');
+				hiddenField.setAttribute("value", data.qty_pallet_rcvd);
+				form.appendChild(hiddenField);
+
+				var hiddenField = document.createElement("input");
+				hiddenField.setAttribute("type", "hidden");
+				hiddenField.setAttribute("name", 'qty_pack_rcvd');
+				hiddenField.setAttribute("value", data.qty_pack_rcvd);
+				form.appendChild(hiddenField);
+
+				document.body.appendChild(form);
+				form.submit();
+				$("body > form").remove();
 			});
 		}
 

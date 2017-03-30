@@ -58,7 +58,7 @@
 					fnShowErrorMessage('', err);
 					return false;
 				}
-				EsCon.set_mandatory($('#nomedit #warehouse_id.mandatory'));
+				EsCon.set_mandatory($('#nomedit #warehouse_id.mandatory').removeClass('hasMandatory'));
 			} // success
 		});
 	});

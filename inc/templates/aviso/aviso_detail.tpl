@@ -2,38 +2,49 @@
 {block name=content}
 {assign var="sub_menu" value=$smarty.session.sub_menu}
 <div id="main">
-	<div class="headerrow" id="headerrow">
+	<div id="headerrow">
+	<div class="headerrow" style="float:left;">
 		<span class="">
+			{#w_group_name#}
+			<select class="" id="w_group_id" name="w_group_id"> 
+				{html_options options=$select_w_group selected={$smarty.session.$sub_menu.w_group_id}}
+			</select>
+		</span>
+		<span class="" style="padding-left: 10px;">
 			{#warehouse_code#}
 			<select class="" id="warehouse_id" name="warehouse_id"> 
 				{html_options options=$select_warehouse selected={$smarty.session.$sub_menu.warehouse_id}}
 			</select>
 		</span>
-		<span class="">&nbsp;&nbsp;</span>
-		<span class="ellipsis">
+		<span class="ellipsis" style="padding-left: 10px;">
 			{#org_name#}
 			<select class="select2chosen" id="org_id" name="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
 			</select>
+			<span class="clear-input" id="org_id_clear">×</span>
 		</span>
-		<span class="">&nbsp;&nbsp;</span>
+	</div>
 
-		{#aviso_date#}
-		<input name="from_date" id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
-		<input name="to_date" id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
-		<span class="">&nbsp;&nbsp;</span>
-
+	<div class="headerrow" style="clear:both; float:left; padding-top:0px;" id="datatable_add_btn_excel">
 		<span class="">
+			{#aviso_date#}
+			<input name="from_date" id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
+			<input name="to_date" id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
+		</span>
+
+		<span class="" style="padding-left: 10px;">
 			{#aviso_status#}
 			<select class="" id="aviso_status" name="aviso_status"> 
 				{html_options options=$select_aviso_status selected={$smarty.session.$sub_menu.aviso_status}}
 			</select>
 		</span>
-		<span class="">&nbsp;&nbsp;</span>
 
-		<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
+		<span class="" style="padding-left: 10px;">
+			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
+		</span>
 
 		{include file='main_menu/list_search.tpl'}
+	</div>
 	</div>
 
 	<table id="table_id">
@@ -51,6 +62,7 @@
 		this.last_params = {};
 
 		this.SetParams = function() {
+			_self.last_params['w_group_id'] = $('#w_group_id', '#headerrow').val();
 			_self.last_params['warehouse_id'] = $('#warehouse_id', '#headerrow').val();
 			_self.last_params['org_id'] = $('#org_id', '#headerrow').val();
 			_self.last_params['aviso_status'] = $('#aviso_status', '#headerrow').val();
@@ -214,7 +226,7 @@
 		// Добавяне на tfoot
 		this.mainTable.append("<tfoot>" + '<tr>'+config.columns.map(function () { return "<td></td>"; }).join("")+'</tr>' + "</tfoot>");
 		oTable = this.mainTable.DataTable(config);
-		datatable_add_btn_excel();
+		datatable_add_btn_excel($('#datatable_add_btn_excel'));
 
 		commonInitMFP();
 	} // InitTable
@@ -235,6 +247,39 @@
 		vTable = new InitTable;
 	}); // $(document).ready
 
+
+	// При смяна на w_group_id, да изтегля списъка от складовете
+	// w_group_id, aviso_date, aviso_time, брой палети
+	$('#w_group_id', '#headerrow').change(function () {
+		var w_group_id = EsCon.getParsedVal($('#w_group_id', '#headerrow'));
+		$.ajax({
+			url: '/aviso/get_w_group_id_warehouse/'+w_group_id+'/warehouse_code',
+			method: "POST",
+			success: function (result) {
+				try {
+					var data = JSON.parse(result)
+				}
+				catch(err) {
+					console.log(err);
+					fnShowErrorMessage('', result);
+					return false;
+				}
+				try {
+					var html = generate_select_option_2D(data, 0, false);
+					$('#warehouse_id', '#headerrow').empty().append(html);
+				}
+				catch(err) {
+					console.log(result);
+					fnShowErrorMessage('', err);
+					return false;
+				}
+			} // success
+		});
+	});
+	$("#org_id_clear", '#headerrow').on("click", function() {
+		$('#org_id', '#headerrow').val(0).change();
+		$('#org_id', '#headerrow').trigger("chosen:updated");
+	});
 
 	$('#submit_button', '#headerrow').click( function () {
 		vTable.SetParams();
