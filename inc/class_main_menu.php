@@ -203,7 +203,7 @@
 			$logon_user_id = 0;
 
 			if (!$_POST['login_user']) {
-				echo 'Попълнете "Доставчик номер" и "Име"';
+				echo 'Попълнете "'.$this->smarty->getConfigVars('org_id').'" и "'.$this->smarty->getConfigVars('login_name').'"';
 				return;
 			}
 
@@ -217,7 +217,7 @@
 			$query_data = _base::sql_fetch_assoc($query_result);
 			_base::sql_free_result($query_result);
 			if (!$query_data or $query_data['is_active'] != '1') {
-				echo 'Несъществуващи "Доставчик номер" или "Име"';
+				echo 'Несъществуващи "'.$this->smarty->getConfigVars('org_id').'" или "'.$this->smarty->getConfigVars('login_name').'"';
 				return;
 			}
 			if (!$query_data['user_email']) {

@@ -44,6 +44,22 @@
 </div>
 
 <script type="text/javascript">
+	function waitingDialog(message) {
+		if (typeof(message)==='undefined') message = '...';
+		$("body #loadingScreen #message").html(message);
+		$("body #loadingScreen-overlay").show();
+		$("body #loadingScreen").show();
+	}
+	function closeWaitingDialog() {
+		$("body #loadingScreen").hide();
+		$("body #loadingScreen-overlay").hide();
+	}
+	function changeLang(new_lang) {
+		jQuery.post('/main_menu/selectlanguage/'+new_lang, { }, function(result) {
+			location.reload();
+		});
+	}
+
 	document.getElementById("id-login").onkeydown = function(event) {
 		if (event.keyCode == 13)
 			$('#login_button').trigger('click');
@@ -61,7 +77,8 @@
 				else {
 					$('#display_text').addClass("hidden");
 					if (result)
-						fnShowErrorMessage('', result);
+						//fnShowErrorMessage('', result);
+						alert("Грешка\n\n"+result);
 				}
 			}
 		});
@@ -74,10 +91,12 @@
 			closeWaitingDialog();
 			// При успешен mail, връщаме 1
 			if (parseInt(result) == 1) {
-				fnShowInfoMessage('', 'Изпратен е мейл на посочения в профила e-mail адрес');
+				//fnShowInfoMessage('', 'Изпратен е мейл на посочения в профила e-mail адрес');
+				alert('Изпратен е мейл на посочения в профила e-mail адрес');
 			} else {
 				if (result)
-					fnShowErrorMessage('', result);
+					//fnShowErrorMessage('', result);
+					alert("Неуспешно изпълнение:\n\n"+result);
 			}
 		});
 

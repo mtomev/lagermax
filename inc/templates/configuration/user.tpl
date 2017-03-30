@@ -41,7 +41,7 @@
 						/*{/if}*/
 					}
 				},
-				{ title: "{#name#}", data: 'user_name', className: "td-no-padding", 
+				{ title: "{#user_name#}", data: 'user_name', className: "td-no-padding", 
 					render: function ( data, type, row ) {
 						if (type !== 'display') return data;
 						/*{if $allow_edit}*/

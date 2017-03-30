@@ -5,7 +5,7 @@
 
 	<div id="edit" class="nomedit-edit">
 		<div class="table-row">
-			<div class="table-cell-label">{#name#}</div>
+			<div class="table-cell-label">{#user_name#}</div>
 			<div class="table-cell">
 				<input id="user_name" class="text mandatory" type="text" maxlength="{$data.field_width.user_name}" name="user_name" value="{$data.user_name}">
 			</div>

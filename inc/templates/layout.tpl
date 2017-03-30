@@ -9,42 +9,37 @@
 	<meta name="googlebot" content="noarchive" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<!-- favicon -->
-	<link rel="Shortcut Icon" type="image/ico" href="/images/favicon.png?v=2">
-	<script type="text/javascript" src="/js/jquery-1.11.3.min.js"></script>
-
-	<link rel="stylesheet" href="/js/Magnific-Popup/magnific-popup.css" type="text/css" media="screen" />
-	<script type="text/javascript" src="/js/Magnific-Popup/jquery.magnific-popup.min.js"></script>
-
-	<link type="text/css" href="/js/jquery-ui-1.11.4.custom/jquery-ui.min.css" rel="stylesheet" />
-	<script type="text/javascript" src="/js/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
-	{*
-	<link type="text/css" href="/js/jquery-ui-1.11.4.custom/jquery-ui-timepicker-addon.css" rel="stylesheet" />
-	<script type="text/javascript" src="/js/jquery-ui-1.11.4.custom/jquery-ui-timepicker-addon.js"></script>
-	*}
-
-	{if $smarty.session.lang.lang == 'BG'}
-	<script type="text/javascript" src="/js/jquery-ui-1.11.4.custom/datepicker-bg.js"></script>
-	{*
-	<script type="text/javascript" src="/js/jquery-ui-1.11.4.custom/jquery-ui-timepicker-bg.js"></script>
-	*}
-	{else}
-	<script type="text/javascript" src="/js/jquery-ui-1.11.4.custom/datepicker-en-GB.js"></script>
-	{/if}
-
+{if $smarty.session.loggedin}
+	<link rel="stylesheet" type="text/css" href="/js/Magnific-Popup/magnific-popup.css" media="screen" />
+	<link rel="stylesheet" type="text/css" href="/js/jquery-ui-1.11.4.custom/jquery-ui.min.css" />
 	<link rel="stylesheet" type="text/css" href="/js/DataTables/datatables.min.css"/>
-	<script type="text/javascript" src="/js/DataTables/datatables.min.js"></script>
-
-	<link rel="stylesheet" href="/js/chosen/chosen.min.css" />
-	<script src="/js/chosen/chosen.jquery.min.js"></script>
-
+	<link rel="stylesheet" type="text/css" href="/js/chosen/chosen.min.css" />
 	{* Винаги трябва да е последно *}
-	<link rel="stylesheet" type="text/css" media="screen" href="/css/layout.css" />
+	<link rel="stylesheet" type="text/css" href="/css/layout.css" media="screen" />
 
+	<script src="/js/jquery-1.11.3.min.js"></script>
+	<script src="/js/Magnific-Popup/jquery.magnific-popup.min.js"></script>
+	<script src="/js/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+	{if $smarty.session.lang.lang == 'BG'}
+	<script src="/js/jquery-ui-1.11.4.custom/datepicker-bg.js"></script>
+	{else}
+	<script src="/js/jquery-ui-1.11.4.custom/datepicker-en-GB.js"></script>
+	{/if}
+	<script src="/js/DataTables/datatables.min.js"></script>
+	<script src="/js/chosen/chosen.jquery.min.js"></script>
+{else}
+	<link rel="stylesheet" type="text/css" href="/css/layout.css" media="screen" />
+	<script src="/js/jquery-1.11.3.min.js"></script>
+{/if}
+
+	<!-- favicon -->
+	<link rel="Shortcut Icon" type="image/ico" href="/images/favicon.png?v=2" />
+	
 <script type="text/javascript">
-{* Дефиниция на класа EsCon *}
-{include file='EsCon.js'}
-{include file='layout.js'}
+{if $smarty.session.loggedin}
+	{include file='EsCon.js'}
+	{include file='layout.js'}
+{/if}
 </script>
 
 </head>
