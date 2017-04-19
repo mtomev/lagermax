@@ -90,6 +90,10 @@
 				}
 				$this->method = $method;
 				$_REQUEST['b'] ? $this->base = $_REQUEST['a'] : $this->base = 'main_menu';
+
+				if (property_exists($method_class, 'forbidden') && $method_class::$forbidden){
+					exit();
+				}
 				$action = new $method_class ($this->smarty);		    
 				$action->$method ();
 			}

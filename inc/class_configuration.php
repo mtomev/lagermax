@@ -13,7 +13,7 @@
 			$_SESSION['sub_menu'] = '';
 		}
 
-		function nomen_list($table, $is_view = false, $order_by = null) {
+		private function nomen_list($table, $is_view = false, $order_by = null) {
 			// Прави стандартно попълване на $data за <table>_list
 			if (!$order_by) 
 				$order_by = 'order by '.$table.'_id';

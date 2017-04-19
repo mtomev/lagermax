@@ -473,15 +473,31 @@ var EsCon = {
 			if (this.nodeName.toLowerCase() === 'select') {
 				// Да сложим текст за option value="0"
 				// Ма само ако нямам -1
-				$('option[value="0"]', $this).attr('disabled', true).html("{#placeholder_required#}");
-				$('option[value=""]', $this).attr('disabled', true).html("{#placeholder_required#}");
+				var $disabled = $('option[value="-1"]', $this);
+				if (!$disabled.length) {
+					$disabled = $('option[value="0"]', $this);
+					if ($disabled.length) {
+						$disabled.attr('disabled', true).html("{#placeholder_required#}");
+						$this.trigger("chosen:updated");
+					}
+					else {
+						$disabled = $('option[value=""]', $this);
+						if ($disabled.length) {
+							$disabled.attr('disabled', true).html("{#placeholder_required#}");
+							$this.trigger("chosen:updated");
+						}
+					}
+				}
 				$this.change(function () {
 					if (Number($(this).val()) == 0)
 						$(this).addClass("mandatory-empty");
 					else
-						$(this).removeClass("mandatory-empty")
+						$(this).removeClass("mandatory-empty");
 				});
-				$this.trigger('change');
+				if (Number($this.val()) == 0)
+					$this.addClass("mandatory-empty");
+				else
+					$this.removeClass("mandatory-empty")
 			} else
 				$this.attr('placeholder', "{#placeholder_required#}");
 		});

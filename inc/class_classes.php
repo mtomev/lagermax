@@ -6,6 +6,8 @@
 //print nl2br2 (print_r($sql_query, true) . PHP_EOL);
 
 	class _base {
+		public static $forbidden = true;
+
 		public static $vat_percent = 19;
 		public static $rent_soll_2_space_rent = 0.95;
 

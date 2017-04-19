@@ -128,6 +128,7 @@
 
 		// Тази функция се вика само като ajax
 		function get_list_aviso () {
+		 	if (!_base::CheckAccess('aviso')) return;
 			$sub_menu = 'aviso';
 			_base::readFilterToSESSION_new($sub_menu);
 			$where = "WHERE (1=1)";
@@ -158,7 +159,7 @@
 
 
 		function aviso_detail ($where_add = '') {
-		 	if (!_base::CheckAccess('aviso')) return;
+		 	if (!_base::CheckAccess('aviso_detail')) return;
 			$_SESSION['main_menu'] = 'aviso';
 			$_SESSION['sub_menu'] = 'aviso_detail';
 			$sub_menu = $_SESSION['sub_menu'];
@@ -203,6 +204,7 @@
 
 		// Тази функция се вика само като ajax
 		function get_list_aviso_detail () {
+		 	if (!_base::CheckAccess('aviso_detail')) return;
 			$sub_menu = 'aviso_detail';
 			_base::readFilterToSESSION_new($sub_menu);
 			$where = "WHERE (1=1)";
@@ -995,6 +997,13 @@
 			_base::sql_free_result($query_result);
 			$warehouse_type = $aviso['warehouse_type'];
 
+			// Ако потребител към някой доставчик, без право да вижда всички доставчици, се опитва да отвори неправомерно друго Авизо
+			if (intVal($_SESSION['userdata']['org_id']) and $aviso['org_id'] != $_SESSION['userdata']['org_id'] and !$_SESSION['userdata']['grants']['view_all_suppliers']) {
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				$_SESSION['display_text'] = $this->smarty->getConfigVars('access_denied');
+				return;
+			}
+
 			// Данните от редовете
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
 			while ($query_data = _base::sql_fetch_assoc($query_result))
@@ -1318,6 +1327,13 @@
 			$aviso = _base::sql_fetch_assoc($query_result);
 			_base::sql_free_result($query_result);
 			$warehouse_type = $aviso['warehouse_type'];
+
+			// Ако потребител към някой доставчик, без право да вижда всички доставчици, се опитва да отвори неправомерно друго Авизо
+			if (intVal($_SESSION['userdata']['org_id']) and $aviso['org_id'] != $_SESSION['userdata']['org_id'] and !$_SESSION['userdata']['grants']['view_all_suppliers']) {
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				$_SESSION['display_text'] = $this->smarty->getConfigVars('access_denied');
+				return;
+			}
 
 			// Данните от редовете
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
@@ -1755,6 +1771,13 @@
 			_base::sql_free_result($query_result);
 			$warehouse_type = $aviso['warehouse_type'];
 
+			// Ако потребител към някой доставчик, без право да вижда всички доставчици, се опитва да отвори неправомерно друго Авизо
+			if (intVal($_SESSION['userdata']['org_id']) and $aviso['org_id'] != $_SESSION['userdata']['org_id'] and !$_SESSION['userdata']['grants']['view_all_suppliers']) {
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				$_SESSION['display_text'] = $this->smarty->getConfigVars('access_denied');
+				return;
+			}
+
 			// Данните от редовете
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id order by shop_name, shop_id, metro_request_no");
 			while ($query_data = _base::sql_fetch_assoc($query_result))
@@ -1798,6 +1821,13 @@
 			$aviso = _base::sql_fetch_assoc($query_result);
 			_base::sql_free_result($query_result);
 			$warehouse_type = $aviso['warehouse_type'];
+
+			// Ако потребител към някой доставчик, без право да вижда всички доставчици, се опитва да отвори неправомерно друго Авизо
+			if (intVal($_SESSION['userdata']['org_id']) and $aviso['org_id'] != $_SESSION['userdata']['org_id'] and !$_SESSION['userdata']['grants']['view_all_suppliers']) {
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				$_SESSION['display_text'] = $this->smarty->getConfigVars('access_denied');
+				return;
+			}
 
 			// Данните от реда
 			$query_result = _base::get_query_result("SELECT * FROM view_aviso_line WHERE aviso_id = $aviso_id and aviso_line_id = $aviso_line_id");

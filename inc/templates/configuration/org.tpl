@@ -49,6 +49,7 @@
 						return displayCheckbox(row.is_active);
 					}
 				},
+				{ title: "{#cnt_user#}", data: 'cnt_user', className: "dt-right", render: EsCon.format0HideZero },
 			],
 
 			// Да маркираме като selected последно редактирания запис
