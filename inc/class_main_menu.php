@@ -19,6 +19,7 @@
 
 		function languages () {
 		 	if (!_base::CheckAccess('languages')) return;
+
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'languages';
 			
@@ -37,6 +38,7 @@
 
 		function languages_save () {
 		 	if (!_base::CheckAccess('languages')) return;
+
 			$clang = $_REQUEST['p1'];
 			if (in_array ($clang, $_SESSION['langs'])) {
 				$fname = $this->smarty->config_dir[0] . "lang_" . $clang . ".txt";
@@ -57,6 +59,7 @@
 
 		function config_edit () {
 		 	if (!_base::CheckAccess('config_edit')) return;
+
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'config';
 			
@@ -247,7 +250,6 @@
 			unset($query);
 
 			_base::commit_transaction();
-			$_SESSION['userdata']['logon_id'] = $new_id;
 
 			// При успешен mail, връщаме 1
 			echo '1';

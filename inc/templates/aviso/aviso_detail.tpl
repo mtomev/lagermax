@@ -146,17 +146,32 @@
 				{ title: "{#weight#}", data: 'weight', className: "dt-right sum_footer_3", render: EsCon.format3HideZero },
 				{ title: "{#volume#}", data: 'volume', className: "dt-right sum_footer_3", render: EsCon.format3HideZero },
 
-				{ title: "{#qty_pallet_calc#}", data: 'qty_pallet_calc', className: "dt-right sum_footer_2",	render: EsCon.format2HideZero },
+				{ title: "{#qty_pallet_calc#}", data: 'qty_pallet_calc', className: "dt-right sum_footer_2", render: EsCon.format2HideZero },
 
-				{ title: "{#qty_pallet_rcvd#}", data: 'qty_pallet_rcvd', className: "dt-right sum_footer_0",	render: EsCon.format0HideZero },
-				{ title: "{#qty_pack_rcvd#}", data: 'qty_pack_rcvd', className: "dt-right sum_footer_0",	render: EsCon.format0HideZero },
-				{ title: "{#qty_pallet_rcvd_calc#}", data: 'qty_pallet_rcvd_calc', className: "dt-right sum_footer_2",	render: EsCon.format2HideZero },
+				{ title: "{#qty_pallet_rcvd#}", data: 'qty_pallet_rcvd', className: "dt-right sum_footer_0 qty_pallet_rcvd", render: EsCon.format0HideZero },
+				{ title: "{#qty_pack_rcvd#}", data: 'qty_pack_rcvd', className: "dt-right sum_footer_0 qty_pack_rcvd", render: EsCon.format0HideZero },
+				{ title: "{#qty_pallet_rcvd_calc#}", data: 'qty_pallet_rcvd_calc', className: "dt-right sum_footer_2", render: EsCon.format2HideZero },
 
 				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', render: aviso_status },
 
 				{ title: "{#org_metro_code#}", name: 'org_metro_code', data: 'org_metro_code', className: "" },
 				{ title: "{#metro_request_no#}", name: 'metro_request_no', data: 'metro_request_no', className: "" },
 			],
+
+			rowCallback: function (row, data, index) {
+				// row e TR tag
+				
+				// aviso_status == '7'-приключено
+				if (data.aviso_status == '7' && data.qty_pallet_rcvd != data.qty_pallet)
+					$('td.qty_pallet_rcvd', row).addClass('isAttention');
+				else
+					$('td.qty_pallet_rcvd', row).removeClass('isAttention');
+
+				if (data.aviso_status == '7' && data.qty_pack_rcvd != data.qty_pack)
+					$('td.qty_pack_rcvd', row).addClass('isAttention');
+				else
+					$('td.qty_pack_rcvd', row).removeClass('isAttention');
+			},
 
 			"footerCallback": function( tfoot, data, start, end, display ) {
 				var api = this.api();

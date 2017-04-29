@@ -100,13 +100,6 @@
 			<div class="table-row">
 				<div class="table-cell-label"></div>
 				<div class="table-cell">
-					<input id="email_sended" class="" type="checkbox" name="email_sended" value="1" {if $data.email_sended == '1'}checked="checked"{/if}>&nbsp;email sended
-				</div>
-			</div>
-
-			<div class="table-row">
-				<div class="table-cell-label"></div>
-				<div class="table-cell">
 					<input id="is_active" class="" type="checkbox" name="is_active" value="1" {if $data.is_active}checked="checked"{/if}>&nbsp;{#is_active#}
 				</div>
 			</div>

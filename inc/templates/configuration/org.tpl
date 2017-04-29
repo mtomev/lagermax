@@ -49,11 +49,16 @@
 						return displayCheckbox(row.is_active);
 					}
 				},
-				{ title: "{#cnt_user#}", data: 'cnt_user', className: "dt-right", render: EsCon.format0HideZero },
+				{ title: "{#cnt_user#}", data: 'cnt_user', className: "dt-right auto_filter", render: EsCon.format0HideZero },
+				{ title: "{#cnt_aviso#}", data: 'cnt_aviso', className: "dt-right auto_filter", render: EsCon.format0HideZero },
 			],
 
 			// Да маркираме като selected последно редактирания запис
 			initComplete: function () {
+				oTable.columns('.auto_filter').every(function (index) {
+					datatable_set_auto_filter_column(this, null, false);
+				});
+
 				var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 				oTable.rows('#'+id).select();
 				oTable.row({ selected: true }).show().draw(false);

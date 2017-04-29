@@ -8,7 +8,9 @@
 			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
 			</select>
+			{if $smarty.session.userdata.grants.view_all_suppliers == '1'}
 			<span class="clear-input" id="org_id_clear">×</span>
+			{/if}
 		</span>
 
 		<span class="" style="padding-left: 10px;">

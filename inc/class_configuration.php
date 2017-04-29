@@ -577,8 +577,6 @@
 			$query->AddParam('user_email');
 			if (!$is_user_profil_edit)
 				$query->AddParam('is_active', 'c');
-			if (!$is_user_profil_edit)
-				$query->AddParam('email_sended', 'c');
 			if ($id != 0) {
 				$query->update([$table."_id" => $id]);
 				$new_id = $id;
@@ -598,6 +596,7 @@
 				$query_data = _base::sql_fetch_assoc($query_result);
 				_base::sql_free_result($query_result);
 				if ($query_data) {
+					$query_data['logon_id'] = $_SESSION['userdata']['logon_id'];
 					$_SESSION['userdata'] = $query_data;
 
 					$sql_query = "SELECT grants
@@ -651,6 +650,7 @@
 		}
 
 		function send_test_mail() {
+			if (!_base::CheckAccess('user_edit')) return;
 			// user_id
 			$user_id = $_REQUEST['p1'];
 			if (!$user_id) return;
@@ -664,11 +664,13 @@
 				for($i=1; $i<=1; $i++) {
 					if (!_base::send_user_mail($data_mail, false)) return;
 				}
+				/*
 				_base::start_transaction();
 				$sql_query = "UPDATE `user` set email_sended = '1'"
 					. PHP_EOL . " where user_id = $user_id";
 				_base::execute_sql($sql_query);
 				_base::commit_transaction();
+				*/
 			}
 		}
 

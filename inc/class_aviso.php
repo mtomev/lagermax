@@ -88,6 +88,7 @@
 
 		function aviso ($where_add = '') {
 		 	if (!_base::CheckAccess('aviso')) return;
+
 			$_SESSION['main_menu'] = 'aviso';
 			$_SESSION['sub_menu'] = 'aviso';
 			$sub_menu = $_SESSION['sub_menu'];
@@ -129,6 +130,7 @@
 		// Тази функция се вика само като ajax
 		function get_list_aviso () {
 		 	if (!_base::CheckAccess('aviso')) return;
+
 			$sub_menu = 'aviso';
 			_base::readFilterToSESSION_new($sub_menu);
 			$where = "WHERE (1=1)";
@@ -153,13 +155,28 @@
 			if ($_SESSION[$sub_menu]['where_add'])
 				$where .= $_SESSION[$sub_menu]['where_add'];
 
-			$data = _base::nomen_list('aviso', true, 'aviso_id', $where);
+			//$data = _base::nomen_list('aviso', true, 'aviso_id', $where);
+			$sql_query = "select * from view_aviso $where order by aviso_id";
+			$query_result = _base::get_query_result($sql_query);
+			$data = array();
+			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+				// 7-приключено
+				if ($query_data['aviso_status'] == '7') {
+					$query_data['qty_pallet'] = $query_data['qty_pallet_rcvd'];
+					$query_data['qty_pack'] = $query_data['qty_pack_rcvd'];
+					$query_data['qty_pallet_calc'] = $query_data['qty_pallet_rcvd_calc'];
+				}
+				$data[] = $query_data + array('id' => $query_data['aviso_id']);
+			}
+			_base::sql_free_result($query_result);
+
 			echo json_encode(array('data' => $data));
 		}
 
 
 		function aviso_detail ($where_add = '') {
 		 	if (!_base::CheckAccess('aviso_detail')) return;
+
 			$_SESSION['main_menu'] = 'aviso';
 			$_SESSION['sub_menu'] = 'aviso_detail';
 			$sub_menu = $_SESSION['sub_menu'];
@@ -205,9 +222,14 @@
 		// Тази функция се вика само като ajax
 		function get_list_aviso_detail () {
 		 	if (!_base::CheckAccess('aviso_detail')) return;
+
 			$sub_menu = 'aviso_detail';
 			_base::readFilterToSESSION_new($sub_menu);
 			$where = "WHERE (1=1)";
+
+			// Ако потребителя няма право да вижда всички Доставчици
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers'])
+				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
 
 			if ($_SESSION[$sub_menu]['w_group_id']) {
 				$where .= ' and (w_group_id = '.intVal($_SESSION[$sub_menu]['w_group_id']).')';
@@ -534,8 +556,14 @@
 
 		function aviso_select_timeslot ($aviso_id = null) {
 			// aviso_id
-			if (!isset($aviso_id))
+			if (!isset($aviso_id)) {
 				$id = intVal($_REQUEST['p1']);
+				if (!$id) {
+					if (!_base::CheckAccess('aviso_add', false)) return;
+				} else {
+					if (!_base::CheckAccess('aviso_edit', false)) return;
+				}
+			}
 			else
 				$id = $aviso_id;
 
@@ -744,11 +772,12 @@
 		}
 
 		function aviso_save_receipt () {
+			if (!_base::CheckAccess('aviso_reception_edit', false)) return;
+
 			// aviso_id
 			$id = intVal($_REQUEST['p1']);
 
 			if (!$id) return;
-			if (!_base::CheckAccess('aviso_reception_edit', false)) return;
 			
 			// Проверки за неправомерност
 			// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
@@ -816,13 +845,13 @@
 		}
 
 		function aviso_edt_complete () {
+			if (!_base::CheckGrant('aviso_reception_view'))
+				if (!_base::CheckAccess('aviso_reception_edit')) return;
+
 			// aviso_id
 			$id = intVal($_REQUEST['p1']);
 
 			if (!$id) return;
-
-			if (!_base::CheckGrant('aviso_reception_view'))
-				if (!_base::CheckAccess('aviso_reception_edit')) return;
 
 			$data = _base::nomen_list_edit('aviso', $id, true);
 			$warehouse_id = intVal($data['warehouse_id']);
@@ -892,11 +921,12 @@
 		}
 
 		function aviso_save_complete () {
+			if (!_base::CheckAccess('aviso_reception_edit', false)) return;
+
 			// aviso_id
 			$id = intVal($_REQUEST['p1']);
 
 			if (!$id) return;
-			if (!_base::CheckAccess('aviso_reception_edit', false)) return;
 			
 			// Проверки за неправомерност
 			// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
@@ -979,6 +1009,9 @@
 
 		// Генериране на PDF
 		function aviso_display () {
+			if (!_base::CheckGrant('aviso_view'))
+				if (!_base::CheckAccess('aviso_edit')) return;
+
 			// aviso_id
 			$aviso_id = intVal($_REQUEST['p1']);
 			// $_REQUEST['p2'] = thumb
@@ -1310,6 +1343,8 @@
 
 		// Генериране на ПРИЕМНО - ПРЕДАВАТЕЛЕН ПРОТОКОЛ
 		function aviso_ppp_display () {
+			if (!_base::CheckGrant('aviso_reception_view'))
+				if (!_base::CheckAccess('aviso_reception_edit')) return;
 			// aviso_id
 			$aviso_id = intVal($_REQUEST['p1']);
 			// $_REQUEST['p2'] = thumb
@@ -1762,6 +1797,8 @@
 		
 		// Генериране на Етикети по Палети и Колети по Авизо
 		function aviso_lables_display () {
+			if (!_base::CheckGrant('aviso_reception_view'))
+				if (!_base::CheckAccess('aviso_reception_edit')) return;
 			// aviso_id
 			$aviso_id = intVal($_REQUEST['p1']);
 
@@ -1809,6 +1846,8 @@
 
 		// Генериране на етикети по един ред от Авизо
 		function aviso_row_lables_display () {
+			if (!_base::CheckGrant('aviso_reception_view'))
+				if (!_base::CheckAccess('aviso_reception_edit')) return;
 			// aviso_id / aviso_line_id
 			// В $_POST трябва да са подадени aviso_status, qty_pallet_rcvd и qty_pack_rcvd
 			$aviso_id = intVal($_REQUEST['p1']);

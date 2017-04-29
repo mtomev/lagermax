@@ -94,8 +94,6 @@
 
 				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding auto_filter", render: displayCheckbox },
 
-				{ title: "email sended", data: 'email_sended', className: "dt-center td-no-padding auto_filter", render: displayCheckbox },
-
 				{ title: "{#mo_date#}", data: 'mo_date', className: "dt-center",	render: EsCon.formatCRDate },
 				{ title: "{#mo_user_name#}", data: 'mo_user_name' },
 			],
