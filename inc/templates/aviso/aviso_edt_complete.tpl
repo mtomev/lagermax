@@ -115,6 +115,26 @@
 						</div>
 					</div>
 				</div>
+				<div style="float: left; padding-left: 40px;">
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_claim_plt_eur#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_claim_plt_eur" value="{$data.aviso_claim_plt_eur}">
+						</div>
+					</div>
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_claim_plt_chep#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_claim_plt_chep" value="{$data.aviso_claim_plt_chep}">
+						</div>
+					</div>
+					<div class="table-row">
+						<div class="table-cell-label">{#aviso_claim_plt_other#}</div>
+						<div class="table-cell">
+							<input class="number-small" data-type="Number0" type="text" name="aviso_claim_plt_other" value="{$data.aviso_claim_plt_other}">
+						</div>
+					</div>
+				</div>
 			</div>
 			<hr>
 
@@ -412,6 +432,7 @@
 		// Редовете от таблицата
 		if (!vLocalTable.prepareToSave()) return;
 		
+		waitingDialog();
 		$.ajax({
 			type: 'POST',
 			async: false,

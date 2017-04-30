@@ -366,7 +366,7 @@ button.add_button:hover {
 	background-color: #1b8048;
 }
 button.green_button {
-	padding: 4px 5px;
+	padding: 8px 5px;
 	border-width: 0;
 	cursor: pointer;
 	color: #FFF;

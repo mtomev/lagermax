@@ -5,7 +5,7 @@
 	<div class="headerrow" id="headerrow">
 		<span class="ellipsis">
 			{#org_name#}
-			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
+			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}>
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
 			</select>
 			{if $smarty.session.userdata.grants.view_all_suppliers == '1'}
@@ -14,7 +14,7 @@
 		</span>
 
 		<span class="" style="padding-left: 10px;">
-			{#aviso_date#}
+			{#pltorg_date#}
 			<input id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
 			<input id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
 		</span>
@@ -23,9 +23,9 @@
 			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
 		</span>
 
-		{if $smarty.session.userdata.grants.aviso_add == '1'}
+		{if $smarty.session.userdata.grants.pltorg_edit == '1'}
 		<span class="" style="padding-left: 10px;">
-			<button class="add_button" url="/aviso/aviso_select_warehouse" rel="edit-0" edit_add_new="{$smarty.session.table_edit}" title="{#Add#} {#table_aviso#}"><span>{#add#}</span></button>
+			<button class="add_button" url="/plt/pltorg_edit/0" rel="edit-0" fullscreen="true" edit_add_new="{$smarty.session.table_edit}" title="{#Add#} {#table_pltorg#}"><span>{#add#}</span></button>
 		</span>
 		{/if}
 
@@ -57,13 +57,13 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
-			// aviso_date, aviso_time
-			order: [[3, 'asc'], [4, 'asc']],
+			// pltorg_date, id
+			order: [[2, 'asc'], [0, 'asc']],
 			"ajax": function (data, callback, settings) {
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
-					url: '/aviso/get_list_aviso',
+					url: '/plt/get_list_pltorg',
 					method: "POST",
 					data: _self.last_params,
 					"dataType": "json",
@@ -87,77 +87,37 @@
 			},
 
 			columns: [
-				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_aviso_edit },
+				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_pltorg_edit },
 
-				{ title: "{#warehouse_code#}", data: 'warehouse_code', className: "auto_filter" },
 				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis" , render: displayEllipses },
 
-				{ title: "{#aviso_date#}", data: 'aviso_date', className: "dt-center",	render: EsCon.formatDate },
-				{ title: "{#aviso_time#}", data: 'aviso_time', className: "dt-center",	render: EsCon.formatTime },
+				{ title: "{#pltorg_date#}", data: 'pltorg_date', className: "dt-center",	render: EsCon.formatDate },
 
-				// aviso_truck_type
-				{ title: "{#aviso_truck_type#}", name: 'aviso_truck_type', data: 'aviso_truck_type', render: aviso_truck_type },
+				{ title: "{#qty_plt_eur#}", data: 'qty_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#qty_plt_chep#}", data: 'qty_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#qty_plt_other#}", data: 'qty_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 
-				{ title: "{#qty_pallet#}", data: 'qty_pallet', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#qty_pack#}", data: 'qty_pack', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#weight#}", data: 'weight', className: "dt-right sum_footer_0",	render: EsCon.format0HideZero },
-				{ title: "{#volume#}", data: 'volume', className: "dt-right sum_footer_3",	render: EsCon.format3HideZero },
+				{ title: "{#qty_ret_plt_eur#}", data: 'qty_ret_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#qty_ret_plt_chep#}", data: 'qty_ret_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#qty_ret_plt_other#}", data: 'qty_ret_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 
-				{ title: "{#qty_pallet_calc#}", data: 'qty_pallet_calc', className: "dt-right sum_footer_2",	render: EsCon.format2HideZero },
+				{ title: "{#qty_claim_plt_eur#}", data: 'qty_claim_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#qty_claim_plt_chep#}", data: 'qty_claim_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#qty_claim_plt_other#}", data: 'qty_claim_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 
 				// Линк към PDF
 				{ title: "{#scan_doc#}", data: 'scan_doc', className: "dt-center td-no-padding", 
 					render: function ( data, type, row ) {
-						return displayDocUpload( data, '/aviso/aviso_display/'+row.aviso_id );
+						return displayDocUpload( data, '/plt/pltorg_display/'+row.pltorg_id );
 					}
 				},
 
-				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', className: "td-no-padding",
-					render: function ( data, type, row ) {
-						if (type !== 'display') return data;
-						var status = aviso_status(data, type);
-						if (data == 0) {
-							/*{if $smarty.session.userdata.grants.aviso_reception == '1'}*/
-							return '<a href="javascript:;" url="/aviso/aviso_edit_receipt/'+row.aviso_id+'" class="aviso_edit_receipt" title="{#menu_aviso_reception#}">'+displayDIV100(status)+'</a>';
-							/*{else}*/
-							return displayDIV100(status);
-							/*{/if}*/
-						}
-						else
-						{
-							/*{if $smarty.session.userdata.grants.aviso_reception_edit == '1' || $smarty.session.userdata.grants.aviso_reception_view == '1'}*/
-							return '<a href="/aviso/aviso_edt_complete/'+row.aviso_id+'" rel="edit_'+row.aviso_id+'" title="{#aviso_complete#}">'+displayDIV100(status)+'</a>';
-							/*{else}*/
-							return displayDIV100(status);
-							/*{/if}*/
-						}
-					}
-				},
+				{ title: "{#aviso_id#}", data: 'aviso_id', className: "dt-right", render: EsCon.formatIntegerHideZero },
 
-				// aviso_truck_no
-				{ title: "{#aviso_truck_no#}", data: 'aviso_truck_no' },
-				// aviso_driver_name
-				{ title: "{#aviso_driver_name#}", data: 'aviso_driver_name' },
-				// aviso_driver_phone
-				{ title: "{#aviso_driver_phone#}", data: 'aviso_driver_phone' },
+				{ title: "{#pltorg_refnumb#}", data: 'pltorg_refnumb' },
+				{ title: "{#pltorg_driver#}", data: 'pltorg_driver' },
 
-				{ title: "{#aviso_start_exec#}", data: 'aviso_start_exec', className: "",	render: EsCon.formatDate },
-				{ title: "{#aviso_end_exec#}", data: 'aviso_end_exec', className: "",	render: EsCon.formatDate },
-				{ title: "{#note#}", data: 'aviso_reject_reason', className: "ellipsis" , render: displayEllipses },
-
-				{ title: "# lines", data: 'cnt_lines', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-
-				{ title: "{#aviso_plt_eur#}", data: 'aviso_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#aviso_plt_chep#}", data: 'aviso_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#aviso_plt_other#}", data: 'aviso_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-
-				{ title: "{#aviso_ret_plt_eur#}", data: 'aviso_ret_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#aviso_ret_plt_chep#}", data: 'aviso_ret_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#aviso_ret_plt_other#}", data: 'aviso_ret_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-
-				{ title: "{#aviso_claim_plt_eur#}", data: 'aviso_claim_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#aviso_claim_plt_chep#}", data: 'aviso_claim_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#aviso_claim_plt_other#}", data: 'aviso_claim_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#note#}", data: 'pltorg_note', className: "ellipsis" , render: displayEllipses },
 
 			],
 
@@ -184,25 +144,12 @@
 			oTable.columns('.auto_filter').every(function (index) {
 				datatable_set_auto_filter_column(this, null, false);
 			});
-			datatable_auto_filter_column(oTable, 'aviso_truck_type', aviso_truck_type, false);
-			datatable_auto_filter_column(oTable, 'aviso_status', aviso_status, false);
 
 			// Да маркираме като selected последно редактирания запис
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
-//var local_start = Date.now();
 			oTable.rows('#'+id).select().draw(false);
 			// Те това е бавното - .draw(false) !!!
 			oTable.row({ selected: true }).show().draw(false);
-			/*
-			oTable.rows().every( function () {
-				var row = this;
-				if (row.data().id == id) {
-					row.select().show().draw(false);
-					return false;
-				}
-			});
-			*/
-//console.log('oTable.rows().every '+(Date.now() - local_start));
 
 			// Заради Иконата за Upload
 			$("#table_id tbody").on("click", 'input, select, a', function() {
@@ -210,26 +157,6 @@
 				oTable.rows().deselect();
 			});
 
-			$("#table_id tbody").on('click', 'a.aviso_edit_receipt', function(event) {
-				is_edit_child = false;
-
-				$this = $(this);
-
-				var url = $this.attr("url");
-				if (!url)
-					url = $this.attr("href");
-				var a_rel = $this.attr("rel");
-
-				// Дали е нов елемент, който после се добавя в таблицата
-				var edit_tr = $(this).parents("tr");
-				edit_row = oTable.row(edit_tr);
-				edit_id = edit_row.data().id;
-
-				edit_delete = false;
-				edit_add_new = false;
-				if (url === '') return;
-				showMFP(url, { }, '#aviso_id');
-			});
 		}
 
 		this.LoadData = function(resetPaging) {

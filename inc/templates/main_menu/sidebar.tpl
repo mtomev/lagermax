@@ -26,6 +26,22 @@
 			</ul>
 			</li>
 
+			<li>
+			{if $smarty.session.userdata.grants.plt == '1'}
+			<a main_menu="plt" href="#">{#menu_plt#}</a>
+			{else}
+			<a main_menu="plt" href="#">{#menu_plt#}</a>
+			{/if}
+			<ul main_menu="plt" class="submenu">
+				{if $smarty.session.userdata.grants.pltorg == '1'}
+				<li><a sub_menu="pltorg" href="/plt/pltorg">{#menu_pltorg#}</a></li>
+				{/if}
+				{if $smarty.session.userdata.grants.pltshop == '1'}
+				<li><a sub_menu="pltshop" href="/plt/pltshop">{#menu_pltshop#}</a></li>
+				{/if}
+			</ul>
+			</li>
+
 			{if $smarty.session.userdata.grants.reports == '1'}
 			<li><a main_menu="reports" href="/reports/timeslot">{#menu_reports#}</a></li>
 			{/if}

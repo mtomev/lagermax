@@ -463,12 +463,17 @@
 			$query->AddParam('aviso_date', 'd');
 			$query->AddParam('aviso_time', 't');
 
+			/*
 			$query->AddParam('aviso_plt_eur', 'n', 0);
 			$query->AddParam('aviso_plt_chep', 'n', 0);
 			$query->AddParam('aviso_plt_other', 'n', 0);
 			$query->AddParam('aviso_ret_plt_eur', 'n', 0);
 			$query->AddParam('aviso_ret_plt_chep', 'n', 0);
 			$query->AddParam('aviso_ret_plt_other', 'n', 0);
+			$query->AddParam('aviso_claim_plt_eur', 'n', 0);
+			$query->AddParam('aviso_claim_plt_chep', 'n', 0);
+			$query->AddParam('aviso_claim_plt_other', 'n', 0);
+			*/
 
 			if ($id != 0) {
 				$query->update(["aviso_id" => $id]);
@@ -542,11 +547,15 @@
 						_base::show_error($this->smarty->getConfigVars('access_denied'));
 				}
 
+				_base::start_transaction();
+
 				$sql_query = "DELETE FROM aviso WHERE aviso_id = $id";
 				_base::execute_sql($sql_query);
 
 				$sql_query = "DELETE FROM aviso_line WHERE aviso_id = $id";
 				_base::execute_sql($sql_query);
+
+				_base::commit_transaction();
 
 				unset($_SESSION{'aviso_id'});
 				_base::put_sys_oper(__METHOD__, 'delete', $_SESSION['table_edit'], $id);
@@ -951,6 +960,9 @@
 			$query->AddParam('aviso_ret_plt_eur', 'n', 0);
 			$query->AddParam('aviso_ret_plt_chep', 'n', 0);
 			$query->AddParam('aviso_ret_plt_other', 'n', 0);
+			$query->AddParam('aviso_claim_plt_eur', 'n', 0);
+			$query->AddParam('aviso_claim_plt_chep', 'n', 0);
+			$query->AddParam('aviso_claim_plt_other', 'n', 0);
 
 			//Попълва се в момента на сетване на статус от 0 на 3/7/9 или от 3 на 9
 			//- изчиства се при сетване на статус от 3/7/9 на 0
@@ -999,6 +1011,45 @@
 					}
 				} // data_line
 			}
+			
+			// Обновяване на палетите в pltorg
+			$pltorg = _base::select_sql("select * from pltorg WHERE aviso_id = $id");
+			// Ако има разлика в което е да е количество
+			$a_fields = array('plt_eur','plt_chep','plt_other', 'ret_plt_eur','ret_plt_eur','ret_plt_eur', 'claim_plt_eur','claim_plt_eur','claim_plt_eur');
+			$has_difference = false;
+			for($i=0, $count=count($a_fields); $i < $count; $i++) {
+				if (intVal($_POST['aviso_'.$a_fields[$i]]) != intVal($pltorg['qty_'.$a_fields[$i]])) {
+					$has_difference = true;
+					break;
+				}
+			}
+			if ($has_difference) {
+				unset($query);
+				$query = new ExecQuery('pltorg', false);
+				$query->add_cr_mo = false;
+				
+				for($i=0, $count=count($a_fields); $i < $count; $i++) {
+					if (intVal($_POST['aviso_'.$a_fields[$i]]) != intVal($pltorg['qty_'.$a_fields[$i]])) {
+						$query->AddParamExt('qty_'.$a_fields[$i], $_POST['aviso_'.$a_fields[$i]], 'n', 0);
+					}
+				}
+
+				if ($pltorg['pltorg_id'])
+					$query->update(["aviso_id" => $id]);
+				else 
+				// Ако не е имало запис в pltorg
+				{
+					$temp = _base::select_sql("select aviso_date, org_id, aviso_driver_name from aviso WHERE aviso_id = $id");
+					$query->add_cr_mo = true;
+					$query->AddParamExt('aviso_id', $id, 'n', 0);
+					$query->AddParamExt('org_id', $temp['org_id'], 'n', 0);
+					$query->AddParamExt('pltorg_date', $temp['aviso_date'], 'd');
+					$query->AddParamExt('pltorg_driver', $temp['aviso_driver_name']);
+					$query->insert();
+				}
+			}
+			// end Обновяване на палетите в pltorg
+
 
 			_base::commit_transaction();
 			_base::put_sys_oper(__METHOD__, 'save', $_SESSION['table_edit'], $id);
@@ -1687,19 +1738,28 @@
 			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_plt_eur']), 0, 0, 'R');
 			$pdf->Cell(20, 4, '', 0, 0, '');
 			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Върнати EUR:'), 0, 0, 'R');
-			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_eur']), 0, 1, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_eur']), 0, 0, 'R');
+			$pdf->Cell(20, 4, '', 0, 0, '');
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Рекламация EUR:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_claim_plt_eur']), 0, 1, 'R');
 
 			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Доставени CHEP:'), 0, 0, 'R');
 			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_plt_chep']), 0, 0, 'R');
 			$pdf->Cell(20, 4, '', 0, 0, '');
 			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Върнати CHEP:'), 0, 0, 'R');
-			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_chep']), 0, 1, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_chep']), 0, 0, 'R');
+			$pdf->Cell(20, 4, '', 0, 0, '');
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Рекламация CHEP:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_claim_plt_chep']), 0, 1, 'R');
 
 			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Доставени скари:'), 0, 0, 'R');
 			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_plt_other']), 0, 0, 'R');
 			$pdf->Cell(20, 4, '', 0, 0, '');
 			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Върнати скари:'), 0, 0, 'R');
-			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_other']), 0, 1, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_ret_plt_other']), 0, 0, 'R');
+			$pdf->Cell(20, 4, '', 0, 0, '');
+			$pdf->Cell(30, 4, iconv('UTF-8', 'windows-1251', 'Рекламация скари:'), 0, 0, 'R');
+			$pdf->Cell(10, 4, iconv('UTF-8', 'windows-1251', $aviso['aviso_claim_plt_other']), 0, 1, 'R');
 
 			
 			// Предал / Приел

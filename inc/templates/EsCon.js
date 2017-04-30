@@ -507,7 +507,12 @@ var EsCon = {
 	check_mandatory: function($elements) {
 		var isOK = true;
 		$elements.each( function() {
-			$(this).removeClass('isRequired');
+			// Ако a е select от class hasChosen
+			if ($(this).hasClass('hasChosen')) {
+				$(this).data("chosen").selected_item.removeClass('isRequired');
+			}
+			else
+				$(this).removeClass('isRequired');
 		});
 		$elements.each( function() {
 			if (this.nodeName.toLowerCase() === 'select') {

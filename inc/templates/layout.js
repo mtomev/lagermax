@@ -236,7 +236,10 @@
 				edit_delete = $this.is("[edit_delete]") ? true : false;
 			}
 			if (url === '') return;
-			showMFP(url);
+			if ($this.attr("fullscreen"))
+				window.location.href = url;
+			else
+				showMFP(url);
 		});
 	} // InitMFP
 
@@ -327,7 +330,12 @@
 		}
 
 		if (!isOK) {
-			$(a).addClass('isRequired');
+			// Ако a е select от class hasChosen
+			if ($(a).hasClass('hasChosen')) {
+				$(a).data("chosen").selected_item.addClass('isRequired');
+			}
+			else
+				$(a).addClass('isRequired');
 			fnShowErrorMessage('{#title_attention#}', '"' + field_caption + '" {#is_required#}!')
 			return false;
 		} else
@@ -638,6 +646,42 @@
 			if ('{$smarty.session.table_edit}' == 'aviso')
 				$edit_delete = ' edit_delete="{$smarty.session.table_edit}"';
 			data = '<a href="/aviso/aviso_edit/'+row.aviso_id+'" rel="edit_'+row.aviso_id+'"'+$edit_delete+' title="{#Edit#} {#table_aviso#}">'+displayDIV100(data)+'</a>';
+			/*{else}*/
+			data = displayDIV100(data);
+			/*{/if}*/
+			return data;
+		}
+		else
+			return data;
+	}
+
+	function display_pltorg_edit( data, type, row, meta ) {
+		if (typeof(type)==='undefined') type = 'display';
+		if ( type ==='display' ) {
+			if (!data) data = '...';
+			/*{if $smarty.session.userdata.grants.pltorg_edit == '1' || $smarty.session.userdata.grants.pltorg_view == '1'}*/
+			var $edit_delete = '';
+			if ('{$smarty.session.table_edit}' == 'pltorg')
+				$edit_delete = ' edit_delete="{$smarty.session.table_edit}"';
+			data = '<a href="/plt/pltorg_edit/'+row.pltorg_id+'" rel="edit_'+row.pltorg_id+'"'+$edit_delete+' title="{#Edit#} {#table_pltorg#}">'+displayDIV100(data)+'</a>';
+			/*{else}*/
+			data = displayDIV100(data);
+			/*{/if}*/
+			return data;
+		}
+		else
+			return data;
+	}
+
+	function display_pltshop_edit( data, type, row, meta ) {
+		if (typeof(type)==='undefined') type = 'display';
+		if ( type ==='display' ) {
+			if (!data) data = '...';
+			/*{if $smarty.session.userdata.grants.pltshop_edit == '1' || $smarty.session.userdata.grants.pltshop_view == '1'}*/
+			var $edit_delete = '';
+			if ('{$smarty.session.table_edit}' == 'pltshop')
+				$edit_delete = ' edit_delete="{$smarty.session.table_edit}"';
+			data = '<a href="/plt/pltshop_edit/'+row.pltshop_id+'" rel="edit_'+row.pltshop_id+'"'+$edit_delete+' title="{#Edit#} {#table_pltshop#}">'+displayDIV100(data)+'</a>';
 			/*{else}*/
 			data = displayDIV100(data);
 			/*{/if}*/

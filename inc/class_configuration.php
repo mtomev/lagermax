@@ -180,7 +180,7 @@
 		 	if (!_base::CheckAccess('warehouse_delete')) return;
 
 			// warehouse_id
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
 				if (_base::check_used_id('aviso', $id, 'warehouse_id')) {
@@ -249,7 +249,7 @@
 		 	if (!_base::CheckAccess('w_group_delete')) return;
 
 			// w_group_id
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
 				if (_base::check_used_id('warehouse', $id, 'w_group_id')) {
@@ -383,10 +383,14 @@
 		 	if (!_base::CheckAccess('org_delete')) return;
 
 			// org_id
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
 				if (_base::check_used_id('aviso', $id, 'org_id')) {
+					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
+					_base::show_error($message);
+				}
+				if (_base::check_used_id('pltorg', $id, 'org_id')) {
 					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
 					_base::show_error($message);
 				}
@@ -397,6 +401,9 @@
 				_base::execute_sql($sql_query);
 
 				$sql_query = "DELETE FROM org_metro WHERE org_id = $id";
+				_base::execute_sql($sql_query);
+
+				$sql_query = "DELETE FROM user WHERE org_id = $id";
 				_base::execute_sql($sql_query);
 
 				_base::commit_transaction();
@@ -461,9 +468,13 @@
 		 	if (!_base::CheckAccess('shop_delete')) return;
 
 			// shop_id
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
+				if (_base::check_used_id('pltshop', $id, 'shop_id')) {
+					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
+					_base::show_error($message);
+				}
 				if (_base::check_used_id('aviso_line', $id, 'shop_id')) {
 					$message = '"'.$this->smarty->getConfigVars('table_'.$_SESSION['table_edit']).'" id:'.$id.' е използван и не може да се изтрие';
 					_base::show_error($message);
@@ -613,7 +624,7 @@
 		function user_delete () {
 		 	if (!_base::CheckAccess('user_delete')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
 				$sql_query = "DELETE FROM user WHERE user_id = $id";
@@ -826,7 +837,7 @@
 		function config_delete () {
 		 	if (!_base::CheckAccess('config_delete')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
 				$sql_query = "DELETE FROM config WHERE config_id = $id";
@@ -897,7 +908,7 @@
 		function calendar_delete () {
 		 	if (!_base::CheckAccess('calendar_delete')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			if ($_POST{'process'} == 'delete' && $id) {
 				$sql_query = "DELETE FROM calendar WHERE calendar_id = $id";

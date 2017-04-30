@@ -67,6 +67,40 @@
 			</div>
 
 			<div class="table-row">
+				<div class="table-cell-label"><b>{#menu_plt#}</b></div>
+				<div class="table-cell">
+					<input type="checkbox" value="1" rel="plt" {if $data.grants["plt"] == '1'}checked{/if}> {#view_menu#}
+					<span>&nbsp;&nbsp;</span>
+				</div>
+			</div>
+			<div class="table-row">
+				<div class="table-cell-label">{#menu_pltorg#}</b></div>
+				<div class="table-cell">
+					<input type="checkbox" value="1" rel="pltorg" {if $data.grants["pltorg"] == '1'}checked{/if}> {#view_menu#}
+					<span>&nbsp;&nbsp;</span>
+					<input type="checkbox" value="1" rel="pltorg_view" {if $data.grants["pltorg_view"] == '1'}checked{/if}> {#view_detail#}
+					<span>&nbsp;&nbsp;</span>
+					<input type="checkbox" value="1" rel="pltorg_edit" {if $data.grants["pltorg_edit"] == '1'}checked{/if}> {#edit#}
+					<span>&nbsp;&nbsp;</span>
+					<input type="checkbox" value="1" rel="pltorg_delete" {if $data.grants["pltorg_delete"] == '1'}checked{/if}> {#delete#}
+					<span>&nbsp;&nbsp;</span>
+				</div>
+			</div>
+			<div class="table-row">
+				<div class="table-cell-label">{#menu_pltshop#}</b></div>
+				<div class="table-cell">
+					<input type="checkbox" value="1" rel="pltshop" {if $data.grants["pltshop"] == '1'}checked{/if}> {#view_menu#}
+					<span>&nbsp;&nbsp;</span>
+					<input type="checkbox" value="1" rel="pltshop_view" {if $data.grants["pltshop_view"] == '1'}checked{/if}> {#view_detail#}
+					<span>&nbsp;&nbsp;</span>
+					<input type="checkbox" value="1" rel="pltshop_edit" {if $data.grants["pltshop_edit"] == '1'}checked{/if}> {#edit#}
+					<span>&nbsp;&nbsp;</span>
+					<input type="checkbox" value="1" rel="pltshop_delete" {if $data.grants["pltshop_delete"] == '1'}checked{/if}> {#delete#}
+					<span>&nbsp;&nbsp;</span>
+				</div>
+			</div>
+
+			<div class="table-row">
 				<div class="table-cell-label"><b>{#menu_reports#}</b></div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="reports" {if $data.grants["reports"] == '1'}checked{/if}> {#view_menu#}
