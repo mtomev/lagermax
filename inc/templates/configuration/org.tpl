@@ -3,6 +3,11 @@
 <div id="main">
 	<div class="headerrow" id="headerrow">
 		{include file='configuration/btn_add.tpl'}
+		{if $smarty.session.userdata.user_id == '1'}
+		<span class="" style="padding-left: 10px;">
+			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
+		</span>
+		{/if}
 		{include file='main_menu/list_search.tpl'}
 	</div>
 
@@ -10,15 +15,34 @@
 </div>
 
 <script type="text/javascript">
-	$(document).ready( function () {
+	function InitTable () {
+		var _self = this;
+		this.mainTable = $("#table_id");
+		this.last_params = {};
+
 		$('#table_id').addClass(dataTable_default_class);
-		oTable = $('#table_id').DataTable( {
-			order: [[1, 'asc']],
+		var config = {
 			paging: true,
-			//data: { },
+			order: [[1, 'asc']],
 			ajax: {
 				url: '/configuration/org_ajax',
 				type: "POST",
+				dataSrc: function (result) {
+					oTable.clear().columns().search('');
+					//return result.data;
+
+					// result.data е масива с данни result.fields е масива с имената на полетата
+					var row = {};
+					for ( var i=0, len=result.data.length; i<len; i++ ) {
+						// За всеки ред се създава Object Json и с него се заменя стария ред
+						row = {};
+						for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
+							row[result.fields[j]] = result.data[i][j];
+						}
+						result.data[i] = row;
+					}
+					return result.data;
+				},
 			},
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center" },
@@ -52,22 +76,30 @@
 				{ title: "{#cnt_user#}", data: 'cnt_user', className: "dt-right auto_filter", render: EsCon.format0HideZero },
 				{ title: "{#cnt_aviso#}", data: 'cnt_aviso', className: "dt-right auto_filter", render: EsCon.format0HideZero },
 			],
+			initComplete: function () {
+				_self.select_row();
+			},
+		} // Datatable
+
+		this.select_row = function() {
+			oTable.columns('.auto_filter').every(function (index) {
+				datatable_set_auto_filter_column(this, null, false);
+			});
 
 			// Да маркираме като selected последно редактирания запис
-			initComplete: function () {
-				oTable.columns('.auto_filter').every(function (index) {
-					datatable_set_auto_filter_column(this, null, false);
-				});
-
-				var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
-				oTable.rows('#'+id).select();
-				oTable.row({ selected: true }).show().draw(false);
-			}
-		}); // Datatable
+			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
+			oTable.rows('#'+id).select();
+			oTable.row({ selected: true }).show().draw(false);
+		}
+		oTable = this.mainTable.DataTable(config);
 		datatable_add_btn_excel();
 
+		$('#submit_button', '#headerrow').click( function () {
+			oTable.ajax.reload( _self.select_row, false );
+		});
+
 		commonInitMFP();
-	}); // $(document).ready
+	} // InitTable
 
 	function fancyboxSaved() {
 		commonFancyboxSaved('/configuration/list_refresh/{$smarty.session.table_edit}/' + edit_id, edit_id);
@@ -75,6 +107,11 @@
 	function fancyboxDeleted() {
 		commonFancyboxDeleted();
 	}
-	
+
+	var vTable;
+	$(document).ready( function () {
+		vTable = new InitTable;
+	}); // $(document).ready
+
 </script>
 {/block}

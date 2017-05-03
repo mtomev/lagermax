@@ -88,6 +88,18 @@
 					"dataType": "json",
 					"cache": false,
 					success: function (result) {
+						//callback( result );
+
+						// result.data е масива с данни result.fields е масива с имената на полетата
+						var row = {};
+						for ( var i=0, len=result.data.length; i<len; i++ ) {
+							// За всеки ред се създава Object Json и с него се заменя стария ред
+							row = {};
+							for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
+								row[result.fields[j]] = result.data[i][j];
+							}
+							result.data[i] = row;
+						}
 						callback( result );
 					},
 					"error": function (xhr, error, thrown) {
@@ -107,7 +119,7 @@
 						}
 					}
 				});
-			},
+			}, // ajax
 			/* Това е алтернатива на горното, но горното е по-универсално
 			"ajax": {
 				url: '/aviso/get_list_aviso_detail',

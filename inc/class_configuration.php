@@ -84,6 +84,37 @@
 		}
 
 
+		private function ajax_list_new ($table, $order_by = '') {
+			$is_view = _base::is_view_exists($table);
+			//$data = $this->nomen_list($table, $is_view, $order_by);
+			if (!$order_by) 
+				$order_by = 'order by '.$table.'_id';
+			else
+			// Ако е подадено '-', значи никаква подредба
+			if ($order_by === '-') 
+				$order_by = '';
+			else
+				$order_by = 'order by '.$order_by;
+
+			if (!$is_view)
+				$sql_query = "select {$table}.* from {$table} $order_by";
+			else
+				$sql_query = "select * from view_{$table} $order_by";
+			$query_result = _base::get_query_result($sql_query);
+			$fields = _base::get_fields_name($query_result);
+			$fields[] = 'id';
+			$indexOfID = array_search($table.'_id', $fields);
+			while ($query_data = _base::sql_fetch_row($query_result, true)) {
+				$query_data[] = $query_data[$indexOfID];
+				$data[] = $query_data;
+			}
+			_base::sql_free_result($query_result);
+			$this->smarty->assign('data', json_encode($data));
+			_base::set_table_edit_AccessRights($table);
+			echo json_encode(array('data' => $data, 'fields' => $fields));
+		}
+
+
 		/*function mass_mailing () {
 			// Изпращане на мейли в групи от по 100
 			$sql_query = "SELECT user_id, user_email, user_full_name, org_id, org_name, user_name, user_password from view_user";
@@ -355,7 +386,7 @@
 		 	if (!_base::CheckAccess('org')) return;
 			// $order_by
 			$order_by = $_REQUEST['p1'];
-			$this->ajax_list('org', $order_by);
+			$this->ajax_list_new('org', $order_by);
 		}
 
 		function org_edit () {

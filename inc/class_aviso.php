@@ -263,19 +263,28 @@
 				$where";
 			$query_result = _base::get_query_result($sql_query);
 			$data = array();
-			try {
-				while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
-					$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
-				}
-			} catch(Exception $e) {
-				unset($data);
-				_base::show_sql_error($e->getMessage());
+			/*
+			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+				$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
 			}
+			*/
+			{
+				$fields = _base::get_fields_name($query_result);
+				$fields[] = 'id';
+				$indexOfID = array_search('aviso_id_id', $fields);
+				$indexOfID2 = array_search('aviso_line_id', $fields);
+				while ($query_data = _base::sql_fetch_row($query_result, true)) {
+					$query_data[] = $query_data[$indexOfID].'-'.$query_data[$indexOfID2];
+					$data[] = $query_data;
+				}
+			}
+
+			// Трети вариант е да се прави echo на части
+			
 			_base::sql_free_result($query_result);
-			//echo json_encode($data);
-			// Ако в aviso_detail.tpl се обработва през dataSrc, няма нужда да се прави с 'data' =>.
 			$_SESSION['memory_end1'] = memory_get_usage();
-			echo json_encode(array('data' => $data));
+			//echo json_encode(array('data' => $data));
+			echo json_encode(array('data' => $data, 'fields' => $fields));
 			$_SESSION['memory_end2'] = memory_get_usage();
 		}
 

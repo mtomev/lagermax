@@ -255,7 +255,7 @@
 
 			$query_result = _base::get_query_result($sql_query);
 			$temp[0] = '&nbsp;';
-			while ($query_data =  _base::sql_fetch_row($query_result, true)) {
+			while ($query_data =  _base::sql_fetch_row($query_result)) {
 				$temp[$query_data[0]] = $query_data[1];
 			}
 			_base::sql_free_result($query_result);
@@ -663,16 +663,22 @@
 			}
 
 			if ($row and $do_htmlspecialchars)
-				foreach($row as $key => $value)
+				foreach($row as $key => &$value) {
 					$row[$key] = htmlspecialchars($value);
+				}
 			return $row;
 		}
 
-		public static function sql_fetch_row($query_result) {
+		public static function sql_fetch_row($query_result, $do_htmlspecialchars = false) {
 			if (!DB_FIREBIRD)
-				$row = mysqli_fetch_array($query_result);
+				$row = mysqli_fetch_row($query_result);
 			else
 				$row = ibase_fetch_row($query_result, IBASE_FETCH_BLOBS);
+
+			if ($row and $do_htmlspecialchars)
+				foreach($row as $key => &$value) {
+					$row[$key] = htmlspecialchars($value);
+				}
 			return $row;
 		}
 

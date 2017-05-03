@@ -3,6 +3,11 @@
 <div id="main">
 	<div class="headerrow" id="headerrow">
 		{include file='configuration/btn_add.tpl'}
+		{if $smarty.session.userdata.user_id == '1'}
+		<span class="" style="padding-left: 10px;">
+			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
+		</span>
+		{/if}
 		{include file='main_menu/list_search.tpl'}
 		{*<button id="mass_mailing" class="submit_button" title="Масово изпращане на мейли до първите 100 потребителя, които имат въведен e-mail и до които още не са изпратени.&#013;Не пита, а направо изпраща.&#013;След като им ги изпрати, отбелязва в тези потребители че са им изпратени мейли."><span>Mass Mailing</span></button>*}
 	</div>
@@ -21,7 +26,6 @@
 			paging: true,
 			// 4 org_name, 1 user_name
 			order: [[4, 'asc'], [1, 'asc']],
-			//data: { },
 			ajax: {
 				url: '/configuration/user_ajax',
 				type: "POST",
@@ -119,6 +123,10 @@
 		oTable = this.mainTable.DataTable(config);
 		datatable_add_btn_excel();
 
+		$('#submit_button', '#headerrow').click( function () {
+			oTable.ajax.reload( _self.select_row, false );
+		});
+
 		commonInitMFP();
 	} // InitTable
 
@@ -134,9 +142,6 @@
 		vTable = new InitTable;
 	}); // $(document).ready
 
-	$('#submit_button', '#headerrow').click( function () {
-		oTable.ajax.reload( vTable.select_row, false );
-	});
 
 	{*
 	$('#mass_mailing').click(function () {
