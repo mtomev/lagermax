@@ -27,13 +27,19 @@
 					<div class="table-row">
 						<div class="table-cell-label">{#pltshop_refnumb#}</div>
 						<div class="table-cell">
-							<input class="text" type="text" value="{$data.pltshop_refnumb}">
+							<input class="text" type="text" name="pltshop_refnumb" value="{$data.pltshop_refnumb}">
 						</div>
 					</div>
 					<div class="table-row">
 						<div class="table-cell-label">{#pltshop_driver#}</div>
 						<div class="table-cell">
-							<input class="text" type="text" value="{$data.pltshop_driver}">
+							<input class="text" type="text" name="pltshop_driver" value="{$data.pltshop_driver}">
+						</div>
+					</div>
+					<div class="table-row">
+						<div class="table-cell-label"></div>
+						<div class="table-cell">
+							* Когато има въведени Рекламации, то {#pltshop_driver#} е задължително
 						</div>
 					</div>
 				</div>
@@ -125,6 +131,9 @@
 			<span>id:{$data.id}</span>
 			<button class="cancel_button" id="cancel_button_doc"><span>{#btn_Cancel#}</span></button>
 			<button class="save_button" id="print_button_doc" style="margin-left: 40px;"><span>{#btn_Print_ppp#}</span></button>
+		{if $data.allow_delete}
+			<button class="delete_button" id="delete_button_doc"><span>{#btn_Delete#}</span></button>
+		{/if}
 		</div>
 		{include file='main_menu/status_line.tpl'}
 	</div>
@@ -160,7 +169,16 @@
 
 	$('#save_button_doc', '#doc_edit').click (function () {
 		if (!EsCon.check_mandatory($('#doc_edit .mandatory'))) return false;
-
+		
+		// Когато има въведени Рекламации, то pltshop_driver е задължително
+		var has_claim = false;
+		$('input[name^="qty_claim"]', '#doc_edit').each( function() {
+			if (Number(EsCon.getParsedVal($(this))))
+				return (has_claim = true);
+		});
+		if (has_claim)
+			if (!checkRequired('#doc_edit input[name="pltshop_driver"]')) return false;
+		
 		waitingDialog();
 		$.ajax({
 			type: 'POST',
@@ -183,5 +201,12 @@
 	$('#cancel_button_doc', '#doc_edit').click (function () {
 		window.location.href = callback_url;
 	});
+	$('#delete_button_doc', '#doc_edit').click (function () {
+		fnDeleteDialog('/plt/pltshop_delete/{$data.id}', '{#table_pltshop#}', '#main', false);
+	});
+	function fancyboxDeleted() {
+		window.location.href = callback_url;
+	}
+
 </script>
 {/block}

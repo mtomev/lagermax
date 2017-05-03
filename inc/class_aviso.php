@@ -257,18 +257,26 @@
 			if ($_SESSION[$sub_menu]['where_add'])
 				$where .= $_SESSION[$sub_menu]['where_add'];
 
+			$_SESSION['memory_middle'] = memory_get_usage();
 			$sql_query = "select view_aviso_detail.*
 				from view_aviso_detail 
 				$where";
 			$query_result = _base::get_query_result($sql_query);
 			$data = array();
-			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
-				$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
+			try {
+				while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+					$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
+				}
+			} catch(Exception $e) {
+				unset($data);
+				_base::show_sql_error($e->getMessage());
 			}
 			_base::sql_free_result($query_result);
 			//echo json_encode($data);
 			// Ако в aviso_detail.tpl се обработва през dataSrc, няма нужда да се прави с 'data' =>.
+			$_SESSION['memory_end1'] = memory_get_usage();
 			echo json_encode(array('data' => $data));
+			$_SESSION['memory_end2'] = memory_get_usage();
 		}
 
 
@@ -539,7 +547,7 @@
 			// aviso_id
 			$id = intval($_REQUEST['p1']);
 
-			if ($_POST{'process'} == 'delete' && $id) {
+			if ($_POST['process'] == 'delete' && $id) {
 				// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
 				if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
 					$temp = _base::select_sql("select org_id from aviso WHERE aviso_id = $id");
@@ -554,6 +562,12 @@
 
 				$sql_query = "DELETE FROM aviso_line WHERE aviso_id = $id";
 				_base::execute_sql($sql_query);
+
+				// Изтриване и на свързания pltorg
+				if ($id) {
+					$sql_query = "DELETE FROM pltorg WHERE aviso_id = $id";
+					_base::execute_sql($sql_query);
+				}
 
 				_base::commit_transaction();
 
@@ -833,6 +847,12 @@
 			) {
 				$sql_query = "UPDATE aviso_line SET qty_pallet_rcvd = 0, qty_pack_rcvd = 0 WHERE aviso_id = $id";
 				_base::execute_sql($sql_query);
+
+				// Изтриване и на свързания pltorg
+				if ($id) {
+					$sql_query = "DELETE FROM pltorg WHERE aviso_id = $id";
+					_base::execute_sql($sql_query);
+				}
 			}
 
 			_base::commit_transaction();
@@ -990,6 +1010,11 @@
 			if ($aviso_status == '9' or $aviso_status <= '3') {
 				$sql_query = "UPDATE aviso_line SET qty_pallet_rcvd = 0, qty_pack_rcvd = 0 WHERE aviso_id = $id";
 				_base::execute_sql($sql_query);
+				// Изтриване и на свързания pltorg
+				if ($id) {
+					$sql_query = "DELETE FROM pltorg WHERE aviso_id = $id";
+					_base::execute_sql($sql_query);
+				}
 			} else {
 				$data_line = $_POST['data_line'];
 				if ($data_line) {
@@ -1012,43 +1037,44 @@
 				} // data_line
 			}
 			
-			// Обновяване на палетите в pltorg
-			$pltorg = _base::select_sql("select * from pltorg WHERE aviso_id = $id");
-			// Ако има разлика в което е да е количество
-			$a_fields = array('plt_eur','plt_chep','plt_other', 'ret_plt_eur','ret_plt_eur','ret_plt_eur', 'claim_plt_eur','claim_plt_eur','claim_plt_eur');
-			$has_difference = false;
-			for($i=0, $count=count($a_fields); $i < $count; $i++) {
-				if (intVal($_POST['aviso_'.$a_fields[$i]]) != intVal($pltorg['qty_'.$a_fields[$i]])) {
-					$has_difference = true;
-					break;
-				}
-			}
-			if ($has_difference) {
-				unset($query);
-				$query = new ExecQuery('pltorg', false);
-				$query->add_cr_mo = false;
-				
+			// Обновяване на палетите в pltorg, само ако е приключено Авизо
+			if ($aviso_status == '7') {
+				$pltorg = _base::select_sql("select * from pltorg WHERE aviso_id = $id");
+				// Ако има разлика в което е да е количество
+				$a_fields = array('plt_eur','plt_chep','plt_other', 'ret_plt_eur','ret_plt_eur','ret_plt_eur', 'claim_plt_eur','claim_plt_eur','claim_plt_eur');
+				$has_difference = false;
 				for($i=0, $count=count($a_fields); $i < $count; $i++) {
 					if (intVal($_POST['aviso_'.$a_fields[$i]]) != intVal($pltorg['qty_'.$a_fields[$i]])) {
-						$query->AddParamExt('qty_'.$a_fields[$i], $_POST['aviso_'.$a_fields[$i]], 'n', 0);
+						$has_difference = true;
+						break;
 					}
 				}
+				if ($has_difference) {
+					unset($query);
+					$query = new ExecQuery('pltorg', false);
+					$query->add_cr_mo = false;
+					
+					for($i=0, $count=count($a_fields); $i < $count; $i++) {
+						if (intVal($_POST['aviso_'.$a_fields[$i]]) != intVal($pltorg['qty_'.$a_fields[$i]])) {
+							$query->AddParamExt('qty_'.$a_fields[$i], $_POST['aviso_'.$a_fields[$i]], 'n', 0);
+						}
+					}
 
-				if ($pltorg['pltorg_id'])
-					$query->update(["aviso_id" => $id]);
-				else 
-				// Ако не е имало запис в pltorg
-				{
-					$temp = _base::select_sql("select aviso_date, org_id, aviso_driver_name from aviso WHERE aviso_id = $id");
-					$query->add_cr_mo = true;
-					$query->AddParamExt('aviso_id', $id, 'n', 0);
-					$query->AddParamExt('org_id', $temp['org_id'], 'n', 0);
-					$query->AddParamExt('pltorg_date', $temp['aviso_date'], 'd');
-					$query->AddParamExt('pltorg_driver', $temp['aviso_driver_name']);
-					$query->insert();
+					if ($pltorg['pltorg_id'])
+						$query->update(["aviso_id" => $id]);
+					else 
+					// Ако не е имало запис в pltorg
+					{
+						$temp = _base::select_sql("select aviso_date, org_id, aviso_driver_name from aviso WHERE aviso_id = $id");
+						$query->add_cr_mo = true;
+						$query->AddParamExt('aviso_id', $id, 'n', 0);
+						$query->AddParamExt('org_id', $temp['org_id'], 'n', 0);
+						$query->AddParamExt('pltorg_date', $temp['aviso_date'], 'd');
+						$query->AddParamExt('pltorg_driver', $temp['aviso_driver_name']);
+						$query->insert();
+					}
 				}
-			}
-			// end Обновяване на палетите в pltorg
+			}// end Обновяване на палетите в pltorg
 
 
 			_base::commit_transaction();

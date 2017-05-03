@@ -8,16 +8,24 @@
 			<div class="table-row">
 				<div class="table-cell-label">{#config_aviso_days_forecast#}</div>
 				<div class="table-cell">
-					<input id="config_aviso_days_forecast" class="number-small mandatory" data-type="Number0" type="text" name="config_aviso_days_forecast" value="{$data.config_aviso_days_forecast}">
+					<input class="number-small mandatory" data-type="Number0" type="text" name="config_aviso_days_forecast" value="{$data.config_aviso_days_forecast}">
 				</div>
 			</div>
 
 			<div class="table-row">
 				<div class="table-cell-label">{#config_aviso_until_time#}</div>
 				<div class="table-cell">
-					<input id="config_aviso_until_time" class="time mandatory" data-type="Time" type="text" name="config_aviso_until_time" value="{$data.config_aviso_until_time}">
+					<input class="time mandatory" data-type="Time" type="text" name="config_aviso_until_time" value="{$data.config_aviso_until_time}">
 				</div>
 			</div>
+
+			<div class="table-row">
+				<div class="table-cell-label">{#config_plt_balans_date#}</div>
+				<div class="table-cell">
+					<input class="date mandatory" data-type="Date" type="text" name="config_plt_balans_date" value="{$data.config_plt_balans_date}">
+				</div>
+			</div>
+
 		</div> {* div id="edit" *}
 
 		<div class="row-button">

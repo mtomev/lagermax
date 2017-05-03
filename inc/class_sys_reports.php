@@ -113,79 +113,12 @@
 			// $_POST съдържа следните параметри: from_date, to_date, user_id
 			// Ако е подаден $_REQUEST['p1'], то тогава се извиква от бутона Изпълни
 			
-			$_SESSION['main_menu'] = 'sys_reports';
-			$_SESSION['sub_menu'] = 'sys_logon';
-			_base::readFilterToSESSION_new('sys_logon');
-			$this->smarty->assign ('current_url', '/sys_reports/sys_logon');
-
-			if (!isset($_SESSION['sys_logon']['user_id']))
-				$_SESSION['sys_logon']['user_id'] = 0;
-
-			_base::get_select_list_sql('select user_id, coalesce(user_full_name, user_name) user_name from view_user order by 2', 'select_user');
-			
-			// Ако няма посочени дати
-			if (isset($_SESSION['sys_logon']['from_date']))
-				$from_date = _base::Str2MySqlDate($_SESSION['sys_logon']['from_date']);
-			else {
-				// Днешна дата - 7 дни
-				$from_date = date('Y-m-d', strtotime(gmdate("Y-m-d"). ' - 7 days'));
-				$_SESSION['sys_logon']['from_date'] = $from_date;
-			}
-			if (isset($_SESSION['sys_logon']['to_date']))
-				$to_date = _base::Str2MySqlDate($_SESSION['sys_logon']['to_date']);
-			else
-				$to_date = '';
-
-			$user_id = intVal($_SESSION['sys_logon']['user_id']);
-
-
-			if (isset($_REQUEST['p1'])) {
-				if ($to_date)
-					$to_date = date('Y-m-d', strtotime($to_date. ' + 1 day'));
-				$sql_query = "select sys_logon.*, coalesce(view_user.user_full_name, view_user.user_name) user_name
-					from sys_logon
-					left outer join view_user on view_user.user_id = sys_logon.logon_user_id
-					where (1=1)";
-				if ($user_id)
-					$sql_query .= " and sys_logon.logon_user_id = $user_id";
-				if ($from_date)
-					$sql_query .= " and sys_logon.logon_date >= '$from_date'";
-				if ($to_date)
-					$sql_query .= " and sys_logon.logon_date < '$to_date'";
-				$sql_query .= " order by logon_id desc";
-				$query_result = _base::get_query_result($sql_query);
-				while ($query_data = _base::sql_fetch_assoc($query_result)) {
-					$data[] = $query_data + array('id' => $query_data['logon_id']);
-				}
-				$fields = _base::get_fields_name($query_result);
-				_base::sql_free_result($query_result);
-				foreach($fields as $finfo)
-					$columns[] = array('title' => $finfo, 'name' => $finfo, 'data' => $finfo);
-			} else {
-				$data = array();
-				$columns = array();
-			}
-
-			$this->smarty->assign ('data', json_encode($data));
-			$this->smarty->assign ('columns', json_encode($columns));
-
-			_base::set_table_edit_AccessRights('sys_logon');
-			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
-		}
-
-
-		function sys_logon1 () {
-			if (!_base::CheckAccess('sys_logon')) return;
-
-			// $_POST съдържа следните параметри: from_date, to_date, user_id
-			// Ако е подаден $_REQUEST['p1'], то тогава се извиква от бутона Изпълни
-			
 			// Ако е инициализиране на справката
 			if (!$_REQUEST['p1']) {
 				$_SESSION['main_menu'] = 'sys_reports';
-				$_SESSION['sub_menu'] = 'sys_logon1';
+				$_SESSION['sub_menu'] = 'sys_logon';
 				_base::readFilterToSESSION_new('sys_logon');
-				$this->smarty->assign ('current_url', '/sys_reports/sys_logon1');
+				$this->smarty->assign ('current_url', '/sys_reports/sys_logon');
 
 				_base::get_select_list_sql('select user_id, coalesce(user_full_name, user_name) user_name from view_user order by 2', 'select_user');
 
@@ -257,7 +190,6 @@ while ($finfo = mysqli_fetch_field ($query_result))
 
 			echo json_encode($detail);
 		}
-
 
 	}
 ?>

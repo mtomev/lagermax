@@ -41,23 +41,30 @@
 		if(e.keyCode == 13) $('#submit_button', '#headerrow').trigger('click');
 	});
 
-	var data = {$data};
+	var columns = {$columns};
 
 	$(document).ready( function () {
+		// Добавяне на tfoot
+		var s = '';
+		for (var i = 1, len = columns.length; i <= len; i++) { s += '<td></td>'; }
+		s = '<tr>'+s+'</tr>';
+		$('#table_id').append('<tfoot>'+s+'</tfoot>');
+
 		$('#table_id').addClass(dataTable_default_class);
 		oTable = $('#table_id').DataTable( {
 			paging: true,
-			data: data,
-			columns: {$columns},
+			data: {},
+			columns: columns,
 
+			/*
 			initComplete: function () {
 				datatable_auto_filter(this.api());
 			}
+			*/
 
 		}); // Datatable
 		datatable_add_btn_excel();
 	}); // $(document).ready
-
 
 
 
@@ -69,9 +76,30 @@
 		params['to_date'] = EsCon.getParsedVal($('#to_date', '#headerrow'), false);
 
 		waitingDialog();
-		href_post(current_url+'/execute', params );
 
+		$.ajax({
+			url: '{$current_url}/search_button',
+			method: "POST",
+			//data: $('#headerrow').serialize(),
+			data: params,
+			success: function (data) {
+				try {
+					// parse и clear са бързи
+					data = JSON.parse(data);
+					oTable.clear().columns().search('');
+					closeWaitingDialog();
+					oTable.rows.add(data).draw();
+					datatable_auto_filter(oTable);
+				}
+				catch(err) {
+					closeWaitingDialog();
+					//fnShowErrorMessage('', err+'\n'+data);
+					fnShowErrorMessage('', err);
+				}
+			} // success
+		});
 		return false;
 	});
+
 </script>
 {/block}

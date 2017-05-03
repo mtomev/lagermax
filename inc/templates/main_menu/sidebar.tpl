@@ -26,6 +26,7 @@
 			</ul>
 			</li>
 
+			{*
 			<li>
 			{if $smarty.session.userdata.grants.plt == '1'}
 			<a main_menu="plt" href="#">{#menu_plt#}</a>
@@ -41,6 +42,14 @@
 				{/if}
 			</ul>
 			</li>
+			*}
+
+			{if $smarty.session.userdata.grants.pltorg == '1'}
+			<li><a main_menu="pltorg" href="/plt/pltorg">{#menu_pltorg#}</a></li>
+			{/if}
+			{if $smarty.session.userdata.grants.pltshop == '1'}
+			<li><a main_menu="pltshop" href="/plt/pltshop">{#menu_pltshop#}</a></li>
+			{/if}
 
 			{if $smarty.session.userdata.grants.reports == '1'}
 			<li><a main_menu="reports" href="/reports/timeslot">{#menu_reports#}</a></li>
@@ -100,9 +109,6 @@
 				{if $smarty.session.userdata.grants.sys_logon == '1'}
 				<li><a sub_menu="sys_logon" href="/sys_reports/sys_logon">{#table_sys_logon#}</a></li>
 				{/if}
-				{if $smarty.session.userdata.user_id == '1'}
-				<li><a sub_menu="sys_logon1" href="/sys_reports/sys_logon1">{#table_sys_logon#}</a></li>
-				{/if}
 			</ul>
 			</li>
 
@@ -120,8 +126,7 @@
 		<a rel="/configuration/user_profil_edit" onclick="showMFP(this.rel)" style="cursor: pointer;" title="{#edit_profil_title#}">{$smarty.session.userdata.user_name}</a>
 		</div>
 		{*if $smarty.session.userdata.user_id == '1'}
-		<br>{$smarty.session.table_edit}
-		<button id="temp_button" class="submit_button"><span>gen user passw</span></button>
+		<button id="temp_button" class="submit_button"><span>pltorg</span></button>
 		{/if*}
 	</div>
 
@@ -166,8 +171,9 @@
 		});
 	});
 
+	{*
 	$('#temp_button').click(function () {
-		waitingDialog('gen user passw -> ...');
+		waitingDialog('pltorg -> ...');
 		jQuery.post('/configuration/temp_update', {}, function (result) {
 			closeWaitingDialog();
 			if (result)
@@ -176,7 +182,9 @@
 				window.location.href = '/';
 		});
 	});
+	*}
 
+	{if $smarty.session.userdata.grants.aviso_reception == '1'}
 	$('#sidemenu #aviso_edit_receipt, #sidemenu #aviso_select_for_complete, #aviso_edit_receipt_button, #aviso_select_for_complete_button').on('click', function(event) {
 		event.preventDefault();
 		event.stopImmediatePropagation();
@@ -197,4 +205,5 @@
 		if (url === '') return;
 		showMFP(url, { }, '#aviso_id');
 	});
+	{/if}
 </script>

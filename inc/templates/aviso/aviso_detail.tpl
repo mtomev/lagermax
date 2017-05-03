@@ -95,12 +95,16 @@
 						if ( error == "parsererror" ) {
 							//fnShowErrorMessage('', 'Invalid JSON response');
 							fnShowErrorMessage('', xhr.responseText);
+							console.log('parsererror', xhr.responseText);
 						}
 						else if ( xhr.readyState === 4 ) {
 							fnShowErrorMessage('', 'Ajax error');
+							console.log('Ajax error', xhr.responseText);
 						}
-						else
+						else {
 							fnShowErrorMessage('', xhr.responseText);
+							console.log('error', thrown, xhr);
+						}
 					}
 				});
 			},

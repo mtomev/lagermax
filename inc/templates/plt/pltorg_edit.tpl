@@ -41,13 +41,13 @@
 					<div class="table-row">
 						<div class="table-cell-label">{#pltorg_refnumb#}</div>
 						<div class="table-cell">
-							<input class="text" type="text" value="{$data.pltorg_refnumb}">
+							<input class="text" type="text" name="pltorg_refnumb" value="{$data.pltorg_refnumb}">
 						</div>
 					</div>
 					<div class="table-row">
 						<div class="table-cell-label">{#pltorg_driver#}</div>
 						<div class="table-cell">
-							<input class="text" type="text" value="{$data.pltorg_driver}">
+							<input class="text" type="text" name="pltorg_driver" value="{$data.pltorg_driver}">
 						</div>
 					</div>
 				</div>
@@ -139,6 +139,9 @@
 			<span>id:{$data.id}</span>
 			<button class="cancel_button" id="cancel_button_doc"><span>{#btn_Cancel#}</span></button>
 			<button class="save_button" id="print_button_doc" style="margin-left: 40px;"><span>{#btn_Print_ppp#}</span></button>
+		{if $data.allow_delete}
+			<button class="delete_button" id="delete_button_doc"><span>{#btn_Delete#}</span></button>
+		{/if}
 		</div>
 		{include file='main_menu/status_line.tpl'}
 	</div>
@@ -197,5 +200,12 @@
 	$('#cancel_button_doc', '#doc_edit').click (function () {
 		window.location.href = callback_url;
 	});
+	$('#delete_button_doc', '#doc_edit').click (function () {
+		fnDeleteDialog('/plt/pltorg_delete/{$data.id}', '{#table_pltorg#}', '#main', false);
+	});
+	function fancyboxDeleted() {
+		window.location.href = callback_url;
+	}
+
 </script>
 {/block}

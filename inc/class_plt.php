@@ -87,7 +87,7 @@
 		function pltorg () {
 		 	if (!_base::CheckAccess('pltorg')) return;
 
-			$_SESSION['main_menu'] = 'plt';
+			$_SESSION['main_menu'] = 'pltorg';
 			$_SESSION['sub_menu'] = 'pltorg';
 			$sub_menu = $_SESSION['sub_menu'];
 			_base::readFilterToSESSION_new($sub_menu);
@@ -304,7 +304,7 @@
 		function pltshop () {
 		 	if (!_base::CheckAccess('pltshop')) return;
 
-			$_SESSION['main_menu'] = 'plt';
+			$_SESSION['main_menu'] = 'pltshop';
 			$_SESSION['sub_menu'] = 'pltshop';
 			$sub_menu = $_SESSION['sub_menu'];
 			_base::readFilterToSESSION_new($sub_menu);

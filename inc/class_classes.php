@@ -463,6 +463,7 @@
 
 			_base::rollback_transaction();
 			_base::commitReadTr();
+			_base::log_in_file($message);
 			exit;
 		}
 		public static function show_sql_error($message = 'Error') {
@@ -484,7 +485,7 @@
 
 			_base::rollback_transaction();
 			_base::commitReadTr();
-//_base::log_in_file('startReadTr');
+			_base::log_in_file($message, false);
 			exit;
 		}
 
@@ -505,7 +506,7 @@
 				} else {
 					self::$ReadTr = ibase_trans(IBASE_READ | IBASE_COMMITTED | IBASE_REC_VERSION | IBASE_NOWAIT, self::$dbMain);
 				}
-				_base::log_in_file('startReadTr ' . self::$ReadTr);
+				//_base::log_in_file('startReadTr ' . self::$ReadTr);
 			}
 		}
 		public static function commitReadTr() {
@@ -516,12 +517,12 @@
 					ibase_commit(self::$ReadTr);
 				}
 				self::$ReadTr = false;
-				_base::log_in_file('commitReadTr');
+				//_base::log_in_file('commitReadTr');
 			}
 		}
 
 		public static function start_transaction() {
-			_base::log_in_file('start_transaction '.self::$transaction_count);
+			//_base::log_in_file('start_transaction '.self::$transaction_count);
 			// Ако няма реално стартирана WriteTr, то я стартираме, иначе само увеличаваме брояча
 			if (self::$transaction_count > 0)
 				self::$transaction_count++;
@@ -538,11 +539,11 @@
 					self::$WriteTr = ibase_trans(IBASE_WRITE | IBASE_COMMITTED | IBASE_REC_VERSION | IBASE_NOWAIT, self::$dbMain);
 				}
 				self::$transaction_count++;
-				_base::log_in_file('real start '.self::$transaction_count, false);
+				//_base::log_in_file('real start '.self::$transaction_count, false);
 			}
 		}
 		public static function commit_transaction() {
-			_base::log_in_file('commit_transaction '.self::$transaction_count);
+			//_base::log_in_file('commit_transaction '.self::$transaction_count);
 			if (self::$transaction_count > 1)
 				self::$transaction_count--;
 			else
@@ -556,11 +557,11 @@
 				}
 				self::$WriteTr = false;
 				self::$transaction_count--;
-				_base::log_in_file('real commit '.self::$transaction_count, false);
+				//_base::log_in_file('real commit '.self::$transaction_count, false);
 			}
 		}
 		public static function rollback_transaction() {
-			_base::log_in_file('rollback_transaction '.self::$transaction_count);
+			//_base::log_in_file('rollback_transaction '.self::$transaction_count);
 			if (self::$transaction_count > 0) {
 				if (!DB_FIREBIRD) {
 					mysqli_rollback(self::$mysqli);
@@ -571,7 +572,7 @@
 				}
 				self::$WriteTr = false;
 				self::$transaction_count--;
-				_base::log_in_file('real rollback '.self::$transaction_count, false);
+				//_base::log_in_file('real rollback '.self::$transaction_count, false);
 			}
 		}
 
@@ -644,9 +645,11 @@
 		}
 
 		public static function sql_fetch_assoc($query_result, $do_htmlspecialchars = false) {
-			if (!DB_FIREBIRD)
+			if (!DB_FIREBIRD) {
 				$row = mysqli_fetch_assoc($query_result);
-			else {
+			}
+			else 
+			{
 				try {
 					$_row = ibase_fetch_assoc($query_result, IBASE_FETCH_BLOBS);
 				} catch(Exception $e) {
@@ -658,6 +661,7 @@
 				} else
 					$row = false;
 			}
+
 			if ($row and $do_htmlspecialchars)
 				foreach($row as $key => $value)
 					$row[$key] = htmlspecialchars($value);
@@ -893,6 +897,7 @@
 		}
 
 		public static function finish_db_connection() {
+			/*
 			if (self::$WriteTr)
 				_base::log_in_file('finish WriteTr', false);
 			if (self::$transaction_count > 0)
@@ -900,12 +905,15 @@
 			_base::rollback_transaction();
 			_base::commitReadTr();
 			_base::log_in_file('==============', false);
+			*/
 		}
 		public static function log_in_file($message, $inclide_trace = true) {
-			return;
-			file_put_contents($_SERVER['DOCUMENT_ROOT'].'/tr.log', $message . PHP_EOL, FILE_APPEND);
+			$prefix = '=========================================' . PHP_EOL;
+			// [2017-05-03 09:52:07] IP user_id org_name
+			$prefix .=  '['.date("Y-m-d H:i:s").'] ' . $_SERVER['REMOTE_ADDR'] . ' user_id:' . $_SESSION['userdata']['user_id'] . $_SESSION['userdata']['org_name'] . PHP_EOL;
+			file_put_contents(FILE_NAME_ERROR, $prefix . $message . PHP_EOL, FILE_APPEND);
 			if ($inclide_trace)
-				file_put_contents($_SERVER['DOCUMENT_ROOT'].'/tr.log', _base::get_trace(1), FILE_APPEND);
+				file_put_contents(FILE_NAME_ERROR, _base::get_trace(1), FILE_APPEND);
 		}
 	} // class _base
 

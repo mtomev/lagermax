@@ -40,7 +40,17 @@
 
 		function list_refresh () {
 			$table = $_REQUEST['p1'];
-			// broker/r_temp_id=<id>
+			$grant = $table.'_edit';
+			if ($table == 'user_role')
+				$grant = 'user_edit';
+			if ($table == 'aviso')
+				$grant = 'aviso';
+		 	if (!_base::CheckGrant($grant)) {
+				echo json_encode(array());
+				return;
+			}
+
+			// table_name/r_temp_id=<id>
 			if (_base::parseREQUEST_p('p2', $param_name, $param_value)) {
 				$field_id = $param_name;
 				$id = $param_value;
@@ -56,6 +66,14 @@
 
 			$is_view = _base::is_view_exists($table);
 			$data = _base::nomen_list_refresh($table, $is_view, $id, $field_id);
+			if ($table == 'aviso') {
+				// Проверки за неправомерност
+				// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
+				if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
+					echo json_encode(array());
+					return;
+				}
+			}
 			echo json_encode($data);
 		}
 
@@ -66,7 +84,7 @@
 		}
 
 
-		function mass_mailing () {
+		/*function mass_mailing () {
 			// Изпращане на мейли в групи от по 100
 			$sql_query = "SELECT user_id, user_email, user_full_name, org_id, org_name, user_name, user_password from view_user";
       $sql_query .= PHP_EOL . "where is_active = '1' and user_email is not null and user_email <> '' and email_sended <> '1'";
@@ -107,7 +125,64 @@
 				}
 				_base::commit_transaction();
 			}
-		}
+		}*/
+
+
+		/*function temp_update () {
+			$sql_query = "SELECT aviso.*, pltorg.pltorg_id from aviso";
+      $sql_query .= PHP_EOL . "left outer join pltorg on pltorg.aviso_id = aviso.aviso_id";
+      $sql_query .= PHP_EOL . "where aviso.aviso_status = '7'";
+      $sql_query .= PHP_EOL . "order by aviso.aviso_id";
+			$query_result = _base::get_query_result($sql_query);
+			while ($query_data = _base::sql_fetch_assoc($query_result))
+				$temp[] = $query_data;
+			_base::sql_free_result($query_result);
+
+			$a_fields = array('plt_eur','plt_chep','plt_other', 'ret_plt_eur','ret_plt_eur','ret_plt_eur', 'claim_plt_eur','claim_plt_eur','claim_plt_eur');
+
+			if ($temp) {
+				_base::start_transaction();
+				foreach($temp as $aviso) {
+					$has_difference = false;
+					for($i=0, $count=count($a_fields); $i < $count; $i++) {
+						if ( intVal($aviso['aviso_'.$a_fields[$i]]) ) {
+							$has_difference = true;
+							break;
+						}
+					}
+					if ($has_difference) {
+						$query = new ExecQuery('pltorg', false);
+						$query->add_cr_mo = false;
+						
+						for($i=0, $count=count($a_fields); $i < $count; $i++) {
+							if ( intVal($aviso['aviso_'.$a_fields[$i]]) ) {
+								$query->AddParamExt('qty_'.$a_fields[$i], $aviso['aviso_'.$a_fields[$i]], 'n', 0);
+							}
+						}
+
+						if ($aviso['pltorg_id'])
+							$query->update(["aviso_id" => $aviso['aviso_id']]);
+						else 
+						// Ако не е имало запис в pltorg
+						{
+							$query->AddParamExt('aviso_id', $aviso['aviso_id'], 'n', 0);
+							$query->AddParamExt('org_id', $aviso['org_id'], 'n', 0);
+							$query->AddParamExt('pltorg_date', $aviso['aviso_date'], 'd');
+							$query->AddParamExt('pltorg_driver', $aviso['aviso_driver_name']);
+
+							$query->AddParamExt('cr_user_id', $aviso['cr_user_id'], 'n', 0);
+							$query->AddParamExt('mo_user_id', $aviso['mo_user_id'], 'n', 0);
+							$query->AddParamExt('cr_date', $aviso['cr_date'], 'd');
+							$query->AddParamExt('mo_date', $aviso['mo_date'], 'd');
+
+							$query->insert();
+						}
+						unset($query);
+					}
+				}
+				_base::commit_transaction();
+			}
+		}*/
 
 
 		function warehouse () {
@@ -521,7 +596,6 @@
 			_base::get_select_list('w_group');
 
 			$data = _base::nomen_list_edit('user', $id, true);
-			$data['user_name'] = htmlspecialchars($data['user_name']);
 			$this->smarty->assign ('data', $data);
 
 			_base::get_select_list('warehouse', null, null, 'where w_group_id = '.intVal($data['w_group_id']));
@@ -542,7 +616,6 @@
 			_base::get_select_list('w_group');
 
 			$data = _base::nomen_list_edit('user', $id, true);
-			$data['user_name'] = htmlspecialchars($data['user_name']);
 			$data['allow_edit'] = true;
 			$data['allow_delete'] = false;
 			$this->smarty->assign ('data', $data);
@@ -788,7 +861,7 @@
 		}
 
 
-		function config () {
+		/*function config () {
 		 	if (!_base::CheckAccess('config')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'config';
@@ -845,7 +918,7 @@
 				unset($_SESSION['config_id']);
 				_base::put_sys_oper(__METHOD__, 'delete', $_SESSION['table_edit'], $id);
 			}
-		}
+		}*/
 
 
 		function calendar () {

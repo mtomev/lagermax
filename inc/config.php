@@ -6,9 +6,7 @@
 
 	define ('SID', session_id ());
 
-	// $_SERVER['DOCUMENT_ROOT']
 	define ('INC_DIR', dirname (__FILE__));
-	//define ('INC_DIR', $_SERVER['DOCUMENT_ROOT'] . '/../inc');
 
 	// Директория, в която се записват прикачените документи
 	define ('UPLOADS_DIR', INC_DIR . '/../uploads');
@@ -25,4 +23,5 @@
 	define ('THUMB_IMG_WIDTH', 100);
 	define ('THUMB_IMG_HEIGHT', 65);
 
+	define ('FILE_NAME_ERROR', rtrim($_SERVER['DOCUMENT_ROOT'], '/ ') . '/error.log');
 ?>

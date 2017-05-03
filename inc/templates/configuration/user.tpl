@@ -138,6 +138,7 @@
 		oTable.ajax.reload( vTable.select_row, false );
 	});
 
+	{*
 	$('#mass_mailing').click(function () {
 		waitingDialog('Mass Mailing -> ...');
 		jQuery.post('/configuration/mass_mailing', {}, function (result) {
@@ -148,5 +149,6 @@
 				location.reload();
 		});
 	});
+	*}
 </script>
 {/block}

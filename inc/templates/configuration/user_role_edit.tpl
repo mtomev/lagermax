@@ -66,6 +66,7 @@
 				</div>
 			</div>
 
+			{*
 			<div class="table-row">
 				<div class="table-cell-label"><b>{#menu_plt#}</b></div>
 				<div class="table-cell">
@@ -73,8 +74,9 @@
 					<span>&nbsp;&nbsp;</span>
 				</div>
 			</div>
+			*}
 			<div class="table-row">
-				<div class="table-cell-label">{#menu_pltorg#}</b></div>
+				<div class="table-cell-label"><b>{#menu_pltorg#}</b></div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="pltorg" {if $data.grants["pltorg"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
@@ -87,7 +89,7 @@
 				</div>
 			</div>
 			<div class="table-row">
-				<div class="table-cell-label">{#menu_pltshop#}</b></div>
+				<div class="table-cell-label"><b>{#menu_pltshop#}</b></div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="pltshop" {if $data.grants["pltshop"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>

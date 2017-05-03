@@ -117,7 +117,7 @@
 						if (type !== 'display') return data;
 						var status = aviso_status(data, type);
 						if (data == 0) {
-							/*{if $smarty.session.userdata.grants.aviso_reception == '1'}*/
+							/*{if $smarty.session.userdata.grants.aviso_reception_edit == '1' || $smarty.session.userdata.grants.aviso_reception_view == '1'}*/
 							return '<a href="javascript:;" url="/aviso/aviso_edit_receipt/'+row.aviso_id+'" class="aviso_edit_receipt" title="{#menu_aviso_reception#}">'+displayDIV100(status)+'</a>';
 							/*{else}*/
 							return displayDIV100(status);
