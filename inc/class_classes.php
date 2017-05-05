@@ -157,9 +157,50 @@
 			return $data;
 		}
 
-		public static function nomen_list_json($table, $is_view = false, $order_by = null, $where = null, $field_id = null) {
-			$data = _base::nomen_list($table, $is_view, $order_by, $where, $field_id);
-			return json_encode($data, JSON_UNESCAPED_UNICODE);
+		public static function echo_nomen_list_partial($table, $is_view = false, $order_by = null, $where = null, $field_id = null) {
+			if (!$order_by) 
+				$order_by = 'order by '.$table.'_id';
+			else
+			// Ако е подадено '-', значи никаква подредба
+			if ($order_by === '-') 
+				$order_by = '';
+			else
+				$order_by = 'order by '.$order_by;
+			if (!$where) $where = '';
+			if (!$field_id) $field_id = $table.'_id';
+			
+			if (!$is_view)
+				$sql_query = "select * from {$table} $where $order_by";
+			else
+				$sql_query = "select * from view_{$table} $where $order_by";
+
+			$time = -microtime(true);
+			$query_result = _base::get_query_result($sql_query);
+
+			$fields = _base::get_fields_name($query_result);
+			$fields[] = 'id';
+			$indexOfID = array_search($field_id, $fields);
+			echo '{'. 
+				substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1)
+				.',"data":[';
+
+			$data = array();
+			$first_echo = true;
+			while ($query_data = _base::sql_fetch_row($query_result, false)) {
+				$query_data[] = $query_data[$indexOfID];
+				$data[] = $query_data;
+				if (count($data) >= 100) {
+					echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+					$data = array();
+					$first_echo = false;
+				}
+			}
+			_base::sql_free_result($query_result);
+			$time += microtime(true);
+			if (count($data)) {
+				echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+			}
+			echo '],'. substr(json_encode(array('execution_time' => number_format($time*1000,3)), JSON_UNESCAPED_UNICODE),1,-1) . '}';
 		}
 
 		public static function nomen_list_edit($table, $id, $is_view = false, $field_id = null, $add_select = null, $do_htmlspecialchars = true) {

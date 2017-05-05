@@ -43,7 +43,6 @@
 					console.log(err);
 					return;
 				}
-				closeWaitingDialog();
 				if (result) {
 					// object[warehouse_code][working_day][timeslot] = { cnt_aviso, qty_pallet, qty_pack, weight, volume, qty_pallet_calc }
 					var html = '';
@@ -91,6 +90,7 @@
 					$('#timeslots').html(html);
 				} else
 					$('#timeslots').html('');
+				closeWaitingDialog();
 			} // success
 		});
 	} // localLoadData

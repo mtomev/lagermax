@@ -58,6 +58,7 @@
 			// pltshop_date, id
 			order: [[2, 'asc'], [0, 'asc']],
 			"ajax": function (data, callback, settings) {
+				waitingDialog();
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
@@ -67,6 +68,18 @@
 					"dataType": "json",
 					"cache": false,
 					success: function (result) {
+						if (result.hasOwnProperty('fields')) {
+							// result.data е масива с данни result.fields е масива с имената на полетата
+							var row = {};
+							for ( var i=0, len=result.data.length; i<len; i++ ) {
+								// За всеки ред се създава Object Json и с него се заменя стария ред
+								row = {};
+								for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
+									row[result.fields[j]] = result.data[i][j];
+								}
+								result.data[i] = row;
+							}
+						}
 						callback( result );
 					},
 					"error": function (xhr, error, thrown) {
@@ -152,14 +165,18 @@
 			// Заради Иконата за Upload
 			$("#table_id tbody").on("click", 'input, select, a', function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-				oTable.rows().deselect();
+				oTable.rows({ selected: true }).deselect();
 			});
 
-		}
+			closeWaitingDialog();
+		} // select_row
 
 		this.LoadData = function(resetPaging) {
-			oTable.rows({ selected: true }).deselect();
-			oTable.ajax.reload( _self.select_row, resetPaging );
+			waitingDialog();
+			setTimeout(function() {
+				oTable.rows({ selected: true }).deselect();
+				oTable.ajax.reload( _self.select_row, resetPaging );
+			}, 10);
 		}
 
 		// Добавяне на tfoot

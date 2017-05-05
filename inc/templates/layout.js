@@ -41,8 +41,9 @@
 		"language": {
 			"loadingRecords": "Loading...",
 			"processing": "Processing...",
+			"lengthMenu": "Display _MENU_ records",
 		},
-
+		
 		rowId: 'id',
 		/*
 		"createdRow": function( row, data, dataIndex ) {
@@ -70,7 +71,11 @@
 		if (new_row_index === undefined)
 			return this;
 		// Row position
-		var row_position = this.table().rows()[0].indexOf( new_row_index );
+//var temp_start = Date.now();
+		// Това е доста бавна операция
+		//var row_position = this.table().rows()[0].indexOf( new_row_index );
+		var row_position = this.table().rows().indexes().indexOf( new_row_index );
+//console.log('row().show() row_position '+(Date.now() - temp_start));
 		// Already on right page ?
 		if( row_position >= page_info.start && row_position < page_info.end ) {
 			// Return row object
@@ -101,7 +106,7 @@
 	var is_edit_child = false;
 
 	function selectClickedRow(el) {
-		oTable.rows().deselect();
+		oTable.rows({ selected: true }).deselect();
 		var edit_tr = $(el).parents("tr");
 		oTable.row(edit_tr).select();
 		edit_row = oTable.row(edit_tr);
@@ -167,7 +172,7 @@
 						edit_row.data(data);
 					else
 						edit_row = oTable.row.add(data);
-					oTable.rows().deselect();
+					oTable.rows({ selected: true }).deselect();
 					edit_row.select();
 					edit_row.draw().show().draw(false);
 					if (typeof callbackSuccess == 'function') callbackSuccess(edit_row);
@@ -297,6 +302,22 @@
 		firstDay: 1
 	});
 
+
+	var entityMap = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#39;',
+		'/': '&#x2F;',
+		'`': '&#x60;',
+		'=': '&#x3D;'
+	};
+	function escapeHtml (string) {
+		return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+			return entityMap[s];
+		});
+	}
 
 	function checkRequired(a, field_caption, data_type) {
 		// Ако не съществува selector a, излизаме
@@ -452,7 +473,7 @@
 		return false;
 	}
 	function fnShowErrorMessage(title, message, fnCallBack, object) {
-		// 06.03.2016 - С тази функция да се замени prepend, когато има грешка при PHP операция
+		closeWaitingDialog();
 		title = title || '{#title_error#}';
 		$('<div style="text-overflow: clip; overflow: hidden; {*word-break: break-all;*} white-space: pre-line;" />')
 			.html(message)
@@ -489,6 +510,7 @@
 		return false;
 	}
 	function fnShowInfoMessage(title, message, fnCallBack, object) {
+		closeWaitingDialog();
 		title = title || 'Info';
 		// За Информативни съобщения
 		$('<div style="text-overflow: clip; overflow: hidden; word-break: break-all; white-space: pre-line;" />')
@@ -767,7 +789,7 @@
 					d = "(empty)";
 					html = '<option value="'+d+'">'+d+'</option>' + html;
 				} else
-					html += '<option value="'+d+'">'+d+'</option>';
+					html += '<option value="'+escapeHtml(d)+'">'+d+'</option>';
 			});
 			html = '<option value="(not empty)">(not empty)</option>' + html;
 			html = '<option value="">&nbsp;</option>' + html;
@@ -799,22 +821,22 @@
 		var html = '';
 		if (typeof(add_not_empty)==='undefined') add_not_empty = true;
 		col.data().unique().sort().each( function ( d, j ) {
-				if (!d) {
-					d = "(empty)";
-					html = '<option value="'+d+'">'+d+'</option>' + html;
-				} else {
-					html += '<option value="'+d+'">';
-					if (typeof(render)=='function')
-						html += render(d);
-					else
-						html += d;
-					html += '</option>';
-				}
-			});
-			if (add_not_empty)
-				html = '<option value="(not empty)">(not empty)</option>' + html;
-			html = '<option value="">&nbsp;</option>' + html;
-			html = '<select style="margin-top: 5px;">' + html + '</select>';
+			if (!d) {
+				d = "(empty)";
+				html = '<option value="'+d+'">'+d+'</option>' + html;
+			} else {
+				html += '<option value="'+escapeHtml(d)+'">';
+				if (typeof(render)=='function')
+					html += render(d);
+				else
+					html += d;
+				html += '</option>';
+			}
+		});
+		if (add_not_empty)
+			html = '<option value="(not empty)">(not empty)</option>' + html;
+		html = '<option value="">&nbsp;</option>' + html;
+		html = '<select style="margin-top: 5px;">' + html + '</select>';
 
 		$(html).appendTo( $(col.header()) )
 		.on( 'click', function (event) {
@@ -933,13 +955,15 @@
 
 	function waitingDialog(message) {
 		if (typeof(message)==='undefined') message = '...';
-		$("body #loadingScreen #message").html(message);
-		$("body #loadingScreen-overlay").show();
-		$("body #loadingScreen").show();
+		//$("body > #loadingScreen-overlay").show();
+		$("body > #loadingScreen-overlay").css( 'display', 'block');
+		$("body > #loadingScreen #message").html(message);
+		$("body > #loadingScreen").css( 'display', 'block');
 	}
 	function closeWaitingDialog() {
-		$("body #loadingScreen").hide();
-		$("body #loadingScreen-overlay").hide();
+		//$("body > #loadingScreen").hide();
+		$("body > #loadingScreen").css( 'display', 'none');
+		$("body > #loadingScreen-overlay").css( 'display', 'none');
 	}
 
 	function sendEmail(data, type, row) {

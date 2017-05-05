@@ -7,9 +7,11 @@
 	$(document).ready( function () {
 		//$("#searchbox").bind("keyup search input paste cut", function(event) {
 		$("#searchbox").on("keyup", function(event) {
-			if (event.keyCode == 13)
+			if (event.keyCode == 13) {
 				// Да е с параметър true (по подразбиране), за да опресни и номерата на страниците
-				oTable.search(this.value).draw();
+				// search( input [, regex[ , smart[ , caseInsen ]]] )
+				oTable.search($(this).val(), false, false).draw();
+			}
 		});
 		$("#searchbox_clear").on("click", function(event) {
 			$("#searchbox").val('');

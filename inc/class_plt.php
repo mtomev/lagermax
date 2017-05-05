@@ -134,9 +134,11 @@
 			if ($to_date)
 				$where .= " and pltorg_date <= '$to_date'";
 
+			/*
 			$data = _base::nomen_list('pltorg', true, 'pltorg_id', $where);
-
 			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
+			*/
+			_base::echo_nomen_list_partial('pltorg', true, 'pltorg_id', $where);
 		}
 
 		function pltorg_edit () {
@@ -339,9 +341,11 @@
 			if ($to_date)
 				$where .= " and pltshop_date <= '$to_date'";
 
+			/*
 			$data = _base::nomen_list('pltshop', true, 'pltshop_id', $where);
-
 			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
+			*/
+			_base::echo_nomen_list_partial('pltshop', true, 'pltshop_id', $where);
 		}
 
 		function pltshop_edit () {

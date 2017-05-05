@@ -60,6 +60,7 @@
 			// aviso_date, aviso_time
 			order: [[3, 'asc'], [4, 'asc']],
 			"ajax": function (data, callback, settings) {
+				waitingDialog();
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
@@ -69,6 +70,18 @@
 					"dataType": "json",
 					"cache": false,
 					success: function (result) {
+						if (result.hasOwnProperty('fields')) {
+							// result.data е масива с данни result.fields е масива с имената на полетата
+							var row = {};
+							for ( var i=0, len=result.data.length; i<len; i++ ) {
+								// За всеки ред се създава Object Json и с него се заменя стария ред
+								row = {};
+								for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
+									row[result.fields[j]] = result.data[i][j];
+								}
+								result.data[i] = row;
+							}
+						}
 						callback( result );
 					},
 					"error": function (xhr, error, thrown) {
@@ -191,23 +204,14 @@
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 //var local_start = Date.now();
 			oTable.rows('#'+id).select().draw(false);
-			// Те това е бавното - .draw(false) !!!
+			// Те това е бавното - .show() !!!
 			oTable.row({ selected: true }).show().draw(false);
-			/*
-			oTable.rows().every( function () {
-				var row = this;
-				if (row.data().id == id) {
-					row.select().show().draw(false);
-					return false;
-				}
-			});
-			*/
 //console.log('oTable.rows().every '+(Date.now() - local_start));
 
 			// Заради Иконата за Upload
 			$("#table_id tbody").on("click", 'input, select, a', function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-				oTable.rows().deselect();
+				oTable.rows({ selected: true }).deselect();
 			});
 
 			$("#table_id tbody").on('click', 'a.aviso_edit_receipt', function(event) {
@@ -230,11 +234,16 @@
 				if (url === '') return;
 				showMFP(url, { }, '#aviso_id');
 			});
-		}
+
+			closeWaitingDialog();
+		} // select_row
 
 		this.LoadData = function(resetPaging) {
-			oTable.rows({ selected: true }).deselect();
-			oTable.ajax.reload( _self.select_row, resetPaging );
+			waitingDialog();
+			setTimeout(function() {
+				oTable.rows({ selected: true }).deselect();
+				oTable.ajax.reload( _self.select_row, resetPaging );
+			}, 10);
 		}
 
 		// Добавяне на tfoot

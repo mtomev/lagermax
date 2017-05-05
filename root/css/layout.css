@@ -652,6 +652,7 @@ table.dataTable tbody td.no-padding {
 }
 .dataTables_wrapper .dataTables_paginate {
 	float: left;
+	margin-left: 20px;
 }
 
 /* За да търси картинките в моята images папка */

@@ -149,7 +149,7 @@
 
 		$('#table_org_metro tbody').on("click", "input, select, textarea", function(event) {
 			// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-			_self.oTableLine.rows().deselect();
+			_self.oTableLine.rows({ selected: true }).deselect();
 		});
 
 		$('#table_org_metro tfoot').on('click', '#org_metro_btn_addLine', function () {
@@ -162,7 +162,7 @@
 			data.real_id = 0;
 			_self.data_line.push(data);
 			var edit_row = _self.oTableLine.row.add( data )
-			_self.oTableLine.rows().deselect();
+			_self.oTableLine.rows({ selected: true }).deselect();
 			edit_row.draw().select();
 			_self.localAfterRowAppend(edit_row);
 			
@@ -184,12 +184,12 @@
 			if (!edit_row)
 				$('#table_org_metro tbody tr').on("click", "td input, td select, td textarea", function() {
 					// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-					_self.oTableLine.rows().deselect();
+					_self.oTableLine.rows({ selected: true }).deselect();
 				});
 			else
 				$(element).on("click", "td input, td select, td textarea", function() {
 					// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-					_self.oTableLine.rows().deselect();
+					_self.oTableLine.rows({ selected: true }).deselect();
 				});
 
 		} // localAfterRowAppend
@@ -200,7 +200,7 @@
 			var row = _self.oTableLine.row($(this).parents("tr"));
 			// Ако текущия ред не е selected
 			if (!$(row).hasClass('selected')) {
-				_self.oTableLine.rows().deselect();
+				_self.oTableLine.rows({ selected: true }).deselect();
 				_self.oTableLine.row(row).select();
 			}
 			fnModalDialog('{#Confirm#}', '{#btn_removeLine#}', 

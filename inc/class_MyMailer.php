@@ -2,6 +2,7 @@
 	require_once(COMPS_DIR.'/PHPMailer/PHPMailerAutoload.php');
 
 	class MyMailer extends PHPMailer {
+		public static $forbidden = true;
     // Set default variables for all new objects
     public $FromName = "Метро платформа Лагермакс";
     public $Mailer   = "smtp";

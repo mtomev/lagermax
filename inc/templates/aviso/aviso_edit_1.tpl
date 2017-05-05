@@ -325,7 +325,7 @@
 				
 				_self.data_line.push(data);
 				var edit_row = _self.oTableLine.row.add( data )
-				_self.oTableLine.rows().deselect();
+				_self.oTableLine.rows({ selected: true }).deselect();
 				edit_row.draw().select();
 				
 				return false;
@@ -339,14 +339,14 @@
 
 			$('#table_line tbody').on("click", "input, select, textarea", function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-				_self.oTableLine.rows().deselect();
+				_self.oTableLine.rows({ selected: true }).deselect();
 			});
 
 			$('#table_line tbody', '#aviso_edit').on('click', '.delete-line', function () {
 				var row = _self.oTableLine.row($(this).parents("tr"));
 				// Ако текущия ред не е selected
 				if (!$(row).hasClass('selected')) {
-					_self.oTableLine.rows().deselect();
+					_self.oTableLine.rows({ selected: true }).deselect();
 					_self.oTableLine.row(row).select();
 				}
 				fnModalDialog('{#Confirm#}', '{#btn_removeLine#}', 

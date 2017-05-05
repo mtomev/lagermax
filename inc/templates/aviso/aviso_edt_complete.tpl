@@ -311,7 +311,7 @@
 		this.TableFinit = function() {
 			$('#table_line tbody').on("click", "input, select, textarea, button", function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-				_self.oTableLine.rows().deselect();
+				_self.oTableLine.rows({ selected: true }).deselect();
 			});
 
 			// Запис на въведената стойност в масива

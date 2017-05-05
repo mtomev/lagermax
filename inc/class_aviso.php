@@ -86,7 +86,7 @@
 			$this->aviso();
 		}
 
-		function aviso ($where_add = '') {
+		function aviso () {
 		 	if (!_base::CheckAccess('aviso')) return;
 
 			$_SESSION['main_menu'] = 'aviso';
@@ -94,9 +94,6 @@
 			$sub_menu = $_SESSION['sub_menu'];
 			_base::readFilterToSESSION_new($sub_menu);
 			$this->smarty->assign ('current_url', '/aviso/aviso');
-
-			// Запомням в $_SESSION where_add
-			$_SESSION[$sub_menu]['where_add'] = $where_add;
 
 			if (!isset($_SESSION[$sub_menu]['org_id']))
 				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
@@ -122,9 +119,7 @@
 			_base::get_select_list('org', null, 'org_name');
 
 			_base::set_table_edit_AccessRights('aviso');
-			// Ако е подадено $where_add, то от съответната функция ще се запише в базата
-			if (!$where_add)
-				_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
+			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 
 		// Тази функция се вика само като ajax
@@ -151,13 +146,13 @@
 			if ($to_date)
 				$where .= " and aviso_date <= '$to_date'";
 
-			// Ако е извикано от подменютата за Инвестиционни или Оперативни разходи
-			if ($_SESSION[$sub_menu]['where_add'])
-				$where .= $_SESSION[$sub_menu]['where_add'];
-
 			//$data = _base::nomen_list('aviso', true, 'aviso_id', $where);
 			$sql_query = "select * from view_aviso $where order by aviso_id";
+
+			$time = -microtime(true);
 			$query_result = _base::get_query_result($sql_query);
+
+			/*
 			$data = array();
 			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
 				// 7-приключено
@@ -169,12 +164,43 @@
 				$data[] = $query_data + array('id' => $query_data['aviso_id']);
 			}
 			_base::sql_free_result($query_result);
-
 			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
+			*/
+
+			$fields = _base::get_fields_name($query_result);
+			$fields[] = 'id';
+			$indexOfID = array_search('aviso_id', $fields);
+			echo '{'. 
+				substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1)
+				.',"data":[';
+
+			$data = array();
+			$first_echo = true;
+			while ($query_data = _base::sql_fetch_row($query_result, false)) {
+				$query_data[] = $query_data[$indexOfID];
+				// 7-приключено
+				if ($query_data['aviso_status'] == '7') {
+					$query_data['qty_pallet'] = $query_data['qty_pallet_rcvd'];
+					$query_data['qty_pack'] = $query_data['qty_pack_rcvd'];
+					$query_data['qty_pallet_calc'] = $query_data['qty_pallet_rcvd_calc'];
+				}
+				$data[] = $query_data;
+				if (count($data) >= 100) {
+					echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+					$data = array();
+					$first_echo = false;
+				}
+			}
+			_base::sql_free_result($query_result);
+			$time += microtime(true);
+			if (count($data)) {
+				echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+			}
+			echo '],'. substr(json_encode(array('execution_time' => number_format($time*1000,3)), JSON_UNESCAPED_UNICODE),1,-1) . '}';
 		}
 
 
-		function aviso_detail ($where_add = '') {
+		function aviso_detail () {
 		 	if (!_base::CheckAccess('aviso_detail')) return;
 
 			$_SESSION['main_menu'] = 'aviso';
@@ -182,9 +208,6 @@
 			$sub_menu = $_SESSION['sub_menu'];
 			_base::readFilterToSESSION_new($sub_menu);
 			$this->smarty->assign ('current_url', '/aviso/aviso_detail');
-
-			// Запомням в $_SESSION where_add
-			$_SESSION[$sub_menu]['where_add'] = $where_add;
 
 			if (!isset($_SESSION[$sub_menu]['org_id']))
 				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
@@ -214,9 +237,7 @@
 			_base::get_select_aviso_status();
 
 			_base::set_table_edit_AccessRights('aviso');
-			// Ако е подадено $where_add, то от съответната функция ще се запише в базата
-			if (!$where_add)
-				_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
+			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 
 		// Тази функция се вика само като ajax
@@ -253,26 +274,28 @@
 					$where .= " and (aviso_status in ('3','7'))";
 			}
 
-			// Ако е извикано от подменютата за Инвестиционни или Оперативни разходи
-			if ($_SESSION[$sub_menu]['where_add'])
-				$where .= $_SESSION[$sub_menu]['where_add'];
-
-			$_SESSION['memory_middle'] = memory_get_usage();
+			$_SESSION['memory_middle'] = number_format(memory_get_usage(), 0, '.',' ');
 			$sql_query = "select view_aviso_detail.*
 				from view_aviso_detail 
 				$where";
 			$query_result = _base::get_query_result($sql_query);
 			$data = array();
+			$time = -microtime(true);
 
 			/*
-			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
-				$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
+			// Вариант с assoc array
+			{
+				while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+					$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
+				}
+				_base::sql_free_result($query_result);
+				$time += microtime(true);
+				echo json_encode(array('execution_time' => $time*1000, 'data' => $data), JSON_UNESCAPED_UNICODE);
 			}
-			_base::sql_free_result($query_result);
-			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 			*/
 
 			/*
+			// Вариант с два масива - отделно имената на полетата и данните без имена на полетата
 			{
 				$fields = _base::get_fields_name($query_result);
 				$fields[] = 'id';
@@ -282,32 +305,46 @@
 					$query_data[] = $query_data[$indexOfID].'-'.$query_data[$indexOfID2];
 					$data[] = $query_data;
 				}
+				_base::sql_free_result($query_result);
+				$_SESSION['memory_end1'] = number_format(memory_get_usage(), 0, '.',' ');
+				echo json_encode(array('data' => $data, 'fields' => $fields), JSON_UNESCAPED_UNICODE);
+				$_SESSION['memory_end2'] = number_format(memory_get_usage(), 0, '.',' ');
 			}
-			_base::sql_free_result($query_result);
-			$_SESSION['memory_end1'] = memory_get_usage();
-			echo json_encode(array('data' => $data, 'fields' => $fields), JSON_UNESCAPED_UNICODE);
-			$_SESSION['memory_end2'] = memory_get_usage();
 			*/
 
 			// Трети вариант е да се прави echo на части
+			// - с два масива - отделно имената на полетата и данните без имена на полетата
 			{
 				$fields = _base::get_fields_name($query_result);
 				$fields[] = 'id';
-				$indexOfID = array_search('aviso_id_id', $fields);
+				$indexOfID = array_search('aviso_id', $fields);
 				$indexOfID2 = array_search('aviso_line_id', $fields);
+				echo '{'. 
+					substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1)
+					.',"data":[';
+
+				$data = array();
+				$first_echo = true;
 				while ($query_data = _base::sql_fetch_row($query_result, false)) {
 					$query_data[] = $query_data[$indexOfID].'-'.$query_data[$indexOfID2];
 					$data[] = $query_data;
+					if (count($data) >= 100) {
+						echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+						$data = array();
+						$first_echo = false;
+					}
 				}
+				_base::sql_free_result($query_result);
+				$time += microtime(true);
+				$_SESSION['memory_end1'] = number_format(memory_get_usage(), 0, '.',' ');
+				if (count($data)) {
+					echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+				}
+				echo '],'. substr(json_encode(array('execution_time' => number_format($time*1000,3)), JSON_UNESCAPED_UNICODE),1,-1) . '}';
+				$_SESSION['memory_end2'] = number_format(memory_get_usage(), 0, '.',' ');
 			}
-			_base::sql_free_result($query_result);
-			$_SESSION['memory_end1'] = memory_get_usage();
-			echo '{'. substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1) .','. substr(json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE),1,-1) . '}';
-			//echo json_encode(array('fields' => $fields, 'data' => $data), JSON_UNESCAPED_UNICODE);
-			$_SESSION['memory_end2'] = memory_get_usage();
 
-
-		}
+		} //get_list_aviso_detail
 
 
 		function aviso_select_warehouse () {

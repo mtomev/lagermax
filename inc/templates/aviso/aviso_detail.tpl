@@ -79,6 +79,7 @@
 			order: [[1, 'asc'], [2, 'asc'], [3, 'asc'], [0, 'asc'], [4, 'asc']],
 
 			"ajax": function (data, callback, settings) {
+				waitingDialog();
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
@@ -88,22 +89,26 @@
 					"dataType": "json",
 					"cache": false,
 					success: function (result) {
-						//callback( result );
-
-						// result.data е масива с данни result.fields е масива с имената на полетата
-						var row = {};
-						for ( var i=0, len=result.data.length; i<len; i++ ) {
-							// За всеки ред се създава Object Json и с него се заменя стария ред
-							row = {};
-							for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
-								row[result.fields[j]] = result.data[i][j];
+//console.log(result.execution_time);
+						if (result.hasOwnProperty('fields')) {
+//var local_start = Date.now();
+							// result.data е масива с данни result.fields е масива с имената на полетата
+							var row = {};
+							for ( var i=0, len=result.data.length; i<len; i++ ) {
+								// За всеки ред се създава Object Json и с него се заменя стария ред
+								row = {};
+								for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
+									row[result.fields[j]] = result.data[i][j];
+								}
+								result.data[i] = row;
 							}
-							result.data[i] = row;
+//console.log('JSON parse '+(Date.now() - local_start));
 						}
 						callback( result );
 					},
 					"error": function (xhr, error, thrown) {
 						api.clear().columns().search('').draw();
+						closeWaitingDialog();
 						if ( error == "parsererror" ) {
 							//fnShowErrorMessage('', 'Invalid JSON response');
 							fnShowErrorMessage('', xhr.responseText);
@@ -215,8 +220,8 @@
 			datatable_auto_filter_column(oTable, 'aviso_status', aviso_status, false);
 
 			// Да маркираме като selected последно редактирания запис
-			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 //var local_start = Date.now();
+			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 			// По oTable.data()
 			var data = oTable.data();
 			var ids = [];
@@ -225,7 +230,7 @@
 					ids.push('#'+data[i].aviso_id+'-'+data[i].aviso_line_id);
 			}
 			oTable.rows(ids).select();
-			// Те това е бавното - .draw(false) !!!
+			// Те това е бавното - .show() !!!
 			//oTable.row({ selected: true }).show().draw(false);
 //console.log('oTable.rows().every '+(Date.now() - local_start));
 
@@ -233,7 +238,7 @@
 			// Заради Иконата за Upload
 			$("#table_id tbody").on("click", 'input, select, a', function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-				oTable.rows().deselect();
+				oTable.rows({ selected: true }).deselect();
 			});
 
 			// Скриване на колоната warehouse_code, ако е избран warehouse_id
@@ -247,11 +252,16 @@
 			} else {
 				oTable.column('aviso_date:name').visible(true);
 			}
-		}
+
+			closeWaitingDialog();
+		} // select_row
 
 		this.LoadData = function(resetPaging) {
-			oTable.rows().deselect();
-			oTable.ajax.reload( _self.select_row, resetPaging );
+			waitingDialog();
+			setTimeout(function() {
+				oTable.rows({ selected: true }).deselect();
+				oTable.ajax.reload( _self.select_row, resetPaging );
+			}, 10);
 		}
 
 		// Добавяне на tfoot
