@@ -138,7 +138,7 @@
 		{/if}
 			<span>id:{$data.id}</span>
 			<button class="cancel_button" id="cancel_button_doc"><span>{#btn_Cancel#}</span></button>
-			<button class="save_button" id="print_button_doc" style="margin-left: 40px;"><span>{#btn_Print_ppp#}</span></button>
+			{*<button class="save_button" id="print_button_doc" style="margin-left: 40px;"><span>{#btn_Print_ppp#}</span></button>*}
 		{if $data.allow_delete}
 			<button class="delete_button" id="delete_button_doc"><span>{#btn_Delete#}</span></button>
 		{/if}

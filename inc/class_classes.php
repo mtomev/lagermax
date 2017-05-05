@@ -159,7 +159,7 @@
 
 		public static function nomen_list_json($table, $is_view = false, $order_by = null, $where = null, $field_id = null) {
 			$data = _base::nomen_list($table, $is_view, $order_by, $where, $field_id);
-			return json_encode($data);
+			return json_encode($data, JSON_UNESCAPED_UNICODE);
 		}
 
 		public static function nomen_list_edit($table, $id, $is_view = false, $field_id = null, $add_select = null, $do_htmlspecialchars = true) {

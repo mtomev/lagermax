@@ -33,7 +33,7 @@
 				$data[] = $query_data + array('id' => $query_data[$table.'_id']);
 			}
 			_base::sql_free_result($query_result);
-			$this->smarty->assign('data', json_encode($data));
+			$this->smarty->assign('data', json_encode($data, JSON_UNESCAPED_UNICODE));
 			_base::set_table_edit_AccessRights($table);
 			return $data;
 		}
@@ -46,7 +46,7 @@
 			if ($table == 'aviso')
 				$grant = 'aviso';
 		 	if (!_base::CheckGrant($grant)) {
-				echo json_encode(array());
+				echo json_encode(array(), JSON_UNESCAPED_UNICODE);
 				return;
 			}
 
@@ -70,17 +70,17 @@
 				// Проверки за неправомерност
 				// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
 				if (!$_SESSION['userdata']['grants']['view_all_suppliers'] and $_SESSION['userdata']['org_id']) {
-					echo json_encode(array());
+					echo json_encode(array(), JSON_UNESCAPED_UNICODE);
 					return;
 				}
 			}
-			echo json_encode($data);
+			echo json_encode($data, JSON_UNESCAPED_UNICODE);
 		}
 
 		private function ajax_list ($table, $order_by = '') {
 			$is_view = _base::is_view_exists($table);
 			$data = $this->nomen_list($table, $is_view, $order_by);
-			echo json_encode(array('data' => $data));
+			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 		}
 
 
@@ -109,9 +109,9 @@
 				$data[] = $query_data;
 			}
 			_base::sql_free_result($query_result);
-			$this->smarty->assign('data', json_encode($data));
+			$this->smarty->assign('data', json_encode($data), JSON_UNESCAPED_UNICODE);
 			_base::set_table_edit_AccessRights($table);
-			echo json_encode(array('data' => $data, 'fields' => $fields));
+			echo json_encode(array('data' => $data, 'fields' => $fields), JSON_UNESCAPED_UNICODE);
 		}
 
 
@@ -407,7 +407,7 @@
 			while ($query_data = _base::sql_fetch_assoc($query_result))
 				$data_line[] = $query_data + array('id' => $query_data['org_metro_id'], 'real_id' => $query_data['org_metro_id']);
 			_base::sql_free_result($query_result);
-			$this->smarty->assign ('data_line', json_encode($data_line));
+			$this->smarty->assign ('data_line', json_encode($data_line, JSON_UNESCAPED_UNICODE));
 
 			// Един празен ред като Object ( JSON )
 			$query_result = _base::get_query_result("select * from org_metro where 1=0");
@@ -415,7 +415,7 @@
 			// Добавяне на ширините на текстовите полета
 			_base::sql_add_field_width($query_result, $empty_line);
 			_base::sql_free_result($query_result);
-			$this->smarty->assign ('empty_line', json_encode($empty_line));
+			$this->smarty->assign ('empty_line', json_encode($empty_line, JSON_UNESCAPED_UNICODE));
 
 			_base::put_sys_oper(__METHOD__, 'edit', $_SESSION['table_edit'], $id);
 		}

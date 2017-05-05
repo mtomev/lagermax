@@ -100,8 +100,8 @@
 				$columns = array();
 			}
 
-			$this->smarty->assign ('data', json_encode($data));
-			$this->smarty->assign ('columns', json_encode($columns));
+			$this->smarty->assign ('data', json_encode($data, JSON_UNESCAPED_UNICODE));
+			$this->smarty->assign ('columns', json_encode($columns, JSON_UNESCAPED_UNICODE));
 
 			_base::set_table_edit_AccessRights('sys_oper');
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
@@ -142,7 +142,7 @@ while ($finfo = mysqli_fetch_field ($query_result))
 				_base::sql_free_result($query_result);
 				foreach($fields as $finfo)
 					$columns[] = array('title' => $finfo, 'name' => $finfo, 'data' => $finfo);
-				$this->smarty->assign ('columns', json_encode($columns));
+				$this->smarty->assign ('columns', json_encode($columns, JSON_UNESCAPED_UNICODE));
 
 				_base::set_table_edit_AccessRights('sys_logon');
 				_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
@@ -188,7 +188,7 @@ while ($finfo = mysqli_fetch_field ($query_result))
 			}
 			_base::sql_free_result($query_result);
 
-			echo json_encode($detail);
+			echo json_encode($detail, JSON_UNESCAPED_UNICODE);
 		}
 
 	}

@@ -260,7 +260,6 @@
 					fnShowErrorMessage('', '{#access_denied#}');
 					return false;
 				}
-//console.log(html);
 				if (html.substr(0, 5) == 'Error') {
 					fnShowErrorMessage('', html);
 					return false;
@@ -400,7 +399,6 @@
 					$(this).dialog('destroy');
 				},
 				create: function (event, ui) {
-					//console.log($(this));
 					$(this).closest(".ui-dialog").removeClass('ui-corner-all')
 						.find(".ui-corner-all").removeClass('ui-corner-all').end()
 						.find(".ui-dialog-buttonpane button").removeClass('ui-button ui-widget ui-state-default ui-state-active ui-state-focus')
@@ -443,7 +441,6 @@
 					$(this).dialog('destroy');
 				},
 				create: function (event, ui) {
-					//console.log($(this));
 					$(this).closest(".ui-dialog").removeClass('ui-corner-all')
 						.find(".ui-corner-all").removeClass('ui-corner-all').end()
 						.find(".ui-dialog-buttonpane button").removeClass('ui-button ui-widget ui-state-default ui-state-active ui-state-focus')
@@ -480,7 +477,6 @@
 					$(this).dialog('destroy');
 				},
 				create: function (event, ui) {
-					//console.log($(this));
 					$(this).closest(".ui-dialog").removeClass('ui-corner-all')
 						.find(".ui-corner-all").removeClass('ui-corner-all').end()
 						.find(".ui-dialog-buttonpane button").removeClass('ui-button ui-widget ui-state-default ui-state-active ui-state-focus')
@@ -518,7 +514,6 @@
 					$(this).dialog('destroy');
 				},
 				create: function (event, ui) {
-					//console.log($(this));
 					$(this).closest(".ui-dialog").removeClass('ui-corner-all')
 						.find(".ui-corner-all").removeClass('ui-corner-all').end()
 						.find(".ui-dialog-buttonpane button").removeClass('ui-button ui-widget ui-state-default ui-state-active ui-state-focus')

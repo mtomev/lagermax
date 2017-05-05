@@ -65,7 +65,7 @@
 				}
 
 //print nl2br2 (print_r($this->working_days, true) . PHP_EOL);
-			echo json_encode($data);
+			echo json_encode($data, JSON_UNESCAPED_UNICODE);
 		}
 
 

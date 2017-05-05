@@ -105,12 +105,14 @@
 				{ title: "{#qty_claim_plt_chep#}", data: 'qty_claim_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#qty_claim_plt_other#}", data: 'qty_claim_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 
+				{*
 				// Линк към PDF
 				{ title: "{#scan_doc#}", data: 'scan_doc', className: "dt-center td-no-padding", 
 					render: function ( data, type, row ) {
 						return displayDocUpload( data, '/plt/pltorg_display/'+row.pltorg_id );
 					}
 				},
+				*}
 
 				{ title: "{#aviso_id#}", data: 'aviso_id', className: "dt-right", render: EsCon.formatIntegerHideZero },
 

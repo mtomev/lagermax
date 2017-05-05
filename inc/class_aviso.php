@@ -170,7 +170,7 @@
 			}
 			_base::sql_free_result($query_result);
 
-			echo json_encode(array('data' => $data));
+			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 		}
 
 
@@ -263,11 +263,16 @@
 				$where";
 			$query_result = _base::get_query_result($sql_query);
 			$data = array();
+
 			/*
 			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
 				$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
 			}
+			_base::sql_free_result($query_result);
+			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 			*/
+
+			/*
 			{
 				$fields = _base::get_fields_name($query_result);
 				$fields[] = 'id';
@@ -278,14 +283,30 @@
 					$data[] = $query_data;
 				}
 			}
-
-			// Трети вариант е да се прави echo на части
-			
 			_base::sql_free_result($query_result);
 			$_SESSION['memory_end1'] = memory_get_usage();
-			//echo json_encode(array('data' => $data));
-			echo json_encode(array('data' => $data, 'fields' => $fields));
+			echo json_encode(array('data' => $data, 'fields' => $fields), JSON_UNESCAPED_UNICODE);
 			$_SESSION['memory_end2'] = memory_get_usage();
+			*/
+
+			// Трети вариант е да се прави echo на части
+			{
+				$fields = _base::get_fields_name($query_result);
+				$fields[] = 'id';
+				$indexOfID = array_search('aviso_id_id', $fields);
+				$indexOfID2 = array_search('aviso_line_id', $fields);
+				while ($query_data = _base::sql_fetch_row($query_result, false)) {
+					$query_data[] = $query_data[$indexOfID].'-'.$query_data[$indexOfID2];
+					$data[] = $query_data;
+				}
+			}
+			_base::sql_free_result($query_result);
+			$_SESSION['memory_end1'] = memory_get_usage();
+			echo '{'. substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1) .','. substr(json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE),1,-1) . '}';
+			//echo json_encode(array('fields' => $fields, 'data' => $data), JSON_UNESCAPED_UNICODE);
+			$_SESSION['memory_end2'] = memory_get_usage();
+
+
 		}
 
 
@@ -319,7 +340,7 @@
 				$where = '';
 			$data = _base::get_select_list_ajax('warehouse', $field_name, $where, $field_name);
 
-			echo json_encode($data);
+			echo json_encode($data, JSON_UNESCAPED_UNICODE);
 		}
 
 
@@ -401,7 +422,7 @@
 					$max_line_id = $query_data['aviso_line_id'];
 			}
 			_base::sql_free_result($query_result);
-			$this->smarty->assign ('data_line', json_encode($data_line));
+			$this->smarty->assign ('data_line', json_encode($data_line, JSON_UNESCAPED_UNICODE));
 			$this->smarty->assign ('max_line_id', $max_line_id);
 
 			// Един празен ред като Object ( JSON )
@@ -410,7 +431,7 @@
 
 			_base::sql_add_field_width($query_result, $empty_line);
 			_base::sql_free_result($query_result);
-			$this->smarty->assign('empty_line', json_encode($empty_line));
+			$this->smarty->assign('empty_line', json_encode($empty_line, JSON_UNESCAPED_UNICODE));
 
 
 
@@ -418,11 +439,10 @@
 
 			_base::get_select_list('org', null, 'org_name');
 			// Списъка от Метро кодовете на този Контрагент
-			//$this->smarty->assign('select_org_metro', json_encode(_base::get_select_org_metro(intVal($data['org_id']))));
-			$this->smarty->assign('select_org_metro', json_encode(_base::get_select_list_ajax('org_metro', 'org_metro_code', 'where org_id = '.intVal($data['org_id']), 'org_metro_code', 'org_metro_code')));
+			$this->smarty->assign('select_org_metro', json_encode(_base::get_select_list_ajax('org_metro', 'org_metro_code', 'where org_id = '.intVal($data['org_id']), 'org_metro_code', 'org_metro_code'), JSON_UNESCAPED_UNICODE));
 
 			// get_select_list_ajax($table, $order_by = null, $where = null, $field_name = null, $field_id = null, $add_select = null)
-			$this->smarty->assign('select_shop', json_encode(_base::get_select_list_ajax('shop', 'shop_name', "where is_active = '1'", 'shop_name')));
+			$this->smarty->assign('select_shop', json_encode(_base::get_select_list_ajax('shop', 'shop_name', "where is_active = '1'", 'shop_name'), JSON_UNESCAPED_UNICODE));
 
 			$this->smarty->assign ('callback_url', "$_SERVER[HTTP_REFERER]");
 			
@@ -676,7 +696,7 @@
 
 			$select_aviso_time = $this->free_timeslot($_POST);
 
-			echo json_encode($select_aviso_time);
+			echo json_encode($select_aviso_time, JSON_UNESCAPED_UNICODE);
 		}
 
 
@@ -945,7 +965,7 @@
 				$data_line[] = $query_data + array('id' => $query_data['aviso_line_id']);
 			}
 			_base::sql_free_result($query_result);
-			$this->smarty->assign ('data_line', json_encode($data_line));
+			$this->smarty->assign ('data_line', json_encode($data_line, JSON_UNESCAPED_UNICODE));
 
 			//_base::sql_add_field_width($query_result, $empty_line);
 

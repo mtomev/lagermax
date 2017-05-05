@@ -136,7 +136,7 @@
 
 			$data = _base::nomen_list('pltorg', true, 'pltorg_id', $where);
 
-			echo json_encode(array('data' => $data));
+			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 		}
 
 		function pltorg_edit () {
@@ -341,7 +341,7 @@
 
 			$data = _base::nomen_list('pltshop', true, 'pltshop_id', $where);
 
-			echo json_encode(array('data' => $data));
+			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 		}
 
 		function pltshop_edit () {
@@ -434,7 +434,7 @@
 
 
 		// Генериране на ПРИЕМНО - ПРЕДАВАТЕЛЕН ПРОТОКОЛ
-		function pltorg_display () {
+		/*function pltorg_display () {
 			if (!_base::CheckGrant('pltorg_view'))
 				if (!_base::CheckAccess('pltorg_edit')) return;
 			// pltorg_id
@@ -617,7 +617,7 @@ return ;
 			// D - download
 			$pdf->Output('I', $aviso['ppp_doc']);
 			_base::put_sys_oper(__METHOD__, 'pdf', 'aviso', $aviso_id);
-		}
+		}*/
 
 	}
 ?>
