@@ -7,12 +7,6 @@
 
 		function __destruct () {}
 
-		function deflt () {
-		 	if (!_base::CheckAccess('configuration')) return;
-			$_SESSION['main_menu'] = 'configuration';
-			$_SESSION['sub_menu'] = '';
-		}
-
 		private function nomen_list($table, $is_view = false, $order_by = null) {
 			// Прави стандартно попълване на $data за <table>_list
 			if (!$order_by) 
@@ -29,7 +23,7 @@
 			else
 				$sql_query = "select * from view_{$table} $order_by";
 			$query_result = _base::get_query_result($sql_query);
-			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+			while ($query_data = _base::sql_fetch_assoc($query_result)) {
 				$data[] = $query_data + array('id' => $query_data[$table.'_id']);
 			}
 			_base::sql_free_result($query_result);
@@ -104,7 +98,7 @@
 			$fields = _base::get_fields_name($query_result);
 			$fields[] = 'id';
 			$indexOfID = array_search($table.'_id', $fields);
-			while ($query_data = _base::sql_fetch_row($query_result, true)) {
+			while ($query_data = _base::sql_fetch_row($query_result)) {
 				$query_data[] = $query_data[$indexOfID];
 				$data[] = $query_data;
 			}
@@ -385,7 +379,8 @@
 		function org_ajax () {
 		 	if (!_base::CheckAccess('org')) return;
 			// $order_by
-			$order_by = $_REQUEST['p1'];
+			//$order_by = $_REQUEST['p1'];
+			$order_by = 'org_name';
 			$this->ajax_list_new('org', $order_by);
 		}
 
@@ -611,7 +606,8 @@
 		function user_ajax () {
 		 	if (!_base::CheckAccess('user')) return;
 			// $order_by
-			$order_by = $_REQUEST['p1'];
+			//$order_by = $_REQUEST['p1'];
+			$order_by = 'org_name,user_name';
 			$this->ajax_list('user', $order_by);
 		}
 
@@ -748,6 +744,9 @@
 			if (!$_POST['user_name']) return true;
 
 			$org_id = intVal($_POST['org_id']);
+			// Ако потребителя няма право да вижда всички Доставчици
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers'])
+				$org_id = intVal($_SESSION['userdata']['org_id']);
 			$user_name = _base::escape_string($_POST['user_name']);
 
 			$sql_query = "SELECT user_id

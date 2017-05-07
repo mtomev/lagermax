@@ -3,7 +3,7 @@
 	{if $data.id > 0}{#Edit#}{else}{#Add#}{/if} {#table_user_role#}
 	</div>
 
-	<div id="edit" class="nomedit-edit">
+	<div id="edit" class="nomedit-edit table-row-hover">
 		<div class="table-row">
 			<div class="table-cell-label">{#name#}</div>
 			<div class="table-cell">
@@ -18,8 +18,12 @@
 		<hr>
 
 		<div class="" id="gratns_flags">
+		{* menu_aviso *}
+			<div class="">
+				<b>{#menu_aviso#}</b>
+			</div>
 			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_aviso#}</b></div>
+				<div class="table-cell-label">{#menu_aviso#}</b></div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="aviso" {if $data.grants["aviso"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
@@ -53,7 +57,7 @@
 			</div>
 
 			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_aviso_reception#}</b></div>
+				<div class="table-cell-label">{#menu_aviso_reception#}</b></div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="aviso_reception" {if $data.grants["aviso_reception"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
@@ -65,18 +69,15 @@
 					<span>&nbsp;&nbsp;</span>
 				</div>
 			</div>
+		{* end menu_aviso *}
 
-			{*
-			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_plt#}</b></div>
-				<div class="table-cell">
-					<input type="checkbox" value="1" rel="plt" {if $data.grants["plt"] == '1'}checked{/if}> {#view_menu#}
-					<span>&nbsp;&nbsp;</span>
-				</div>
+		{* menu_plt *}
+			<hr>
+			<div class="table-cell">
+				<b>{#menu_plt#}</b>
 			</div>
-			*}
 			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_pltorg#}</b></div>
+				<div class="table-cell-label">{#menu_pltorg#}</b></div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="pltorg" {if $data.grants["pltorg"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
@@ -89,7 +90,7 @@
 				</div>
 			</div>
 			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_pltshop#}</b></div>
+				<div class="table-cell-label">{#menu_pltshop#}</b></div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="pltshop" {if $data.grants["pltshop"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
@@ -101,24 +102,35 @@
 					<span>&nbsp;&nbsp;</span>
 				</div>
 			</div>
+		{* end menu_plt *}
+
+		{* menu_reports *}
+			<hr>
+			<div class="">
+				<b>{#menu_reports#}</b>
+			</div>
 
 			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_reports#}</b></div>
+				<div class="table-cell-label">{#menu_rep_timeslot#}</b></div>
 				<div class="table-cell">
-					<input type="checkbox" value="1" rel="reports" {if $data.grants["reports"] == '1'}checked{/if}> {#view_menu#}
+					<input type="checkbox" value="1" rel="rep_timeslot" {if $data.grants["rep_timeslot"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
 				</div>
 			</div>
 
-
-	{* menu_configuration *}
-			<br>
 			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_configuration#}</b></div>
+				<div class="table-cell-label">{#menu_rep_timeslot_shop#}</b></div>
 				<div class="table-cell">
-					<input type="checkbox" value="1" rel="configuration" {if $data.grants["configuration"] == '1'}checked{/if}> {#view_menu#}
+					<input type="checkbox" value="1" rel="rep_timeslot_shop" {if $data.grants["rep_timeslot_shop"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
 				</div>
+			</div>
+		{* end menu_reports *}
+
+		{* menu_configuration *}
+			<hr>
+			<div class="">
+				<b>{#menu_configuration#}</b>	
 			</div>
 
 			<div class="table-row">
@@ -228,11 +240,15 @@
 					<span>&nbsp;&nbsp;</span>
 				</div>
 			</div>
-	{* end menu_configuration *}
+		{* end menu_configuration *}
 
-			<br>
+		{* menu_sys_reports *}
+			<hr>
+			<div class="table-cell">
+				<b>{#menu_sys_reports#}</b>
+			</div>
 			<div class="table-row">
-				<div class="table-cell-label"><b>{#menu_sys_reports#}</b></div>
+				<div class="table-cell-label">{#menu_sys_reports#}</div>
 				<div class="table-cell">
 					<input type="checkbox" value="1" rel="sys_reports" {if $data.grants["sys_reports"] == '1'}checked{/if}> {#view_menu#}
 					<span>&nbsp;&nbsp;</span>
@@ -252,11 +268,12 @@
 					<span>&nbsp;&nbsp;</span>
 				</div>
 			</div>
+		{* end menu_sys_reports *}
 
 		{* special_grants *}
-			<br>
-			<div class="table-row">
-				<div class="table-cell-label"><b>{#special_grants#}</b></div>
+			<hr>
+			<div class="">
+				<b>{#special_grants#}</b>
 			</div>
 			<div class="table-row">
 				<div class="table-cell-label"></div>

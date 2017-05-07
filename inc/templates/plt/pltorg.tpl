@@ -57,14 +57,16 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
+			{*
 			// pltorg_date, id
 			order: [[2, 'asc'], [0, 'asc']],
+			*}
 			"ajax": function (data, callback, settings) {
 				waitingDialog();
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
-					url: '/plt/get_list_pltorg',
+					url: '/plt/pltorg_ajax',
 					method: "POST",
 					data: _self.last_params,
 					"dataType": "json",
@@ -102,9 +104,9 @@
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_pltorg_edit },
 
-				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis" , render: displayEllipses },
+				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis", render: displayEllipses },
 
-				{ title: "{#pltorg_date#}", data: 'pltorg_date', className: "dt-center",	render: EsCon.formatDate },
+				{ title: "{#pltorg_date#}", data: 'pltorg_date', className: "dt-center", render: EsCon.formatDate },
 
 				{ title: "{#qty_plt_eur#}", data: 'qty_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#qty_plt_chep#}", data: 'qty_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
@@ -129,10 +131,10 @@
 
 				{ title: "{#aviso_id#}", data: 'aviso_id', className: "dt-right", render: EsCon.formatIntegerHideZero },
 
-				{ title: "{#pltorg_refnumb#}", data: 'pltorg_refnumb' },
-				{ title: "{#pltorg_driver#}", data: 'pltorg_driver' },
+				{ title: "{#pltorg_refnumb#}", data: 'pltorg_refnumb', render: escapeHtml },
+				{ title: "{#pltorg_driver#}", data: 'pltorg_driver', render: escapeHtml },
 
-				{ title: "{#note#}", data: 'pltorg_note', className: "ellipsis" , render: displayEllipses },
+				{ title: "{#note#}", data: 'pltorg_note', className: "ellipsis", render: displayEllipses },
 
 			],
 

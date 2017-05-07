@@ -17,28 +17,29 @@
 			data: {$data},
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center" },
+				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding auto_filter", render: displayCheckbox },
 				{ title: "{#shop_name#}", data: 'shop_name', className: "td-no-padding",
 					render: function ( data, type, row ) {
+						data = escapeHtml(data);
 						if (type !== 'display') return data;
-						{if $allow_view}
+						/*{if $allow_view}*/
 						return '<a href="/configuration/{$smarty.session.table_edit}_edit/'+row.id+'" rel="edit-'+row.id+'" edit_delete="{$smarty.session.table_edit}">'+displayDIV100(data)+'</a>';
-						{else}
+						/*{else}*/
 						return displayDIV100(data);
-						{/if}
+						/*{/if}*/
 					}
 				},
 				{ title: "{#address#}", data: 'shop_address',	className: "ellipsis", render: displayEllipses },
-				{ title: "{#shop_code#}", data: 'shop_code' },
+				{ title: "{#shop_code#}", data: 'shop_code', render: escapeHtml },
 
-				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding",
-					render: function ( data, type, row ) {
-						return displayCheckbox(row.is_active);
-					}
-				},
 			],
 
-			// Да маркираме като selected последно редактирания запис
 			initComplete: function () {
+				this.api().columns('.auto_filter').every(function (index) {
+					datatable_set_auto_filter_column(this, null, false);
+				});
+
+				// Да маркираме като selected последно редактирания запис
 				var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 				this.api().rows('#'+id).select();
 				this.api().row({ selected: true }).show().draw(false);

@@ -149,7 +149,7 @@
 				$sql_query = "select * from view_{$table} $where $order_by";
 			$query_result = _base::get_query_result($sql_query);
 			$data = array();
-			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+			while ($query_data = _base::sql_fetch_assoc($query_result)) {
 				$data[] = $query_data + array('id' => $query_data[$field_id]);
 			}
 			_base::sql_free_result($query_result);
@@ -186,7 +186,7 @@
 
 			$data = array();
 			$first_echo = true;
-			while ($query_data = _base::sql_fetch_row($query_result, false)) {
+			while ($query_data = _base::sql_fetch_row($query_result)) {
 				$query_data[] = $query_data[$indexOfID];
 				$data[] = $query_data;
 				if (count($data) >= 100) {
@@ -272,7 +272,7 @@
 			else
 				$sql_query = "SELECT * FROM view_{$table} WHERE $field_id = $id";
 			$query_result = _base::get_query_result($sql_query);
-			$data = _base::sql_fetch_assoc($query_result, true);
+			$data = _base::sql_fetch_assoc($query_result, false);
 			_base::sql_free_result($query_result);
 			$data['id'] = $id;
 			return $data;
@@ -346,7 +346,7 @@
 			$sql_query .= " ORDER BY $order_by";
 			$query_result = _base::get_query_result($sql_query);
 			$temp[0] = array('id' => '0', 'name' => '&nbsp;');
-			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+			while ($query_data = _base::sql_fetch_assoc($query_result, false)) {
 				$temp[] = $query_data;
 			}
 			_base::sql_free_result($query_result);
@@ -394,7 +394,8 @@
 				$data = _base::sql_fetch_assoc($query_result);
 				_base::sql_free_result($query_result);
 				// escape special chars
-				$result = htmlspecialchars($data[$field_name]);
+				//$result = htmlspecialchars($data[$field_name]);
+				$result = $data[$field_name];
 			} else {
 				$result = null;
 			}

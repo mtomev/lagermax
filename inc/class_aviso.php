@@ -146,15 +146,14 @@
 			if ($to_date)
 				$where .= " and aviso_date <= '$to_date'";
 
-			//$data = _base::nomen_list('aviso', true, 'aviso_id', $where);
-			$sql_query = "select * from view_aviso $where order by aviso_id";
+			$sql_query = "select * from view_aviso $where order by aviso_date, aviso_time";
 
 			$time = -microtime(true);
 			$query_result = _base::get_query_result($sql_query);
 
 			/*
 			$data = array();
-			while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+			while ($query_data = _base::sql_fetch_assoc($query_result)) {
 				// 7-приключено
 				if ($query_data['aviso_status'] == '7') {
 					$query_data['qty_pallet'] = $query_data['qty_pallet_rcvd'];
@@ -176,7 +175,7 @@
 
 			$data = array();
 			$first_echo = true;
-			while ($query_data = _base::sql_fetch_row($query_result, false)) {
+			while ($query_data = _base::sql_fetch_row($query_result)) {
 				$query_data[] = $query_data[$indexOfID];
 				// 7-приключено
 				if ($query_data['aviso_status'] == '7') {
@@ -275,17 +274,18 @@
 			}
 
 			$_SESSION['memory_middle'] = number_format(memory_get_usage(), 0, '.',' ');
+			$time = -microtime(true);
 			$sql_query = "select view_aviso_detail.*
 				from view_aviso_detail 
-				$where";
+				$where
+				order by aviso_date, warehouse_code, aviso_time, aviso_id, shop_name";
 			$query_result = _base::get_query_result($sql_query);
 			$data = array();
-			$time = -microtime(true);
 
 			/*
 			// Вариант с assoc array
 			{
-				while ($query_data = _base::sql_fetch_assoc($query_result, true)) {
+				while ($query_data = _base::sql_fetch_assoc($query_result)) {
 					$data[] = $query_data + array('id' => $query_data['aviso_id'].'-'.$query_data['aviso_line_id']);
 				}
 				_base::sql_free_result($query_result);
@@ -301,7 +301,7 @@
 				$fields[] = 'id';
 				$indexOfID = array_search('aviso_id_id', $fields);
 				$indexOfID2 = array_search('aviso_line_id', $fields);
-				while ($query_data = _base::sql_fetch_row($query_result, true)) {
+				while ($query_data = _base::sql_fetch_row($query_result)) {
 					$query_data[] = $query_data[$indexOfID].'-'.$query_data[$indexOfID2];
 					$data[] = $query_data;
 				}
@@ -325,7 +325,7 @@
 
 				$data = array();
 				$first_echo = true;
-				while ($query_data = _base::sql_fetch_row($query_result, false)) {
+				while ($query_data = _base::sql_fetch_row($query_result)) {
 					$query_data[] = $query_data[$indexOfID].'-'.$query_data[$indexOfID2];
 					$data[] = $query_data;
 					if (count($data) >= 100) {

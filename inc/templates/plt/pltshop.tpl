@@ -55,14 +55,16 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
+			{*
 			// pltshop_date, id
 			order: [[2, 'asc'], [0, 'asc']],
+			*}
 			"ajax": function (data, callback, settings) {
 				waitingDialog();
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
-					url: '/plt/get_list_pltshop',
+					url: '/plt/pltshop_ajax',
 					method: "POST",
 					data: _self.last_params,
 					"dataType": "json",
@@ -125,10 +127,10 @@
 				},
 				*}
 
-				{ title: "{#pltshop_refnumb#}", data: 'pltshop_refnumb' },
-				{ title: "{#pltshop_driver#}", data: 'pltshop_driver' },
+				{ title: "{#pltshop_refnumb#}", data: 'pltshop_refnumb', render: escapeHtml },
+				{ title: "{#pltshop_driver#}", data: 'pltshop_driver', render: escapeHtml },
 
-				{ title: "{#note#}", data: 'pltshop_note', className: "ellipsis" , render: displayEllipses },
+				{ title: "{#note#}", data: 'pltshop_note', className: "ellipsis", render: displayEllipses },
 
 			],
 

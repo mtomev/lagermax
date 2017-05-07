@@ -20,7 +20,7 @@
 </div>
 <script type="text/javascript">
 	$('#show_session').click (function () {
-		window.location.href = '/sys_reports/deflt/reload';
+		window.location.href = '/sys_reports/sys_session/reload';
 	});
 </script>
 {/if}

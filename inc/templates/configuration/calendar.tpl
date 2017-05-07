@@ -28,11 +28,13 @@
 					}
 				},
 
-				{ title: "{#calendar_is_working_day#}", data: 'calendar_is_working_day', className: "dt-center", render: calendar_is_working_day },
+				{ title: "{#calendar_is_working_day#}", name: 'calendar_is_working_day', data: 'calendar_is_working_day', className: "dt-center", render: calendar_is_working_day },
 			],
 
-			// Да маркираме като selected последно редактирания запис
 			initComplete: function () {
+				datatable_auto_filter_column(this.api(), 'calendar_is_working_day', calendar_is_working_day, false);
+
+				// Да маркираме като selected последно редактирания запис
 				var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 				this.api().rows('#'+id).select();
 				this.api().row({ selected: true }).show().draw(false);

@@ -29,7 +29,7 @@
 	function localLoadData(params) {
 		waitingDialog();
 		$.ajax({
-			url: '/reports/get_timeslot',
+			url: '/reports/rep_timeslot_ajax',
 			method: "POST",
 			data: params,
 			success: function (result) {

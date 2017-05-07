@@ -7,14 +7,14 @@
 		
 		function __destruct () {}
 		
-		function deflt () {
+
+		function sys_session () {
 		 	if (!_base::CheckAccess('sys_reports')) return;
 			// Ако е подаден $_REQUEST['p1'], то тогава се извиква от бутона Изпълни
 			if (!$_REQUEST['p1']) {
 				$_SESSION['main_menu'] = 'sys_reports';
-				$_SESSION['sub_menu'] = '-';
+				$_SESSION['sub_menu'] = 'sys_session';
 			}
-			//$_SESSION{'display_path'} = 'sys_reports/deflt.tpl';
 		}
 
 		function sys_oper () {

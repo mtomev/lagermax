@@ -23,7 +23,10 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
+			{* Сортирането е в PHP
+			// 1 org_name
 			order: [[1, 'asc']],
+			*}
 			ajax: {
 				url: '/configuration/org_ajax',
 				type: "POST",
@@ -46,8 +49,10 @@
 			},
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center" },
+				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding auto_filter", render: displayCheckbox },
 				{ title: "{#org_name#}", data: 'org_name', className: "td-no-padding",
 					render: function ( data, type, row ) {
+						data = escapeHtml(data);
 						if (type !== 'display') return data;
 						/*{if $allow_view}*/
 						return '<a href="/configuration/{$smarty.session.table_edit}_edit/'+row.id+'" rel="edit-'+row.id+'" edit_delete="{$smarty.session.table_edit}">'+displayDIV100(data)+'</a>';
@@ -58,7 +63,7 @@
 				},
 				{ title: "{#org_metro_code#}", data: 'org_metro_code',	className: "ellipsis", render: displayEllipses },
 				{ title: "{#address#}", data: 'org_address',	className: "ellipsis", render: displayEllipses },
-				{ title: "{#contact#}", data: 'org_contact' },
+				{ title: "{#contact#}", data: 'org_contact', render: escapeHtml },
 				{ title: "{#phone#}", data: 'org_phone',	className: "ellipsis", render: displayEllipses },
 				{ title: "{#email#}", data: 'org_email',	className: "ellipsis", render: displayEllipses },
 
@@ -68,11 +73,6 @@
 
 				{ title: "{#note#}", data: 'org_note', className: "ellipsis", render: displayEllipses },
 
-				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding",
-					render: function ( data, type, row ) {
-						return displayCheckbox(row.is_active);
-					}
-				},
 				{ title: "{#cnt_user#}", data: 'cnt_user', className: "dt-right auto_filter", render: EsCon.format0HideZero },
 				{ title: "{#cnt_aviso#}", data: 'cnt_aviso', className: "dt-right auto_filter", render: EsCon.format0HideZero },
 			],

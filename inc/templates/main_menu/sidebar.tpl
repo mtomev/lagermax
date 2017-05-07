@@ -15,24 +15,11 @@
 				{if $smarty.session.userdata.grants.aviso_detail == '1'}
 				<li><a sub_menu="aviso_detail" href="/aviso/aviso_detail">{#menu_aviso_detail#}</a></li>
 				{/if}
-				{*
-				{if $smarty.session.userdata.grants.aviso_reception == '1'}
-				<li><a id="aviso_edit_receipt" sub_menu="aviso_reception" href="/aviso/aviso_edit_receipt">{#menu_aviso_reception#}</a></li>
-				{/if}
-				{if $smarty.session.userdata.grants.aviso_reception == '1'}
-				<li><a id="aviso_select_for_complete" sub_menu="aviso_reception" href="/aviso/aviso_select_for_complete">{#aviso_complete#}</a></li>
-				{/if}
-				*}
 			</ul>
 			</li>
 
-			{*
 			<li>
-			{if $smarty.session.userdata.grants.plt == '1'}
-			<a main_menu="plt" href="#">{#menu_plt#}</a>
-			{else}
-			<a main_menu="plt" href="#">{#menu_plt#}</a>
-			{/if}
+			<a main_menu="plt" href="/" class="expand">{#menu_plt#} ></a>
 			<ul main_menu="plt" class="submenu">
 				{if $smarty.session.userdata.grants.pltorg == '1'}
 				<li><a sub_menu="pltorg" href="/plt/pltorg">{#menu_pltorg#}</a></li>
@@ -42,26 +29,21 @@
 				{/if}
 			</ul>
 			</li>
-			*}
-
-			{if $smarty.session.userdata.grants.pltorg == '1'}
-			<li><a main_menu="pltorg" href="/plt/pltorg">{#menu_pltorg#}</a></li>
-			{/if}
-			{if $smarty.session.userdata.grants.pltshop == '1'}
-			<li><a main_menu="pltshop" href="/plt/pltshop">{#menu_pltshop#}</a></li>
-			{/if}
-
-			{if $smarty.session.userdata.grants.reports == '1'}
-			<li><a main_menu="reports" href="/reports/timeslot">{#menu_reports#}</a></li>
-			{/if}
 
 			<li>
-			{if $smarty.session.userdata.grants.configuration == '1'}
-			{*<a main_menu="configuration" href="/configuration">{#menu_configuration#}</a>*}
-			<a main_menu="configuration" href="#">{#menu_configuration#}</a>
-			{else}
-			<a main_menu="configuration" href="#">{#menu_configuration#}</a>
-			{/if}
+			<a main_menu="reports" href="/" class="expand">{#menu_reports#} ></a>
+			<ul main_menu="reports" class="submenu">
+				{if $smarty.session.userdata.grants.rep_timeslot == '1'}
+				<li><a sub_menu="rep_timeslot" href="/reports/rep_timeslot">{#menu_rep_timeslot#}</a></li>
+				{/if}
+				{if $smarty.session.userdata.grants.rep_timeslot_shop == '1'}
+				<li><a sub_menu="rep_timeslot_shop" href="/reports/rep_timeslot_shop">{#menu_rep_timeslot_shop#}</a></li>
+				{/if}
+			</ul>
+			</li>
+
+			<li>
+			<a main_menu="configuration" href="/" class="expand">{#menu_configuration#} ></a>
 			<ul main_menu="configuration" class="submenu">
 				{if $smarty.session.userdata.grants.w_group == '1'}
 				<li><a sub_menu="w_group" href="/configuration/w_group">{#menu_w_group#}</a></li>
@@ -97,12 +79,11 @@
 			</li>
 
 			<li>
-			{if $smarty.session.userdata.grants.sys_reports == '1' && $smarty.session.userdata.user_id == '1'}
-			<a main_menu="sys_reports" href="/sys_reports/deflt">{#menu_sys_reports#}</a>
-			{else}
-			<a main_menu="sys_reports" href="#">{#menu_sys_reports#}</a>
-			{/if}
+			<a main_menu="sys_reports" href="/" class="expand">{#menu_sys_reports#} ></a>
 			<ul main_menu="sys_reports" class="submenu">
+				{if $smarty.session.userdata.user_id == '1'}
+				<li><a sub_menu="sys_session" href="/sys_reports/sys_session">SESSION</a></li>
+				{/if}
 				{if $smarty.session.userdata.grants.sys_oper == '1'}
 				<li><a sub_menu="sys_oper" href="/sys_reports/sys_oper">{#table_sys_oper#}</a></li>
 				{/if}
@@ -142,25 +123,36 @@
 	{/if}
 
 <script type="text/javascript">
-	/* Да се виждат всички
-	// Скривам всички подменютата, без онези на които предходния li е забранен за избиране, т.е. href='#'
-	$(".submenu", "#sidemenu li:not(:has(a[href='#']))").addClass("hidden");
+	//Да се виждат всички
+	// Скривам всички подменютата, на главните менюта от клас expand
+	$("ul.submenu", "#sidemenu li:has(a.expand)").addClass("hidden");
 	// Разпъвам текущото подменю
 	$("ul[main_menu='{$smarty.session.main_menu}'].submenu", "#sidemenu").removeClass("hidden");
-	*/
+	
+	// Скривам всички главни менюта, които подменю
+	$("li:has(a.expand):not(:has(li))", "#sidemenu").addClass("hidden");
 
-	// Скривам всички главни менюта, които са забранени за избиране и нямат подменю
-	$("li:has(a[href='#']):not(:has(li))", "#sidemenu").addClass("hidden");
+	// На всички главни менюта от клас expand
+	$("li a.expand", "#sidemenu").on('click', function () {
+		var $ul = $(this).parent().children('ul');
+		if ($ul.hasClass("hidden"))
+			$ul.removeClass("hidden");
+		else
+			$ul.addClass("hidden");
+		return false;
+	});
 
-	var main_menu = $("[main_menu='{$smarty.session.main_menu}']", '#sidemenu');
-	var sub_menu = $("ul[main_menu='{$smarty.session.main_menu|default:''}'] a[sub_menu='{$smarty.session.sub_menu|default:''}']", '#sidemenu');
-	if (sub_menu.length) {
-		$(sub_menu).addClass("selected");
-		current_menu_text = $(sub_menu).html();
-	} else {
-		$(main_menu).addClass("selected");
-		current_menu_text = $(main_menu).html();
-	}
+	$(document).ready( function () {
+		var $sub_menu = $("ul[main_menu='{$smarty.session.main_menu|default:''}'] a[sub_menu='{$smarty.session.sub_menu|default:''}']", '#sidemenu');
+		if ($sub_menu.length) {
+			$sub_menu.addClass("selected");
+			current_menu_text = $sub_menu.html();
+		} else {
+			var $main_menu = $("li a[main_menu='{$smarty.session.main_menu}']", '#sidemenu');
+			$main_menu.addClass("selected");
+			current_menu_text = $main_menu.html();
+		}
+	}); // $(document).ready
 
 	$('#logout_button').click(function () {
 		jQuery.post('/main_menu/logout', {}, function (result) {

@@ -87,7 +87,7 @@
 		function pltorg () {
 		 	if (!_base::CheckAccess('pltorg')) return;
 
-			$_SESSION['main_menu'] = 'pltorg';
+			$_SESSION['main_menu'] = 'plt';
 			$_SESSION['sub_menu'] = 'pltorg';
 			$sub_menu = $_SESSION['sub_menu'];
 			_base::readFilterToSESSION_new($sub_menu);
@@ -111,7 +111,7 @@
 		}
 
 		// Тази функция се вика само като ajax
-		function get_list_pltorg () {
+		function pltorg_ajax () {
 		 	if (!_base::CheckAccess('pltorg')) return;
 
 			$sub_menu = 'pltorg';
@@ -138,7 +138,7 @@
 			$data = _base::nomen_list('pltorg', true, 'pltorg_id', $where);
 			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 			*/
-			_base::echo_nomen_list_partial('pltorg', true, 'pltorg_id', $where);
+			_base::echo_nomen_list_partial('pltorg', true, 'pltorg_date, pltorg_id', $where);
 		}
 
 		function pltorg_edit () {
@@ -306,7 +306,7 @@
 		function pltshop () {
 		 	if (!_base::CheckAccess('pltshop')) return;
 
-			$_SESSION['main_menu'] = 'pltshop';
+			$_SESSION['main_menu'] = 'plt';
 			$_SESSION['sub_menu'] = 'pltshop';
 			$sub_menu = $_SESSION['sub_menu'];
 			_base::readFilterToSESSION_new($sub_menu);
@@ -324,7 +324,7 @@
 		}
 
 		// Тази функция се вика само като ajax
-		function get_list_pltshop () {
+		function pltshop_ajax () {
 		 	if (!_base::CheckAccess('pltshop')) return;
 
 			$sub_menu = 'pltshop';
@@ -345,7 +345,7 @@
 			$data = _base::nomen_list('pltshop', true, 'pltshop_id', $where);
 			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 			*/
-			_base::echo_nomen_list_partial('pltshop', true, 'pltshop_id', $where);
+			_base::echo_nomen_list_partial('pltshop', true, 'pltshop_date, pltshop_id', $where);
 		}
 
 		function pltshop_edit () {

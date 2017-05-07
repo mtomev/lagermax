@@ -184,7 +184,7 @@
 	}
 
 	function commonFancyboxDeleted(callbackSuccess) {
-		// Ако не се изтрива плащане, всъщност ще опресним реда
+		// Ако се изтрива елемента от показаната таблица, ще премахнем реда от таблицата, иначе ще опресним реда
 		if (edit_delete) {
 			edit_row.remove().draw('page');
 			if (typeof callbackSuccess == 'function') callbackSuccess(edit_row);
@@ -313,8 +313,10 @@
 		'`': '&#x60;',
 		'=': '&#x3D;'
 	};
-	function escapeHtml (string) {
-		return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+	function escapeHtml (data) {
+		if (!data) return '';
+		if (data == '&nbsp;') return data;
+		return String(data).replace(/[&<>"'`=\/]/g, function (s) {
 			return entityMap[s];
 		});
 	}
@@ -597,10 +599,13 @@
 
 	function displayEllipses( data, type, row, meta ) {
 		if (typeof(type)==='undefined') type = 'display';
-		if ( type ==='display' )
-			return '<span title="'+data+'">' + data + '</span>';
-		else
+		if (!data) return '';
+		data = escapeHtml(data);
+		if (type !== 'display') {
+//console.log(type);
 			return data;
+		}
+		return '<span title="'+data+'">' + data + '</span>';
 	}
 
 
@@ -789,7 +794,7 @@
 					d = "(empty)";
 					html = '<option value="'+d+'">'+d+'</option>' + html;
 				} else
-					html += '<option value="'+escapeHtml(d)+'">'+d+'</option>';
+					html += '<option value="'+escapeHtml(d)+'">'+escapeHtml(d)+'</option>';
 			});
 			html = '<option value="(not empty)">(not empty)</option>' + html;
 			html = '<option value="">&nbsp;</option>' + html;
@@ -829,7 +834,7 @@
 				if (typeof(render)=='function')
 					html += render(d);
 				else
-					html += d;
+					html += escapeHtml(d);
 				html += '</option>';
 			}
 		});
@@ -874,7 +879,7 @@
 			else
 			if (len == 2 && auto_select_alone && i == 1)
 				html += ' selected';
-			html += '>'+select_list[i].name+'</option>';
+			html += '>'+escapeHtml(select_list[i].name)+'</option>';
 		}
 		return html;
 	}
@@ -892,14 +897,14 @@
 			html += '<option value="'+key+'"';
 			if ( key == selected_key )
 				html += ' selected';
-			html += '>'+text+'</option>';
+			html += '>'+escapeHtml(text)+'</option>';
 		}
 
 		for (var key in select_list) {
 			// Ако е група
 			if(typeof select_list[key] == 'object') {
 				// Създаваме група
-				html += '<optgroup label="'+key+'">';
+				html += '<optgroup label="'+escapeHtml(key)+'">';
 				for (var sub_key in select_list[key])
 					one_select(sub_key, select_list[key][sub_key]);
 				html += '</optgroup>';

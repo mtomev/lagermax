@@ -24,8 +24,10 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
+			{* Сортирането е в PHP
 			// 4 org_name, 1 user_name
 			order: [[4, 'asc'], [1, 'asc']],
+			*}
 			ajax: {
 				url: '/configuration/user_ajax',
 				type: "POST",
@@ -45,8 +47,10 @@
 						/*{/if}*/
 					}
 				},
+				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding auto_filter", render: displayCheckbox },
 				{ title: "{#user_name#}", data: 'user_name', className: "td-no-padding", 
 					render: function ( data, type, row ) {
+						data = escapeHtml(data);
 						if (type !== 'display') return data;
 						/*{if $allow_edit}*/
 						return '<a href="/configuration/{$smarty.session.table_edit}_edit/'+row.id+'" rel="edit-'+row.id+'" edit_delete="{$smarty.session.table_edit}">'+displayDIV100(data)+'</a>';
@@ -55,8 +59,9 @@
 						/*{/if}*/
 					}
 				},
-				{ title: "{#user_role_name#}", data: 'user_role_name', className: "auto_filter", /*className: "td-no-padding",
+				{ title: "{#user_role_name#}", data: 'user_role_name', className: "auto_filter", {*className: "td-no-padding",
 					render: function ( data, type, row ) {
+						data = escapeHtml(data);
 						if (type !== 'display') return data;
 						if (!data) data = '';
 						//{if $smarty.session.userdata.grants.user_edit == '1' || $smarty.session.userdata.grants.user_view == '1'}
@@ -65,11 +70,12 @@
 						return displayDIV100(data);
 						//{/if}
 					}
-					*/
+					*}
 				},
-				{ title: "{#org_id#}", data: 'org_id', className: "dt-right" },
+				{ title: "{#org_id#}", data: 'org_id', className: "dt-right", render: EsCon.formatIntegerHideZero },
 				{ title: "{#table_org#}", data: 'org_name', className: "td-no-padding",
 					render: function ( data, type, row ) {
+						data = escapeHtml(data);
 						if (type !== 'display') return data;
 						if (!data) data = '';
 						/*{if $smarty.session.userdata.grants.org_edit == '1' || $smarty.session.userdata.grants.org_view == '1'}*/
@@ -79,27 +85,16 @@
 						/*{/if}*/
 					}
 				},
-				{ title: "{#email#}", data: 'user_email', className: "td-no-padding",
-					render: function ( data, type, row ) {
-						if (type !== 'display') return data;
-						/*{if $allow_edit}*/
-						return '<a href="/configuration/{$smarty.session.table_edit}_edit/'+row.id+'" rel="edit-'+row.id+'" edit_delete="{$smarty.session.table_edit}">'+displayDIV100(data)+'</a>';
-						/*{else}*/
-						return displayDIV100(data);
-						/*{/if}*/
-					}
-				},
+				{ title: "{#email#}", data: 'user_email', className: "ellipsis", render: displayEllipses },
 
-				{ title: "{#w_group_name#}", data: 'w_group_name', className: "" },
-				{ title: "{#warehouse_name#}", data: 'warehouse_name', className: "" },
+				{ title: "{#w_group_name#}", data: 'w_group_name', className: "", render: escapeHtml },
+				{ title: "{#warehouse_code#}", data: 'warehouse_code', className: "", render: escapeHtml },
 
-				{ title: "{#full_name#}", data: 'user_full_name' },
-				{ title: "{#phone#}", data: 'user_phone' },
+				{ title: "{#full_name#}", data: 'user_full_name', render: escapeHtml },
+				{ title: "{#phone#}", data: 'user_phone', render: escapeHtml },
 
-				{ title: "{#is_active#}", data: 'is_active', className: "dt-center td-no-padding auto_filter", render: displayCheckbox },
-
-				{ title: "{#mo_date#}", data: 'mo_date', className: "dt-center",	render: EsCon.formatCRDate },
-				{ title: "{#mo_user_name#}", data: 'mo_user_name' },
+				//{ title: "{#mo_date#}", data: 'mo_date', className: "dt-center",	render: EsCon.formatCRDate },
+				//{ title: "{#mo_user_name#}", data: 'mo_user_name' },
 			],
 			initComplete: function () {
 				_self.select_row();

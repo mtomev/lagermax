@@ -9,13 +9,13 @@
 		function __destruct () {}
 
 
-		function timeslot () {
-		 	if (!_base::CheckAccess('aviso')) return;
+		function rep_timeslot () {
+		 	if (!_base::CheckAccess('rep_timeslot')) return;
 			$_SESSION['main_menu'] = 'reports';
-			$_SESSION['sub_menu'] = 'timeslot';
+			$_SESSION['sub_menu'] = 'rep_timeslot';
 			$sub_menu = $_SESSION['sub_menu'];
 			_base::readFilterToSESSION_new($sub_menu);
-			$this->smarty->assign ('current_url', '/reports/timeslot');
+			$this->smarty->assign ('current_url', '/reports/rep_timeslot');
 
 			if (!isset($_SESSION[$sub_menu]['from_date']) or !$_SESSION[$sub_menu]['from_date'])
 				// Днешна дата
@@ -28,9 +28,9 @@
 			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
 		}
 
-		// Тази функция се вика само като ajax
-		function get_timeslot () {
-			_base::readFilterToSESSION_new('timeslot');
+		function rep_timeslot_ajax () {
+		 	if (!_base::CheckAccess('rep_timeslot')) return;
+			_base::readFilterToSESSION_new('rep_timeslot');
 
 			$where_warehouse = "where is_active = '1'";
 			if ($_SESSION[$_SESSION['sub_menu']]['w_group_id']) {
@@ -64,12 +64,10 @@
 					}
 				}
 
-//print nl2br2 (print_r($this->working_days, true) . PHP_EOL);
 			echo json_encode($data, JSON_UNESCAPED_UNICODE);
 		}
 
-
-		// Връща масив със списъка от свободни слотове за подадения склад за подадената дата
+		// Връща масив със заявените количества по слотове за подадения склад за подадената дата
 		// [ "09:00" => [бр.авиза, палети, колети, тегло, обем, сметнати палети], ... ]
 		private function fill_timeslot($array_param) {
 			$warehouse_id = intVal($array_param['warehouse_id']);
@@ -125,6 +123,123 @@
 			
 			return $result;
 		}
+
+		
+		function rep_timeslot_shop () {
+		 	if (!_base::CheckAccess('rep_timeslot_shop')) return;
+			$_SESSION['main_menu'] = 'reports';
+			$_SESSION['sub_menu'] = 'rep_timeslot_shop';
+			$sub_menu = $_SESSION['sub_menu'];
+			_base::readFilterToSESSION_new($sub_menu);
+			$this->smarty->assign ('current_url', '/reports/rep_timeslot_shop');
+
+			if (!isset($_SESSION[$sub_menu]['from_date']) or !$_SESSION[$sub_menu]['from_date'])
+				// Днешна дата
+				$_SESSION[$sub_menu]['from_date'] = date('Y-m-d');
+
+			if (!isset($_SESSION[$sub_menu]['w_group_id']))
+				$_SESSION[$sub_menu]['w_group_id'] = $_SESSION['userdata']['w_group_id'];
+			_base::get_select_list('w_group');
+			
+			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
+		}
+
+		function rep_timeslot_shop_ajax () {
+		 	if (!_base::CheckAccess('rep_timeslot_shop')) return;
+			_base::readFilterToSESSION_new('rep_timeslot_shop');
+
+			if (!isset($_SESSION[$_SESSION['sub_menu']]['from_date']) or !$_SESSION[$_SESSION['sub_menu']]['from_date'])
+				// Днешна дата
+				$_SESSION[$_SESSION['sub_menu']]['from_date'] = date('Y-m-d');
+
+			$curr_date = date('Y-m-d', strtotime($_SESSION[$_SESSION['sub_menu']]['from_date']. " - 1 day"));
+			$w_group_id = intVal($_SESSION[$_SESSION['sub_menu']]['w_group_id']);
+			$summarize = intVal($_SESSION[$_SESSION['sub_menu']]['summarize']);
+
+
+			// Заетост на времевите слотове по дни за всяка платформа
+			// [shop_id => [working_day => [timeslot => [бр.авиза, палети, колети, тегло, обем, сметнати палети] ] ]
+
+			// Зареждаме работните дни в масива working_days
+			$config_aviso_days_forecast = _base::get_config('config_aviso_days_forecast');
+			if (!$config_aviso_days_forecast) $config_aviso_days_forecast = 5;
+			$this->load_working_days($curr_date, $config_aviso_days_forecast);
+			// Първия работен ден след предишния ден на посочената дата
+			$from_date = $curr_date = $this->working_days[1];
+			$to_date = $this->working_days[$config_aviso_days_forecast-1];
+
+			$shop = _base::select_sql_multiline("select shop_id, shop_name from shop where is_active = '1' order by shop_name");
+			$data = array();
+			if ($shop)
+				foreach($shop as $line) {
+					for ($i = 1; $i < $config_aviso_days_forecast; $i++) {
+						if ($summarize)
+							$data[$this->working_days[$i]][$line['shop_name']] = $this->fill_timeslot_shop($line + array('for_date'=>$this->working_days[$i], 'w_group_id' => $w_group_id, 'summarize' => $summarize));
+						else
+							$data[$line['shop_name']][$this->working_days[$i]] = $this->fill_timeslot_shop($line + array('for_date'=>$this->working_days[$i], 'w_group_id' => $w_group_id, 'summarize' => $summarize));
+					}
+				}
+
+			echo json_encode($data, JSON_UNESCAPED_UNICODE);
+		}
+
+		// Връща масив със заявените количества по слотове за подадения магазин за подадената дата
+		// [ "09:00" => [бр.авиза, палети, колети, тегло, обем, сметнати палети], ... ]
+		private function fill_timeslot_shop($array_param) {
+			// w_group_id, shop_id, for_date
+			$w_group_id = intVal($array_param['w_group_id']);
+			$shop_id = intVal($array_param['shop_id']);
+			$for_date = $array_param['for_date'];
+			$summarize = intVal($array_param['summarize']);
+
+			$result = array();
+			$total = array('cnt_aviso'=>0,'qty_pallet'=>0,'qty_pack'=>0,'weight'=>0,'volume'=>0,'qty_pallet_calc'=>0);
+			// Какви заявки вече има за склада и датата
+			$sql_query = "select aviso.aviso_time, count(distinct aviso.aviso_id) cnt_aviso,
+				sum(aviso_line.qty_pallet) qty_pallet,
+				sum(aviso_line.qty_pack) qty_pack,
+				sum(aviso_line.weight) weight,
+				sum(aviso_line.volume) volume,
+				sum(aviso_line.qty_pallet)+(sum(aviso_line.qty_pack/warehouse.w_pack2pallet)) qty_pallet_calc
+				from aviso
+				left outer join warehouse on aviso.warehouse_id = warehouse.warehouse_id
+				left outer join aviso_line on aviso_line.aviso_id = aviso.aviso_id
+				where aviso.aviso_date = '$for_date'" . PHP_EOL
+				. ($w_group_id ? "and warehouse.w_group_id = $w_group_id" . PHP_EOL : '')
+				."and aviso_line.shop_id = $shop_id
+				group by aviso.aviso_time";
+			$query_result = _base::get_query_result($sql_query);
+			while ($query_data = _base::sql_fetch_assoc($query_result)) {
+				if (!$summarize) {
+					$curr_time = substr($query_data['aviso_time'], 0, 5);
+					$result[$curr_time]['cnt_aviso'] = $query_data['cnt_aviso'];
+					$result[$curr_time]['qty_pallet'] = $query_data['qty_pallet'];
+					$result[$curr_time]['qty_pack'] = $query_data['qty_pack'];
+					$result[$curr_time]['weight'] = $query_data['weight'];
+					$result[$curr_time]['volume'] = $query_data['volume'];
+					$result[$curr_time]['qty_pallet_calc'] = $query_data['qty_pallet_calc'];
+				}
+
+				$total['cnt_aviso'] += $query_data['cnt_aviso'];
+				$total['qty_pallet'] += $query_data['qty_pallet'];
+				$total['qty_pack'] += $query_data['qty_pack'];
+				$total['weight'] += $query_data['weight'];
+				$total['volume'] += $query_data['volume'];
+				$total['qty_pallet_calc'] += $query_data['qty_pallet_calc'];
+			}
+			_base::sql_free_result($query_result);
+
+			// Накрая един сумарен ред
+			if (!$summarize)
+				$result['----'] = $total;
+			else
+				$result = $total;
+
+			
+			return $result;
+		}
+
+
 
 		// Зареждане на $config_aviso_days_forecast+2 работни дни след $date в масива working_days
 		private function load_working_days($date, $config_aviso_days_forecast) {

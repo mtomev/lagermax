@@ -15,7 +15,7 @@
 
 	class site {
 		public $smarty;
-		var $base = '.';
+		var $method_class = '.';
 		var $method = 'deflt';
 	
 		function __construct () {
@@ -63,9 +63,6 @@
 
 			$this->global_variables ();
 
-// debugging трябва да е след global_variables
-//$this->smarty->debugging = true;
-
 			set_error_handler('exceptions_error_handler', E_WARNING);
 
 			// $_REQUEST{'a'}/$_REQUEST{'b'}/$_REQUEST{'p1'}/$_REQUEST{'p2'}/$_REQUEST{'p3'}/$_REQUEST{'p4'}
@@ -78,25 +75,44 @@
 				$_REQUEST['b'] = 'deflt';
 				$_SESSION['org_id'] = $org_id;
 			}
-			if (!$_REQUEST{'b'}) $_REQUEST{'b'} = 'deflt';
-			$_REQUEST{'b'} ? $method = $_REQUEST{'b'} : $method = $_REQUEST{'a'};
 
-			$_REQUEST{'b'} ? $method_class = $_REQUEST{'a'} : $method_class = 'main_menu';
+			$this->method_class = $_REQUEST['a'];
+			$this->method = $_REQUEST['b'];
+
 		
-			if (class_exists ($method_class)) {
-				if (!method_exists ($method_class, $method)) {
-					unset ($_REQUEST['b']);
-					$method = 'deflt';
+			// Ако не се е логнал, допустимите операции са
+			// main_menu/login  main_menu/mail_password main_menu/selectlanguage
+			// да се логне и пак да го прати на исканото URL
+			if (!$_SESSION['loggedin'])
+				if ($this->method_class != 'main_menu' or !in_array($this->method, array('login','mail_password','selectlanguage'))) {
+					$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+					$_SESSION['relogin_url'] = "$_SERVER[REQUEST_URI]";
+					return;
 				}
-				$this->method = $method;
-				$_REQUEST['b'] ? $this->base = $_REQUEST['a'] : $this->base = 'main_menu';
 
-				if (property_exists($method_class, 'forbidden') && $method_class::$forbidden){
-					exit();
-				}
-				$action = new $method_class ($this->smarty);		    
-				$action->$method ();
+			// Ако не съществува такъв клас
+			if (!class_exists($this->method_class)) {
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				return;
 			}
+
+			// Ако не съществува такъв метод в класа
+			if (!method_exists($this->method_class, $this->method)) {
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				return;
+			}
+
+			// Ако класа е означен като forbidden за директно извикване от html
+			$method_class = $this->method_class;
+			if (property_exists($this->method_class, 'forbidden') && $method_class::$forbidden){
+				$_SESSION['display_path'] = 'main_menu/deflt.tpl';
+				return;
+			}
+
+			$action = new $method_class ($this->smarty);
+			$method = $this->method;
+			// $action->{$this->method}();
+			$action->$method();
 		}
 
 		function __destruct () {
@@ -108,7 +124,7 @@
 			// Ако съм задал от процедурата новия tpl
 			$path = isset($_SESSION['display_path'])?$_SESSION['display_path']:null;
 			if (!$path)
-				$path = $this->base . '/' . $this->method . '.tpl';
+				$path = $this->method_class . '/' . $this->method . '.tpl';
 
 			// Отрязвам първата /
 			if (substr($path, 0, 1) == '/') $path = substr($path, 1);

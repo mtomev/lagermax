@@ -60,6 +60,7 @@
 		var _self = this;
 		this.mainTable = $("#table_id");
 		this.last_params = {};
+		this.total_reload = 0;
 
 		this.SetParams = function() {
 			_self.last_params['w_group_id'] = $('#w_group_id', '#headerrow').val();
@@ -75,9 +76,10 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
+			{*
 			// aviso_date, warehouse_code, aviso_time, aviso_id, shop_name
 			order: [[1, 'asc'], [2, 'asc'], [3, 'asc'], [0, 'asc'], [4, 'asc']],
-
+			*}
 			"ajax": function (data, callback, settings) {
 				waitingDialog();
 				var api = this.api();
@@ -89,7 +91,7 @@
 					"dataType": "json",
 					"cache": false,
 					success: function (result) {
-//console.log(result.execution_time);
+//console.log('result.execution_time ' + result.execution_time);
 						if (result.hasOwnProperty('fields')) {
 //var local_start = Date.now();
 							// result.data е масива с данни result.fields е масива с имената на полетата
@@ -153,11 +155,11 @@
 			columns: [
 				{ title: "#", data: 'aviso_id', className: "dt-center td-no-padding", render: display_aviso_edit },
 
-				{ title: "{#aviso_date#}", name: 'aviso_date', data: 'aviso_date', className: "dt-center auto_filter",	render: EsCon.formatDate },
-				{ title: "{#warehouse_code#}", name: 'warehouse_code', data: 'warehouse_code', className: "auto_filter" },
+				{ title: "{#aviso_date#}", name: 'aviso_date', data: 'aviso_date', className: "dt-center", render: EsCon.formatDate },
+				{ title: "{#warehouse_code#}", name: 'warehouse_code', data: 'warehouse_code', className: "auto_filter", render: escapeHtml },
 				{ title: "{#aviso_time#}", data: 'aviso_time', className: "dt-center",	render: EsCon.formatTime },
 
-				{ title: "{#shop_name#}", name: 'shop_name', data: 'shop_name', className: "auto_filter" },
+				{ title: "{#shop_name#}", name: 'shop_name', data: 'shop_name', className: "auto_filter", render: escapeHtml },
 
 				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis" , render: displayEllipses },
 
@@ -176,7 +178,7 @@
 				{ title: "{#aviso_status#}", name: 'aviso_status', data: 'aviso_status', render: aviso_status },
 
 				{ title: "{#org_metro_code#}", name: 'org_metro_code', data: 'org_metro_code', className: "" },
-				{ title: "{#metro_request_no#}", name: 'metro_request_no', data: 'metro_request_no', className: "" },
+				{ title: "{#metro_request_no#}", name: 'metro_request_no', data: 'metro_request_no', className: "", render: escapeHtml },
 			],
 
 			rowCallback: function (row, data, index) {
@@ -217,6 +219,7 @@
 			oTable.columns('.auto_filter').every(function (index) {
 				datatable_set_auto_filter_column(this, null, false);
 			});
+			datatable_auto_filter_column(oTable, 'aviso_date', EsCon.formatDate, false);
 			datatable_auto_filter_column(oTable, 'aviso_status', aviso_status, false);
 
 			// Да маркираме като selected последно редактирания запис
@@ -253,10 +256,12 @@
 				oTable.column('aviso_date:name').visible(true);
 			}
 
+//console.log('total_reload '+(Date.now() - _self.total_reload));
 			closeWaitingDialog();
 		} // select_row
 
 		this.LoadData = function(resetPaging) {
+			_self.total_reload = Date.now();
 			waitingDialog();
 			setTimeout(function() {
 				oTable.rows({ selected: true }).deselect();
@@ -266,6 +271,7 @@
 
 		// Добавяне на tfoot
 		this.mainTable.append("<tfoot>" + '<tr>'+config.columns.map(function () { return "<td></td>"; }).join("")+'</tr>' + "</tfoot>");
+		_self.total_reload = Date.now();
 		oTable = this.mainTable.DataTable(config);
 		datatable_add_btn_excel($('#datatable_add_btn_excel'));
 

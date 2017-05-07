@@ -57,8 +57,10 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
+			{*
 			// aviso_date, aviso_time
 			order: [[3, 'asc'], [4, 'asc']],
+			*}
 			"ajax": function (data, callback, settings) {
 				waitingDialog();
 				var api = this.api();
@@ -102,7 +104,7 @@
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_aviso_edit },
 
-				{ title: "{#warehouse_code#}", data: 'warehouse_code', className: "auto_filter" },
+				{ title: "{#warehouse_code#}", data: 'warehouse_code', className: "auto_filter", render: escapeHtml },
 				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis" , render: displayEllipses },
 
 				{ title: "{#aviso_date#}", data: 'aviso_date', className: "dt-center",	render: EsCon.formatDate },
@@ -148,11 +150,11 @@
 				},
 
 				// aviso_truck_no
-				{ title: "{#aviso_truck_no#}", data: 'aviso_truck_no' },
+				{ title: "{#aviso_truck_no#}", data: 'aviso_truck_no', render: escapeHtml },
 				// aviso_driver_name
-				{ title: "{#aviso_driver_name#}", data: 'aviso_driver_name' },
+				{ title: "{#aviso_driver_name#}", data: 'aviso_driver_name', render: escapeHtml },
 				// aviso_driver_phone
-				{ title: "{#aviso_driver_phone#}", data: 'aviso_driver_phone' },
+				{ title: "{#aviso_driver_phone#}", data: 'aviso_driver_phone', render: escapeHtml },
 
 				{ title: "{#aviso_start_exec#}", data: 'aviso_start_exec', className: "",	render: EsCon.formatDate },
 				{ title: "{#aviso_end_exec#}", data: 'aviso_end_exec', className: "",	render: EsCon.formatDate },

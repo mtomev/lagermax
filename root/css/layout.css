@@ -133,9 +133,14 @@ hr {
 	margin-bottom: 0px;
 	margin-left: 10px;
 }
-.sidemenu li {
-	line-height: 17px;
+.sidemenu > li {
 	padding-right: 10px;
+}
+.sidemenu {
+	font-size: 15px;
+}
+.submenu {
+	font-size: 13px !important;
 }
 .sidemenu li a:link,
 .sidemenu li a,
@@ -144,28 +149,33 @@ hr {
 .submenu li a,
 .submenu li a:visited
  {
-	font-size: 1.1em;
 	text-align: left;
 	color: #757575;
-	padding-top: 2px;
-	padding-bottom: 2px;
 	padding-left: 10px;
 	padding-right: 10px;
 	display: block;
 	text-decoration: none;
 }
-.submenu li {
-	line-height: 16px;
-	padding-right: 10px;
+.sidemenu li a:link,
+.sidemenu li a,
+.sidemenu li a:visited
+{
+	padding-top: 4px;
+	padding-bottom: 4px;
 }
-.submenu {
-	font-size: 85% !important;
+.submenu li a:link,
+.submenu li a,
+.submenu li a:visited
+{
+	padding-top: 4px;
+	padding-bottom: 4px;
 }
+
 .sidemenu li a.selected {
 	background-color: #EEE;
 	color: #000;
 }
-.sidemenu li a:hover:not([href='#']), .submenu li a:hover {
+.sidemenu li a:hover, .submenu li a:hover {
 	background-color: #DDD;
 	color: #000;
 }
@@ -225,6 +235,9 @@ td.ellipsis, .ellipsis select  {
 .table-row {
 	margin: 2px 0;
 	display: table-row;
+}
+.table-row-hover .table-row:hover {
+	background-color: rgba(0, 0, 0, 0.06);
 }
 .table-cell-label {
 	display: table-cell;
