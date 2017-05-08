@@ -39,6 +39,9 @@
 				{if $smarty.session.userdata.grants.rep_timeslot_shop == '1'}
 				<li><a sub_menu="rep_timeslot_shop" href="/reports/rep_timeslot_shop">{#menu_rep_timeslot_shop#}</a></li>
 				{/if}
+				{if $smarty.session.userdata.grants.rep_plt_balans == '1'}
+				<li><a sub_menu="rep_plt_balans" href="/reports/rep_plt_balans">{#menu_rep_plt_balans#}</a></li>
+				{/if}
 			</ul>
 			</li>
 

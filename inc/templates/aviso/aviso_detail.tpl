@@ -85,7 +85,7 @@
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
-					url: '/aviso/get_list_aviso_detail',
+					url: '/aviso/aviso_detail_ajax',
 					method: "POST",
 					data: _self.last_params,
 					"dataType": "json",
@@ -129,7 +129,7 @@
 			}, // ajax
 			/* Това е алтернатива на горното, но горното е по-универсално
 			"ajax": {
-				url: '/aviso/get_list_aviso_detail',
+				url: '/aviso/aviso_detail_ajax',
 				type: "POST",
 				"data": function ( d ) {
 					return $.extend( {}, d, _self.last_params );

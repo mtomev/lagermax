@@ -623,6 +623,17 @@ table.dataTable tbody th.dt-body-wrap,
 table.dataTable tbody td.dt-body-wrap {
 	white-space: normal !important;
 }
+
+table.dataTable thead th.dt-head-bold,
+table.dataTable thead td.dt-head-bold,
+table.dataTable tfoot th.dt-head-bold,
+table.dataTable tfoot td.dt-head-bold {
+  font-weight: bold;
+}
+table.dataTable tbody th.dt-body-gray,
+table.dataTable tbody td.dt-body-gray {
+	background-color: #F0F0F0;
+}
 /* Да се скрие Search, но все пак да прави филтриране. Ако се забрани със searching: false в опциите, то не прави търсене */
 .dataTables_filter {
 	display: none;

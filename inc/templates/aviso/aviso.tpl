@@ -3,6 +3,12 @@
 {assign var="sub_menu" value=$smarty.session.sub_menu}
 <div id="main">
 	<div class="headerrow" id="headerrow">
+		<span class="">
+			{#w_group_name#}
+			<select class="" id="w_group_id" name="w_group_id"> 
+				{html_options options=$select_w_group selected={$smarty.session.$sub_menu.w_group_id}}
+			</select>
+		</span>
 		<span class="ellipsis">
 			{#org_name#}
 			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
@@ -47,6 +53,7 @@
 		this.last_params = {};
 
 		this.SetParams = function() {
+			_self.last_params['w_group_id'] = $('#w_group_id', '#headerrow').val();
 			_self.last_params['org_id'] = $('#org_id', '#headerrow').val();
 
 			_self.last_params['from_date'] = EsCon.getParsedVal($('#from_date', '#headerrow'));
@@ -66,7 +73,7 @@
 				var api = this.api();
 				api.clear().columns().search('');
 				$.ajax({
-					url: '/aviso/get_list_aviso',
+					url: '/aviso/aviso_ajax',
 					method: "POST",
 					data: _self.last_params,
 					"dataType": "json",

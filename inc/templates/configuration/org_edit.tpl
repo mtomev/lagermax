@@ -82,9 +82,9 @@
 </div>
 
 <script type="text/javascript">
-	var vTable;
+	var vTable_org_metro;
 	$(document).ready( function () {
-		vTable = new table_org_metro({$data|json_encode}, {$data_line});
+		vTable_org_metro = new table_org_metro({$data|json_encode}, {$data_line});
 
 		// Автоматично разпъване на textarea
 		$('textarea', '#nomedit').each(function () {
@@ -262,7 +262,7 @@
 	} // table_org_metro
 
 	function callbackSave() {
-		if (!vTable.prepareToSave()) return;
+		if (!vTable_org_metro.prepareToSave()) return;
 		return true;
 	}
 

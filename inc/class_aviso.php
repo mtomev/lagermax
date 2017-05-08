@@ -86,6 +86,8 @@
 			$this->aviso();
 		}
 
+
+
 		function aviso () {
 		 	if (!_base::CheckAccess('aviso')) return;
 
@@ -119,11 +121,10 @@
 			_base::get_select_list('org', null, 'org_name');
 
 			_base::set_table_edit_AccessRights('aviso');
-			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
+			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
 		}
 
-		// Тази функция се вика само като ajax
-		function get_list_aviso () {
+		function aviso_ajax () {
 		 	if (!_base::CheckAccess('aviso')) return;
 
 			$sub_menu = 'aviso';
@@ -136,6 +137,9 @@
 			if (!$_SESSION['userdata']['grants']['view_all_suppliers'])
 				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
 			
+			if ($_SESSION[$sub_menu]['w_group_id']) {
+				$where .= ' and (w_group_id = '.intVal($_SESSION[$sub_menu]['w_group_id']).')';
+			}
 			if ($_SESSION[$sub_menu]['org_id'])
 				$where .= " and (org_id = {$_SESSION[$sub_menu]['org_id']})";
 
@@ -169,6 +173,14 @@
 			$fields = _base::get_fields_name($query_result);
 			$fields[] = 'id';
 			$indexOfID = array_search('aviso_id', $fields);
+			$i_aviso_status = array_search('aviso_status', $fields);
+
+			$i_qty_pallet = array_search('qty_pallet', $fields);
+			$i_qty_pallet_rcvd = array_search('qty_pallet_rcvd', $fields);
+			$i_qty_pack = array_search('qty_pack', $fields);
+			$i_qty_pack_rcvd = array_search('qty_pack_rcvd', $fields);
+			$i_qty_pallet_calc = array_search('qty_pallet_calc', $fields);
+			$i_qty_pallet_rcvd_calc = array_search('qty_pallet_rcvd_calc', $fields);
 			echo '{'. 
 				substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1)
 				.',"data":[';
@@ -178,10 +190,10 @@
 			while ($query_data = _base::sql_fetch_row($query_result)) {
 				$query_data[] = $query_data[$indexOfID];
 				// 7-приключено
-				if ($query_data['aviso_status'] == '7') {
-					$query_data['qty_pallet'] = $query_data['qty_pallet_rcvd'];
-					$query_data['qty_pack'] = $query_data['qty_pack_rcvd'];
-					$query_data['qty_pallet_calc'] = $query_data['qty_pallet_rcvd_calc'];
+				if ($query_data[$i_aviso_status] == '7') {
+					$query_data[$i_qty_pallet] = $query_data[$i_qty_pallet_rcvd];
+					$query_data[$i_qty_pack] = $query_data[$i_qty_pack_rcvd];
+					$query_data[$i_qty_pallet_calc] = $query_data[$i_qty_pallet_rcvd_calc];
 				}
 				$data[] = $query_data;
 				if (count($data) >= 100) {
@@ -236,11 +248,10 @@
 			_base::get_select_aviso_status();
 
 			_base::set_table_edit_AccessRights('aviso');
-			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
+			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
 		}
 
-		// Тази функция се вика само като ajax
-		function get_list_aviso_detail () {
+		function aviso_detail_ajax () {
 		 	if (!_base::CheckAccess('aviso_detail')) return;
 
 			$sub_menu = 'aviso_detail';
@@ -1107,7 +1118,7 @@
 			if ($aviso_status == '7') {
 				$pltorg = _base::select_sql("select * from pltorg WHERE aviso_id = $id");
 				// Ако има разлика в което е да е количество
-				$a_fields = array('plt_eur','plt_chep','plt_other', 'ret_plt_eur','ret_plt_eur','ret_plt_eur', 'claim_plt_eur','claim_plt_eur','claim_plt_eur');
+				$a_fields = array('plt_eur','plt_chep','plt_other', 'ret_plt_eur','ret_plt_chep','ret_plt_other', 'claim_plt_eur','claim_plt_chep','claim_plt_other');
 				$has_difference = false;
 				for($i=0, $count=count($a_fields); $i < $count; $i++) {
 					if (intVal($_POST['aviso_'.$a_fields[$i]]) != intVal($pltorg['qty_'.$a_fields[$i]])) {
@@ -1136,7 +1147,9 @@
 						$query->AddParamExt('aviso_id', $id, 'n', 0);
 						$query->AddParamExt('org_id', $temp['org_id'], 'n', 0);
 						$query->AddParamExt('pltorg_date', $temp['aviso_date'], 'd');
-						$query->AddParamExt('pltorg_driver', $temp['aviso_driver_name']);
+						// Само ако има Рекламация, се записва шофьора
+						if ( intVal($_POST['aviso_claim_plt_eur']) or intVal($_POST['aviso_claim_plt_chep']) or intVal($_POST['aviso_claim_plt_other']) )
+							$query->AddParamExt('pltorg_driver', $temp['aviso_driver_name']);
 						$query->insert();
 					}
 				}

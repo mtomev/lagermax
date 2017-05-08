@@ -141,6 +141,9 @@
 				$_SESSION[$sub_menu]['w_group_id'] = $_SESSION['userdata']['w_group_id'];
 			_base::get_select_list('w_group');
 			
+			if (!isset($_SESSION[$sub_menu]['summarize']))
+				$_SESSION[$sub_menu]['summarize'] = '1';
+
 			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
 		}
 
@@ -279,6 +282,203 @@
 			return $this->working_days[$index + $days];
 		}
 
+
+		function rep_plt_balans () {
+		 	if (!_base::CheckAccess('rep_plt_balans')) return;
+
+			$_SESSION['main_menu'] = 'reports';
+			$_SESSION['sub_menu'] = 'rep_plt_balans';
+			$sub_menu = $_SESSION['sub_menu'];
+			_base::readFilterToSESSION_new($sub_menu);
+			$this->smarty->assign('current_url', '/reports/rep_plt_balans');
+
+			if (!isset($_SESSION[$sub_menu]['org_id']))
+				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
+			// Ако потребителя няма право да вижда всички Доставчици
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers'])
+				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
+
+			$config_plt_balans_date = _base::get_config('config_plt_balans_date');
+			if (!isset($_SESSION[$sub_menu]['from_date']))
+				$_SESSION[$sub_menu]['from_date'] = $config_plt_balans_date;
+			$this->smarty->assign('config_plt_balans_date', $config_plt_balans_date);
+
+			_base::get_select_list('org', null, 'org_name');
+
+			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
+		}
+
+		function rep_plt_balans_ajax () {
+		 	if (!_base::CheckAccess('rep_plt_balans')) return;
+
+			$sub_menu = 'rep_plt_balans';
+			_base::readFilterToSESSION_new($sub_menu);
+			$where = "where (1=1)";
+			$where_ns = "where (1=1)";
+
+			if (!isset($_SESSION[$sub_menu]['org_id']))
+				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
+			// Ако потребителя няма право да вижда всички Доставчици
+			if (!$_SESSION['userdata']['grants']['view_all_suppliers'])
+				$_SESSION[$sub_menu]['org_id'] = $_SESSION['userdata']['org_id'];
+
+			$org_id = intVal($_SESSION[$sub_menu]['org_id']);
+			if ($org_id)
+				$where .= " and (org_id = $org_id)";
+
+			$config_plt_balans_date = _base::get_config('config_plt_balans_date');
+
+			$from_date = $_SESSION[$sub_menu]['from_date'];
+			$to_date = $_SESSION[$sub_menu]['to_date'];
+			if ($from_date < $config_plt_balans_date) {
+				$_SESSION[$sub_menu]['from_date'] = $config_plt_balans_date;
+				$from_date = $config_plt_balans_date;
+			}
+			if ($from_date)
+				$where .= " and pltorg_date >= '$from_date'";
+			if ($to_date)
+				$where .= " and pltorg_date <= '$to_date'";
+
+			if ($org_id)
+				$where_ns .= " and (org_id = $org_id)";
+			if ($config_plt_balans_date)
+				$where_ns .= " and (pltorg_date >= '$config_plt_balans_date')";
+			if ($from_date)
+				$where_ns .= " and (pltorg_date < '$from_date')";
+
+			$sql_query = " 
+select sss.org_id, org.org_name,
+ns_eur, in_eur, ret_eur, claim_eur, (ns_eur+in_eur-ret_eur-claim_eur) ks_eur,
+ns_chep, in_chep, ret_chep, claim_chep, (ns_chep+in_chep-ret_chep-claim_chep) ks_chep,
+ns_other, in_other, ret_other, claim_other, (ns_other+in_other-ret_other-claim_other) ks_other
+
+from (
+select ss.org_id,
+sum(ns_eur) as ns_eur,
+sum(ns_chep) as ns_chep,
+sum(ns_other) as ns_other,
+
+sum(in_eur) in_eur,
+sum(ret_eur) ret_eur,
+sum(claim_eur) claim_eur,
+
+sum(in_chep) in_chep,
+sum(ret_chep) ret_chep,
+sum(claim_chep) claim_chep,
+
+sum(in_other) in_other,
+sum(ret_other) ret_other,
+sum(claim_other) claim_other
+
+from (
+select org_id,
+org_ns_plt_eur ns_eur,
+org_ns_plt_chep ns_chep,
+org_ns_plt_other ns_other,
+
+0 as in_eur,
+0 as ret_eur,
+0 as claim_eur,
+
+0 as in_chep,
+0 as ret_chep,
+0 as claim_chep,
+
+0 as in_other,
+0 as ret_other,
+0 as claim_other
+
+from org
+where ((org_ns_plt_eur <> 0) or (org_ns_plt_chep <> 0) or (org_ns_plt_other <> 0))" . PHP_EOL
+. ($org_id ? " and (org_id = $org_id)" : '') . PHP_EOL
+. "union all
+
+select org_id,
+sum(qty_plt_eur-qty_ret_plt_eur-qty_claim_plt_eur) as ns_eur,
+sum(qty_plt_chep-qty_ret_plt_chep-qty_claim_plt_chep) as ns_chep,
+sum(qty_plt_other-qty_ret_plt_other-qty_claim_plt_other) as ns_other,
+
+0 as in_eur,
+0 as ret_eur,
+0 as claim_eur,
+
+0 as in_chep,
+0 as ret_chep,
+0 as claim_chep,
+
+0 as in_other,
+0 as ret_other,
+0 as claim_other
+
+from pltorg
+$where_ns
+group by org_id
+
+union all
+
+select org_id,
+0 as ns_eur,
+0 as ns_chep,
+0 as ns_other,
+
+sum(qty_plt_eur) in_eur,
+sum(qty_ret_plt_eur) ret_eur,
+sum(qty_claim_plt_eur) claim_eur,
+
+sum(qty_plt_chep) in_chep,
+sum(qty_ret_plt_chep) ret_chep,
+sum(qty_claim_plt_chep) claim_chep,
+
+sum(qty_plt_other) in_other,
+sum(qty_ret_plt_other) ret_other,
+sum(qty_claim_plt_other) claim_other
+
+from pltorg
+$where
+group by org_id
+) ss
+group by ss.org_id
+) sss
+left join org on sss.org_id = org.org_id
+order by org_name";
+
+			$time = -microtime(true);
+			$query_result = _base::get_query_result($sql_query);
+
+			/*
+			$data = array();
+			while ($query_data = _base::sql_fetch_assoc($query_result)) {
+				$data[] = $query_data + array('id' => $query_data['org_id']);
+			}
+			_base::sql_free_result($query_result);
+			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
+			*/
+
+			$fields = _base::get_fields_name($query_result);
+			$fields[] = 'id';
+			$indexOfID = array_search('org_id', $fields);
+			echo '{'. 
+				substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1)
+				.',"data":[';
+
+			$data = array();
+			$first_echo = true;
+			while ($query_data = _base::sql_fetch_row($query_result)) {
+				$query_data[] = $query_data[$indexOfID];
+				$data[] = $query_data;
+				if (count($data) >= 100) {
+					echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+					$data = array();
+					$first_echo = false;
+				}
+			}
+			_base::sql_free_result($query_result);
+			$time += microtime(true);
+			if (count($data)) {
+				echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
+			}
+			echo '],'. substr(json_encode(array('execution_time' => number_format($time*1000,3)), JSON_UNESCAPED_UNICODE),1,-1) . '}';
+		}
 
 	}
 ?>
