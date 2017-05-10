@@ -7,26 +7,10 @@
 
 		function __destruct () {}
 
-		private function nomen_list($table, $is_view = false, $order_by = null) {
+		private function nomen_list_json($table, $sql_query, $field_id = null) {
 			// Прави стандартно попълване на $data за <table>_list
-			if (!$order_by) 
-				$order_by = 'order by '.$table.'_id';
-			else
-			// Ако е подадено '-', значи никаква подредба
-			if ($order_by === '-') 
-				$order_by = '';
-			else
-				$order_by = 'order by '.$order_by;
+			$data = _base::nomen_list($sql_query, $field_id);
 
-			if (!$is_view)
-				$sql_query = "select {$table}.* from {$table} $order_by";
-			else
-				$sql_query = "select * from view_{$table} $order_by";
-			$query_result = _base::get_query_result($sql_query);
-			while ($query_data = _base::sql_fetch_assoc($query_result)) {
-				$data[] = $query_data + array('id' => $query_data[$table.'_id']);
-			}
-			_base::sql_free_result($query_result);
 			$this->smarty->assign('data', json_encode($data, JSON_UNESCAPED_UNICODE));
 			_base::set_table_edit_AccessRights($table);
 			return $data;
@@ -53,13 +37,20 @@
 				unset($field_id);
 			}
 
-			// Ако $id === 0, то трябва да се върне последно добавения елемент $_SESSION{'<table>_id'}
+			// Ако $id === 0, то трябва да се върне последно добавения елемент $_SESSION['<table>_id']
 			if (!$id)
 				$id = $_SESSION[$table.'_id'];
 			if (!$id) return;
 
 			$is_view = _base::is_view_exists($table);
-			$data = _base::nomen_list_refresh($table, $is_view, $id, $field_id);
+			$id = intVal($id);
+			if (!$field_id) $field_id = $table.'_id';
+			if (!$is_view)
+				$sql_query = "SELECT * FROM {$table} WHERE $field_id = $id";
+			else
+				$sql_query = "SELECT * FROM view_{$table} WHERE $field_id = $id";
+
+			$data = _base::nomen_list_refresh($sql_query, $id);
 			if ($table == 'aviso') {
 				// Проверки за неправомерност
 				// Ако потребителя е с фиксиран org_id, проверка дали това Авизо е на същия org_id
@@ -71,33 +62,15 @@
 			echo json_encode($data, JSON_UNESCAPED_UNICODE);
 		}
 
-		private function ajax_list ($table, $order_by = '') {
-			$is_view = _base::is_view_exists($table);
-			$data = $this->nomen_list($table, $is_view, $order_by);
-			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
-		}
-
-
-		private function ajax_list_new ($table, $order_by = '') {
-			$is_view = _base::is_view_exists($table);
-			//$data = $this->nomen_list($table, $is_view, $order_by);
-			if (!$order_by) 
-				$order_by = 'order by '.$table.'_id';
-			else
-			// Ако е подадено '-', значи никаква подредба
-			if ($order_by === '-') 
-				$order_by = '';
-			else
-				$order_by = 'order by '.$order_by;
-
-			if (!$is_view)
-				$sql_query = "select {$table}.* from {$table} $order_by";
-			else
-				$sql_query = "select * from view_{$table} $order_by";
+		private function ajax_list ($sql_query, $field_id = null) {
 			$query_result = _base::get_query_result($sql_query);
 			$fields = _base::get_fields_name($query_result);
 			$fields[] = 'id';
-			$indexOfID = array_search($table.'_id', $fields);
+			// Ако не е подадено името на полето за id, взимам първото поле
+			if ($field_id)
+				$indexOfID = array_search($field_id, $fields);
+			else
+				$indexOfID = 0;
 			while ($query_data = _base::sql_fetch_row($query_result)) {
 				$query_data[] = $query_data[$indexOfID];
 				$data[] = $query_data;
@@ -214,7 +187,7 @@
 		 	if (!_base::CheckAccess('warehouse')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'warehouse';
-			$this->nomen_list('warehouse', true, 'warehouse_name');
+			$this->nomen_list_json($_SESSION['sub_menu'], "select * from view_warehouse order by warehouse_name");
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 
@@ -222,7 +195,7 @@
 		 	if (!_base::CheckGrant('warehouse_view'))
 				if (!_base::CheckAccess('warehouse_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			_base::get_select_list('w_group');
 			_base::get_select_warehouse_type();
@@ -245,7 +218,7 @@
 		function warehouse_save () {
 		 	if (!_base::CheckAccess('warehouse_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 			$table = 'warehouse';
 
 			_base::start_transaction();
@@ -301,7 +274,7 @@
 		 	if (!_base::CheckAccess('w_group')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'w_group';
-			$this->nomen_list('w_group', true, 'w_group_name');
+			$this->nomen_list_json($_SESSION['sub_menu'], "select * from view_w_group order by w_group_name");
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 
@@ -309,7 +282,7 @@
 		 	if (!_base::CheckGrant('w_group_view'))
 				if (!_base::CheckAccess('w_group_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			$data = _base::nomen_list_edit('w_group', $id, true);
 
@@ -323,7 +296,7 @@
 		function w_group_save () {
 		 	if (!_base::CheckAccess('w_group_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 			$table = 'w_group';
 
 			_base::start_transaction();
@@ -371,24 +344,20 @@
 		 	if (!_base::CheckAccess('org')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'org';
-			//$this->nomen_list('org', true, 'org_name');
-			_base::set_table_edit_AccessRights('org');
+			_base::set_table_edit_AccessRights($_SESSION['sub_menu']);
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
-
 		function org_ajax () {
 		 	if (!_base::CheckAccess('org')) return;
-			// $order_by
-			//$order_by = $_REQUEST['p1'];
 			$order_by = 'org_name';
-			$this->ajax_list_new('org', $order_by);
+			$this->ajax_list("select * from view_org order by org_name");
 		}
 
 		function org_edit () {
 		 	if (!_base::CheckGrant('org_view'))
 				if (!_base::CheckAccess('org_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			$data = _base::nomen_list_edit('org', $id, true);
 
@@ -418,7 +387,7 @@
 		function org_save () {
 		 	if (!_base::CheckAccess('org_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 			$table = 'org';
 
 			_base::start_transaction();
@@ -520,7 +489,7 @@
 		 	if (!_base::CheckAccess('shop')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'shop';
-			$this->nomen_list('shop', true, 'shop_name');
+			$this->nomen_list_json($_SESSION['sub_menu'], "select * from view_shop order by shop_name");
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 
@@ -528,7 +497,7 @@
 		 	if (!_base::CheckGrant('shop_view'))
 				if (!_base::CheckAccess('shop_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			$data = _base::nomen_list_edit('shop', $id, true);
 
@@ -542,7 +511,7 @@
 		function shop_save () {
 		 	if (!_base::CheckAccess('shop_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 			$table = 'shop';
 
 			_base::start_transaction();
@@ -599,22 +568,18 @@
 		 	if (!_base::CheckAccess('user')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'user';
-			//$this->nomen_list('user', true, 'user_name');
 			_base::set_table_edit_AccessRights('user');
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 		function user_ajax () {
 		 	if (!_base::CheckAccess('user')) return;
-			// $order_by
-			//$order_by = $_REQUEST['p1'];
-			$order_by = 'org_name,user_name';
-			$this->ajax_list('user', $order_by);
+			$this->ajax_list("select * from view_user order by org_name,user_name");
 		}
 
 		function user_edit () {
 		 	if (!_base::CheckAccess('user_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			// Списъци за select
 			// get_select_list($table, $smarty_var = null, $order_by = null, $where = null) {
@@ -661,8 +626,11 @@
 			if (!$is_user_profil_edit)
 				if (!_base::CheckAccess('user_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 			$table = 'user';
+
+			if ($is_user_profil_edit and !$id)
+				return;
 
 			// Проверка дали няма въведен вече такъв потребител
 			if (!$this->check_unique_user($id))
@@ -766,7 +734,7 @@
 		function send_test_mail() {
 			if (!_base::CheckAccess('user_edit')) return;
 			// user_id
-			$user_id = $_REQUEST['p1'];
+			$user_id = intVal($_REQUEST['p1']);
 			if (!$user_id) return;
 			// Ако -1, то е изпращане на мейл при нов потребител
 			if ($user_id < 0)
@@ -797,7 +765,7 @@
 		 	if (!_base::CheckAccess('user')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'user_role';
-			$this->nomen_list('user_role', false, 'user_role_name');
+			$this->nomen_list_json($_SESSION['sub_menu'], "select * from user_role order by user_role_name");
 			$this->smarty->assign('allow_edit', ($_SESSION['userdata']['grants']['user_edit'] == '1'));
 			$this->smarty->assign('allow_view', ($_SESSION['userdata']['grants']['user_edit'] == '1') or ($_SESSION['userdata']['grants']['user_view'] == '1'));
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
@@ -891,78 +859,18 @@
 		}
 
 
-		/*function config () {
-		 	if (!_base::CheckAccess('config')) return;
-			$_SESSION['main_menu'] = 'configuration';
-			$_SESSION['sub_menu'] = 'config';
-			$this->nomen_list('config');
-			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
-		}
-
-		function config_edit () {
-		 	if (!_base::CheckAccess('config_edit')) return;
-
-			$id = $_REQUEST['p1'];
-
-			$data = _base::nomen_list_edit('config', $id);
-			$this->smarty->assign ('data', $data);
-			$_SESSION['config_id'] =$id;
-			$_SESSION['table_edit'] = 'config';
-
-			_base::put_sys_oper(__METHOD__, 'edit', $_SESSION['table_edit'], $id);
-		}
-
-		function config_save () {
-		 	if (!_base::CheckAccess('config_edit')) return;
-
-			$id = $_REQUEST['p1'];
-			$table = 'config';
-
-			_base::start_transaction();
-
-			$query = new ExecQuery($table);
-			$query->AddParam($table.'_name');
-			$query->AddParam('config_value');
-			if ($id != 0) {
-				$query->update([$table."_id" => $id]);
-				$new_id = $id;
-			}
-			else
-				$new_id = $query->insert();
-			unset($query);
-
-			_base::commit_transaction();
-			$_SESSION[$table.'_id'] = $new_id;
-
-			_base::put_sys_oper(__METHOD__, 'save', $_SESSION['table_edit'], $_SESSION[$table.'_id']);
-		}
-
-		function config_delete () {
-		 	if (!_base::CheckAccess('config_delete')) return;
-
-			$id = intVal($_REQUEST['p1']);
-
-			if ($_POST{'process'} == 'delete' && $id) {
-				$sql_query = "DELETE FROM config WHERE config_id = $id";
-				_base::execute_sql($sql_query);
-				unset($_SESSION['config_id']);
-				_base::put_sys_oper(__METHOD__, 'delete', $_SESSION['table_edit'], $id);
-			}
-		}*/
-
-
 		function calendar () {
 		 	if (!_base::CheckAccess('calendar')) return;
 			$_SESSION['main_menu'] = 'configuration';
 			$_SESSION['sub_menu'] = 'calendar';
-			$this->nomen_list('calendar', true, 'calendar_date');
+			$this->nomen_list_json($_SESSION['sub_menu'], "select * from view_calendar order by calendar_date");
 			_base::put_sys_oper(__METHOD__, 'browse', $_SESSION['sub_menu'], 0);
 		}
 
 		function calendar_edit () {
 		 	if (!_base::CheckAccess('calendar_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 
 			$data = _base::nomen_list_edit('calendar', $id);
 			if (!$id) {
@@ -978,7 +886,7 @@
 		function calendar_save () {
 		 	if (!_base::CheckAccess('calendar_edit')) return;
 
-			$id = $_REQUEST['p1'];
+			$id = intVal($_REQUEST['p1']);
 			$table = 'calendar';
 			
 			$week_day = date('w', strtotime($_POST['calendar_date']));

@@ -133,6 +133,14 @@
 					<span>&nbsp;&nbsp;</span>
 				</div>
 			</div>
+
+			<div class="table-row">
+				<div class="table-cell-label">{#menu_rep_pltshop_balans#}</b></div>
+				<div class="table-cell">
+					<input type="checkbox" value="1" rel="rep_pltshop_balans" {if $data.grants["rep_pltshop_balans"] == '1'}checked{/if}> {#view_menu#}
+					<span>&nbsp;&nbsp;</span>
+				</div>
+			</div>
 		{* end menu_reports *}
 
 		{* menu_configuration *}

@@ -24,17 +24,8 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
-			{* Сортирането е в PHP
-			// 4 org_name, 1 user_name
-			order: [[4, 'asc'], [1, 'asc']],
-			*}
-			ajax: {
-				url: '/configuration/user_ajax',
-				type: "POST",
-				dataSrc: function (result) {
-					oTable.clear().columns().search('');
-					return result.data;
-				},
+			"ajax": function (data, callback, settings) {
+				datatables_ajax({ data:{}, callback:callback, settings:settings, url:'/configuration/user_ajax' });
 			},
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center td-no-padding",
@@ -111,6 +102,8 @@
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 			oTable.rows('#'+id).select();
 			oTable.row({ selected: true }).show().draw(false);
+
+			closeWaitingDialog();
 		}
 
 		// Добавяне на tfoot
@@ -119,7 +112,8 @@
 		datatable_add_btn_excel();
 
 		$('#submit_button', '#headerrow').click( function () {
-			oTable.ajax.reload( _self.select_row, false );
+			oTable.rows({ selected: true }).deselect();
+			oTable.ajax.reload( _self.select_row );
 		});
 
 		commonInitMFP();

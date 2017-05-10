@@ -12,7 +12,7 @@
 		</span>
 
 		<span class="" style="padding-left: 10px;">
-			{#pltshop_date#}
+			{#aviso_date#}
 			<input id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
 			<input id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
 		</span>
@@ -20,12 +20,6 @@
 		<span class="" style="padding-left: 10px;">
 			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
 		</span>
-
-		{if $smarty.session.userdata.grants.pltshop_edit == '1'}
-		<span class="" style="padding-left: 10px;">
-			<button class="add_button" url="/plt/pltshop_edit/0" rel="edit-0" fullscreen="true" edit_add_new="{$smarty.session.table_edit}" title="{#Add#} {#table_pltshop#}"><span>{#add#}</span></button>
-		</span>
-		{/if}
 
 		{include file='main_menu/list_search.tpl'}
 	</div>
@@ -56,40 +50,52 @@
 		var config = {
 			paging: true,
 			"ajax": function (data, callback, settings) {
-				datatables_ajax({ data:_self.last_params, callback:callback, settings:settings, url:'/plt/pltshop_ajax' });
+				datatables_ajax({ data:_self.last_params, callback:callback, settings:settings, url:'/reports/rep_pltshop_balans_ajax' });
 			},
 			columns: [
-				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_pltshop_edit },
-
-				{ title: "{#shop_name#}", data: 'shop_name', className: "auto_filter ellipsis" , render: displayEllipses },
-
-				{ title: "{#pltshop_date#}", data: 'pltshop_date', className: "dt-center",	render: EsCon.formatDate },
-
-				{ title: "{#qty_plt_eur#}", data: 'qty_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#qty_plt_chep#}", data: 'qty_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#qty_plt_other#}", data: 'qty_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-
-				{ title: "{#qty_ret_plt_eur#}", data: 'qty_ret_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#qty_ret_plt_chep#}", data: 'qty_ret_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#qty_ret_plt_other#}", data: 'qty_ret_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-
-				{ title: "{#qty_claim_plt_eur#}", data: 'qty_claim_plt_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#qty_claim_plt_chep#}", data: 'qty_claim_plt_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-				{ title: "{#qty_claim_plt_other#}", data: 'qty_claim_plt_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
-
-				{*
-				// Линк към PDF
-				{ title: "{#scan_doc#}", data: 'scan_doc', className: "dt-center td-no-padding", 
+				// shop_id
+				{ title: '#', data: 'id', className: "dt-center td-no-padding",
 					render: function ( data, type, row ) {
-						return displayDocUpload( data, '/plt/pltshop_display/'+row.pltshop_id );
+						data = escapeHtml(data);
+						if (type !== 'display') return data;
+						/*{if $smarty.session.userdata.grants.shop_edit == '1' || $smarty.session.userdata.grants.shop_view == '1'}*/
+						return '<a href="/configuration/shop_edit/'+row.shop_id+'" rel="edit-'+row.shop_id+'" title="{#Edit#} {#table_shop#}">'+displayDIV100(data)+'</a>';
+						/*{else}*/
+						return displayDIV100(data);
+						/*{/if}*/
 					}
 				},
-				*}
 
-				{ title: "{#pltshop_refnumb#}", data: 'pltshop_refnumb', render: escapeHtml },
-				{ title: "{#pltshop_driver#}", data: 'pltshop_driver', render: escapeHtml },
+				{ title: "{#shop_name#}", data: 'shop_name', className: "auto_filter ellipsis",
+					//render: displayEllipses
+					render: function ( data, type, row ) {
+						data = escapeHtml(data);
+						if (type !== 'display') return data;
+						/*{if $smarty.session.userdata.grants.pltshop == '1'}*/
+						return '<a href="javascript:;" url="/plt/pltshop" class="pltshop" title="{#menu_pltshop#}">'+displayDIV100(data)+'</a>';
+						/*{else}*/
+						return displayDIV100(data);
+						/*{/if}*/
+					}
+				},
 
-				{ title: "{#note#}", data: 'pltshop_note', className: "ellipsis", render: displayEllipses },
+				{ title: "{#plt_eur#} {#balance_ns#}", data: 'ns_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_eur#} {#balance_in#}", data: 'in_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_eur#} {#balance_ret#}", data: 'ret_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_eur#} {#balance_claim#}", data: 'claim_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_eur#} {#balance_ks#}", data: 'ks_eur', className: "dt-right dt-body-gray sum_footer_0", render: EsCon.format0HideZero },
+
+				{ title: "{#plt_chep#} {#balance_ns#}", data: 'ns_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_chep#} {#balance_in#}", data: 'in_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_chep#} {#balance_ret#}", data: 'ret_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_chep#} {#balance_claim#}", data: 'claim_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_chep#} {#balance_ks#}", data: 'ks_chep', className: "dt-right dt-body-gray sum_footer_0", render: EsCon.format0HideZero },
+
+				{ title: "{#plt_other#} {#balance_ns#}", data: 'ns_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_other#} {#balance_in#}", data: 'in_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_other#} {#balance_ret#}", data: 'ret_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_other#} {#balance_claim#}", data: 'claim_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
+				{ title: "{#plt_other#} {#balance_ks#}", data: 'ks_other', className: "dt-right dt-body-gray sum_footer_0", render: EsCon.format0HideZero },
 
 			],
 
@@ -120,14 +126,27 @@
 			// Да маркираме като selected последно редактирания запис
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 			oTable.rows('#'+id).select().draw(false);
-			// Те това е бавното - .draw(false) !!!
 			oTable.row({ selected: true }).show().draw(false);
 
-			// Заради Иконата за Upload
-			$("#table_id tbody").off('click.deselect').on('click.deselect', 'input, select, a', function() {
-				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
-				oTable.rows({ selected: true }).deselect();
+
+			$("#table_id tbody").off('click.pltshop').on('click.pltshop', 'a.pltshop', function(event) {
+				$this = $(this);
+
+				var url = $this.attr("url");
+				if (!url)
+					url = $this.attr("href");
+				if (url === '') return;
+
+				selectClickedRow(this);
+				var params = {};
+				params['shop_id'] = edit_row.data().shop_id;
+				params['from_date'] = _self.last_params['from_date'];
+				params['to_date'] = _self.last_params['to_date'];
+
+				href_post(url, params, 'POST', '_blank' );
+				return false;
 			});
+
 
 			closeWaitingDialog();
 		} // select_row
@@ -161,6 +180,19 @@
 		$("select.select2chosen:not(.hasChosen)", '#headerrow').each(function (idx, el) {
 			select2chosen(el);
 		});
+		
+		/*{*
+		// Минимална От дата за Баланса
+		$('#from_date', '#headerrow').datepicker( "option", "minDate", EsCon.formatDate('{$config_plt_balans_date}') );
+		$('#from_date', '#headerrow').on('change', function () {
+			var value = $(this).val();
+			value = EsCon.parseDate(value);
+			if (!value || value < '{$config_plt_balans_date}') {
+				$(this).addClass('isnan');
+				$(this).val(EsCon.formatDate('{$config_plt_balans_date}'));
+			}
+		});
+		*}*/
 
 		vTable = new InitTable;
 	}); // $(document).ready

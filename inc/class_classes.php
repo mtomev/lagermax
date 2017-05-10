@@ -129,25 +129,16 @@
 		}
 
 
-		public static function nomen_list($table, $is_view = false, $order_by = null, $where = null, $field_id = null) {
+		public static function nomen_list($sql_query, $field_id = null) {
 			// Прави стандартно попълване на $data за <table>_list
 
-			if (!$order_by) 
-				$order_by = 'order by '.$table.'_id';
-			else
-			// Ако е подадено '-', значи никаква подредба
-			if ($order_by === '-') 
-				$order_by = '';
-			else
-				$order_by = 'order by '.$order_by;
-			if (!$where) $where = '';
-			if (!$field_id) $field_id = $table.'_id';
-			
-			if (!$is_view)
-				$sql_query = "select * from {$table} $where $order_by";
-			else
-				$sql_query = "select * from view_{$table} $where $order_by";
 			$query_result = _base::get_query_result($sql_query);
+			// Ако не е подадено името на полето за id, взимам първото поле
+			if (!$field_id) {
+				$fields = _base::get_fields_name($query_result);
+				$field_id = $fields[0];
+			}
+
 			$data = array();
 			while ($query_data = _base::sql_fetch_assoc($query_result)) {
 				$data[] = $query_data + array('id' => $query_data[$field_id]);
@@ -157,29 +148,18 @@
 			return $data;
 		}
 
-		public static function echo_nomen_list_partial($table, $is_view = false, $order_by = null, $where = null, $field_id = null) {
-			if (!$order_by) 
-				$order_by = 'order by '.$table.'_id';
-			else
-			// Ако е подадено '-', значи никаква подредба
-			if ($order_by === '-') 
-				$order_by = '';
-			else
-				$order_by = 'order by '.$order_by;
-			if (!$where) $where = '';
-			if (!$field_id) $field_id = $table.'_id';
-			
-			if (!$is_view)
-				$sql_query = "select * from {$table} $where $order_by";
-			else
-				$sql_query = "select * from view_{$table} $where $order_by";
-
+		public static function echo_nomen_list_partial($sql_query, $field_id = null) {
 			$time = -microtime(true);
 			$query_result = _base::get_query_result($sql_query);
 
 			$fields = _base::get_fields_name($query_result);
 			$fields[] = 'id';
-			$indexOfID = array_search($field_id, $fields);
+			// Ако не е подадено името на полето за id, взимам първото поле
+			if ($field_id)
+				$indexOfID = array_search($field_id, $fields);
+			else
+				$indexOfID = 0;
+			
 			echo '{'. 
 				substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1)
 				.',"data":[';
@@ -259,18 +239,11 @@
 			return $data;
 		}
 
-		public static function nomen_list_refresh($table, $is_view = false, $id, $field_id = null) {
-		// Прави стандартно връщане на данните от един ред
-		// извиква се от PHP процедурите
-		// configuration->list_refresh
+		public static function nomen_list_refresh($sql_query, $id) {
+			// Прави стандартно връщане на данните от един ред
+			// извиква се от PHP процедурите
+			// configuration->list_refresh
 
-			$id = intVal($id);
-			if (!$field_id) $field_id = $table.'_id';
-			
-			if (!$is_view)
-				$sql_query = "SELECT * FROM {$table} WHERE $field_id = $id";
-			else
-				$sql_query = "SELECT * FROM view_{$table} WHERE $field_id = $id";
 			$query_result = _base::get_query_result($sql_query);
 			$data = _base::sql_fetch_assoc($query_result, false);
 			_base::sql_free_result($query_result);
@@ -810,39 +783,6 @@
 			return $is_view;
 		}
 
-
-
-		public static function readFilterToSESSION($prefix = ''){
-			if ($prefix) $prefix = $prefix . '_';
-
-			if (isset($_POST['site_id']))
-				$_SESSION[$prefix.'site_id'] = $_POST['site_id'];
-			if (isset($_POST['building_id']))
-				$_SESSION[$prefix . "building_id"] = $_POST['building_id'];
-			if (isset($_POST['building_active_only']))
-				$_SESSION[$prefix . "building_active_only"] = $_POST['building_active_only'];
-
-			if (isset($_POST['entm_id']))
-				$_SESSION[$prefix.'entm_id'] = $_POST['entm_id'];
-			if (isset($_POST['object_manager_id']))
-				$_SESSION[$prefix.'object_manager_id'] = $_POST['object_manager_id'];
-			if (isset($_POST['broker_id']))
-				$_SESSION[$prefix.'broker_id'] = $_POST['broker_id'];
-			if (isset($_POST['tenant_is_finished']))
-				$_SESSION[$prefix.'tenant_is_finished'] = $_POST['tenant_is_finished'];
-			if (isset($_POST['r_invoice_status']))
-				// Без префикс
-				$_SESSION['r_invoice_status'] = $_POST['r_invoice_status'];
-			if (isset($_POST['from_date']))
-				$_SESSION[$prefix.'from_date'] = $_POST['from_date'];
-			if (isset($_POST['to_date']))
-				$_SESSION[$prefix.'to_date'] = $_POST['to_date'];
-			if (isset($_POST['r_firm_id']))
-				$_SESSION[$prefix.'r_firm_id'] = $_POST['r_firm_id'];
-
-			if (isset($_POST['space_type']))
-				$_SESSION[$prefix.'space_type'] = $_POST['space_type'];
-		}
 
 		// Нов начин за запомняне на параметрите по справките, като се групират отделно за всяка справка
 		public static function readFilterToSESSION_new($prefix = null){

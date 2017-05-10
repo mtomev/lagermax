@@ -935,12 +935,14 @@
 	}
 
 	// href_post('/contact/', { name: 'Johnny Bravo' });
-	function href_post(path, params, method) {
+	function href_post(path, params, method, target) {
 		method = method || "POST"; // Set method to post by default if not specified.
+		target = target || "_self"; // по подразбиране се отваря в същия прозорец
 
 		var form = document.createElement("form");
 		form.setAttribute("method", method);
 		form.setAttribute("action", path);
+		form.setAttribute("target", '_blank');
 
 		if (params)
 			for(var key in params) {
@@ -1014,6 +1016,54 @@
 		$(el).chosen(opt).addClass("hasChosen");
 	}
 
+	function datatables_ajax(params) {
+		// params = { data: params.url,, callback, settings, url }
+		waitingDialog();
+		var api = new $.fn.dataTable.Api( params.settings );
+		api.clear().columns().search('');
+		$.ajax({
+			url: params.url,
+			method: "POST",
+			data: params.data,
+			"dataType": "json",
+			"cache": false,
+			success: function (result) {
+//console.log('result.execution_time ' + result.execution_time);
+				if (result.hasOwnProperty('fields')) {
+//var local_start = Date.now();
+					// result.data е масива с данни result.fields е масива с имената на полетата
+					var row = {};
+					for ( var i=0, len=result.data.length; i<len; i++ ) {
+						// За всеки ред се създава Object Json и с него се заменя стария ред
+						row = {};
+						for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
+							row[result.fields[j]] = result.data[i][j];
+						}
+						result.data[i] = row;
+					}
+//console.log('JSON parse '+(Date.now() - local_start));
+				}
+				params.callback( result );
+			},
+			"error": function (xhr, error, thrown) {
+				api.clear().columns().search('').draw();
+				closeWaitingDialog();
+				if ( error == "parsererror" ) {
+					//fnShowErrorMessage('', 'Invalid JSON response');
+					fnShowErrorMessage('', xhr.responseText);
+					console.log('parsererror', xhr.responseText);
+				}
+				else if ( xhr.readyState === 4 ) {
+					fnShowErrorMessage('', 'Ajax error');
+					console.log('Ajax error', xhr.responseText);
+				}
+				else {
+					fnShowErrorMessage('', xhr.responseText);
+					console.log('error', thrown, xhr);
+				}
+			}
+		});
+	} // datatables_ajax
 
 	$.ajaxSetup({
 		method: 'POST',

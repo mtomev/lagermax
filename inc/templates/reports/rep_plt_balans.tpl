@@ -84,45 +84,8 @@
 		var config = {
 			paging: true,
 			"ajax": function (data, callback, settings) {
-				waitingDialog();
-				var api = this.api();
-				api.clear().columns().search('');
-				$.ajax({
-					url: '/reports/rep_plt_balans_ajax',
-					method: "POST",
-					data: _self.last_params,
-					"dataType": "json",
-					"cache": false,
-					success: function (result) {
-						if (result.hasOwnProperty('fields')) {
-							// result.data е масива с данни result.fields е масива с имената на полетата
-							var row = {};
-							for ( var i=0, len=result.data.length; i<len; i++ ) {
-								// За всеки ред се създава Object Json и с него се заменя стария ред
-								row = {};
-								for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
-									row[result.fields[j]] = result.data[i][j];
-								}
-								result.data[i] = row;
-							}
-						}
-						callback( result );
-					},
-					"error": function (xhr, error, thrown) {
-						api.clear().columns().search('').draw();
-						if ( error == "parsererror" ) {
-							//fnShowErrorMessage('', 'Invalid JSON response');
-							fnShowErrorMessage('', xhr.responseText);
-						}
-						else if ( xhr.readyState === 4 ) {
-							fnShowErrorMessage('', 'Ajax error');
-						}
-						else
-							fnShowErrorMessage('', xhr.responseText);
-					}
-				});
+				datatables_ajax({ data:_self.last_params, callback:callback, settings:settings, url:'/reports/rep_plt_balans_ajax' });
 			},
-
 			columns: [
 				// org_id
 				{ title: '#', data: 'id', className: "dt-center td-no-padding",
@@ -137,7 +100,18 @@
 					}
 				},
 
-				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis" , render: displayEllipses },
+				{ title: "{#org_name#}", data: 'org_name', className: "auto_filter ellipsis",
+					//render: displayEllipses
+					render: function ( data, type, row ) {
+						data = escapeHtml(data);
+						if (type !== 'display') return data;
+						/*{if $smarty.session.userdata.grants.pltorg == '1'}*/
+						return '<a href="javascript:;" url="/plt/pltorg" class="pltorg" title="{#menu_pltorg#}">'+displayDIV100(data)+'</a>';
+						/*{else}*/
+						return displayDIV100(data);
+						/*{/if}*/
+					}
+				},
 
 				{ title: "{#plt_eur#} {#balance_ns#}", data: 'ns_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#plt_eur#} {#balance_in#}", data: 'in_eur', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
@@ -182,13 +156,31 @@
 			oTable.columns('.auto_filter').every(function (index) {
 				datatable_set_auto_filter_column(this, null, false);
 			});
-			datatable_auto_filter_column(oTable, 'aviso_truck_type', aviso_truck_type, false);
-			datatable_auto_filter_column(oTable, 'aviso_status', aviso_status, false);
 
 			// Да маркираме като selected последно редактирания запис
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 			oTable.rows('#'+id).select().draw(false);
 			oTable.row({ selected: true }).show().draw(false);
+
+
+			$("#table_id tbody").off('click.pltorg').on('click.pltorg', 'a.pltorg', function(event) {
+				$this = $(this);
+
+				var url = $this.attr("url");
+				if (!url)
+					url = $this.attr("href");
+				if (url === '') return;
+
+				selectClickedRow(this);
+				var params = {};
+				params['org_id'] = edit_row.data().org_id;
+				params['from_date'] = _self.last_params['from_date'];
+				params['to_date'] = _self.last_params['to_date'];
+
+				href_post(url, params, 'POST', '_blank' );
+				return false;
+			});
+
 
 			closeWaitingDialog();
 		} // select_row

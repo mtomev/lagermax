@@ -42,6 +42,9 @@
 				{if $smarty.session.userdata.grants.rep_plt_balans == '1'}
 				<li><a sub_menu="rep_plt_balans" href="/reports/rep_plt_balans">{#menu_rep_plt_balans#}</a></li>
 				{/if}
+				{if $smarty.session.userdata.grants.rep_pltshop_balans == '1'}
+				<li><a sub_menu="rep_pltshop_balans" href="/reports/rep_pltshop_balans">{#menu_rep_pltshop_balans#}</a></li>
+				{/if}
 			</ul>
 			</li>
 

@@ -23,29 +23,8 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
-			{* Сортирането е в PHP
-			// 1 org_name
-			order: [[1, 'asc']],
-			*}
-			ajax: {
-				url: '/configuration/org_ajax',
-				type: "POST",
-				dataSrc: function (result) {
-					oTable.clear().columns().search('');
-					//return result.data;
-
-					// result.data е масива с данни result.fields е масива с имената на полетата
-					var row = {};
-					for ( var i=0, len=result.data.length; i<len; i++ ) {
-						// За всеки ред се създава Object Json и с него се заменя стария ред
-						row = {};
-						for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
-							row[result.fields[j]] = result.data[i][j];
-						}
-						result.data[i] = row;
-					}
-					return result.data;
-				},
+			"ajax": function (data, callback, settings) {
+				datatables_ajax({ data:{}, callback:callback, settings:settings, url:'/configuration/org_ajax' });
 			},
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center" },
@@ -90,12 +69,15 @@
 			var id = edit_id || {$smarty.session["{$smarty.session.table_edit}_id"]|default:0};
 			oTable.rows('#'+id).select();
 			oTable.row({ selected: true }).show().draw(false);
+
+			closeWaitingDialog();
 		}
 		oTable = this.mainTable.DataTable(config);
 		datatable_add_btn_excel();
 
 		$('#submit_button', '#headerrow').click( function () {
-			oTable.ajax.reload( _self.select_row, false );
+			oTable.rows({ selected: true }).deselect();
+			oTable.ajax.reload( _self.select_row );
 		});
 
 		commonInitMFP();

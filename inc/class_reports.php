@@ -300,7 +300,7 @@
 
 			$config_plt_balans_date = _base::get_config('config_plt_balans_date');
 			if (!isset($_SESSION[$sub_menu]['from_date']))
-				$_SESSION[$sub_menu]['from_date'] = $config_plt_balans_date;
+				$_SESSION[$sub_menu]['from_date'] = max(date('Y-m-d'), $config_plt_balans_date);
 			$this->smarty->assign('config_plt_balans_date', $config_plt_balans_date);
 
 			_base::get_select_list('org', null, 'org_name');
@@ -391,6 +391,7 @@ org_ns_plt_other ns_other,
 from org
 where ((org_ns_plt_eur <> 0) or (org_ns_plt_chep <> 0) or (org_ns_plt_other <> 0))" . PHP_EOL
 . ($org_id ? " and (org_id = $org_id)" : '') . PHP_EOL
+
 . "union all
 
 select org_id,
@@ -442,42 +443,126 @@ group by ss.org_id
 left join org on sss.org_id = org.org_id
 order by org_name";
 
-			$time = -microtime(true);
-			$query_result = _base::get_query_result($sql_query);
+			_base::echo_nomen_list_partial($sql_query, 'org_id');
+		}
 
-			/*
-			$data = array();
-			while ($query_data = _base::sql_fetch_assoc($query_result)) {
-				$data[] = $query_data + array('id' => $query_data['org_id']);
-			}
-			_base::sql_free_result($query_result);
-			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
-			*/
 
-			$fields = _base::get_fields_name($query_result);
-			$fields[] = 'id';
-			$indexOfID = array_search('org_id', $fields);
-			echo '{'. 
-				substr(json_encode(array('fields' => $fields), JSON_UNESCAPED_UNICODE),1,-1)
-				.',"data":[';
+		function rep_pltshop_balans () {
+		 	if (!_base::CheckAccess('rep_pltshop_balans')) return;
 
-			$data = array();
-			$first_echo = true;
-			while ($query_data = _base::sql_fetch_row($query_result)) {
-				$query_data[] = $query_data[$indexOfID];
-				$data[] = $query_data;
-				if (count($data) >= 100) {
-					echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
-					$data = array();
-					$first_echo = false;
-				}
-			}
-			_base::sql_free_result($query_result);
-			$time += microtime(true);
-			if (count($data)) {
-				echo ($first_echo ? '':',') . substr(json_encode($data, JSON_UNESCAPED_UNICODE),1,-1);
-			}
-			echo '],'. substr(json_encode(array('execution_time' => number_format($time*1000,3)), JSON_UNESCAPED_UNICODE),1,-1) . '}';
+			$_SESSION['main_menu'] = 'reports';
+			$_SESSION['sub_menu'] = 'rep_pltshop_balans';
+			$sub_menu = $_SESSION['sub_menu'];
+			_base::readFilterToSESSION_new($sub_menu);
+			$this->smarty->assign('current_url', '/reports/rep_pltshop_balans');
+
+			if (!isset($_SESSION[$sub_menu]['from_date']))
+				$_SESSION[$sub_menu]['from_date'] = date('Y-m-d');
+
+			_base::get_select_list('shop', null, 'shop_name');
+
+			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
+		}
+
+		function rep_pltshop_balans_ajax () {
+		 	if (!_base::CheckAccess('rep_pltshop_balans')) return;
+
+			$sub_menu = 'rep_pltshop_balans';
+			_base::readFilterToSESSION_new($sub_menu);
+			$where = "where (1=1)";
+			$where_ns = "where (1=1)";
+
+			$shop_id = intVal($_SESSION[$sub_menu]['shop_id']);
+			if ($shop_id)
+				$where .= " and (shop_id = $shop_id)";
+
+			$from_date = $_SESSION[$sub_menu]['from_date'];
+			$to_date = $_SESSION[$sub_menu]['to_date'];
+			if ($from_date)
+				$where .= " and pltshop_date >= '$from_date'";
+			if ($to_date)
+				$where .= " and pltshop_date <= '$to_date'";
+
+			if ($shop_id)
+				$where_ns .= " and (shop_id = $shop_id)";
+			if ($from_date)
+				$where_ns .= " and (pltshop_date < '$from_date')";
+
+			$sql_query = " 
+select sss.shop_id, shop.shop_name,
+ns_eur, in_eur, ret_eur, claim_eur, (ns_eur+in_eur-ret_eur-claim_eur) ks_eur,
+ns_chep, in_chep, ret_chep, claim_chep, (ns_chep+in_chep-ret_chep-claim_chep) ks_chep,
+ns_other, in_other, ret_other, claim_other, (ns_other+in_other-ret_other-claim_other) ks_other
+
+from (
+select ss.shop_id,
+sum(ns_eur) as ns_eur,
+sum(ns_chep) as ns_chep,
+sum(ns_other) as ns_other,
+
+sum(in_eur) in_eur,
+sum(ret_eur) ret_eur,
+sum(claim_eur) claim_eur,
+
+sum(in_chep) in_chep,
+sum(ret_chep) ret_chep,
+sum(claim_chep) claim_chep,
+
+sum(in_other) in_other,
+sum(ret_other) ret_other,
+sum(claim_other) claim_other
+
+from (
+select shop_id,
+sum(qty_plt_eur-qty_ret_plt_eur-qty_claim_plt_eur) as ns_eur,
+sum(qty_plt_chep-qty_ret_plt_chep-qty_claim_plt_chep) as ns_chep,
+sum(qty_plt_other-qty_ret_plt_other-qty_claim_plt_other) as ns_other,
+
+0 as in_eur,
+0 as ret_eur,
+0 as claim_eur,
+
+0 as in_chep,
+0 as ret_chep,
+0 as claim_chep,
+
+0 as in_other,
+0 as ret_other,
+0 as claim_other
+
+from pltshop
+$where_ns
+group by shop_id
+
+union all
+
+select shop_id,
+0 as ns_eur,
+0 as ns_chep,
+0 as ns_other,
+
+sum(qty_plt_eur) in_eur,
+sum(qty_ret_plt_eur) ret_eur,
+sum(qty_claim_plt_eur) claim_eur,
+
+sum(qty_plt_chep) in_chep,
+sum(qty_ret_plt_chep) ret_chep,
+sum(qty_claim_plt_chep) claim_chep,
+
+sum(qty_plt_other) in_other,
+sum(qty_ret_plt_other) ret_other,
+sum(qty_claim_plt_other) claim_other
+
+from pltshop
+$where
+group by shop_id
+) ss
+group by ss.shop_id
+) sss
+left join shop on sss.shop_id = shop.shop_id
+order by shop_name";
+
+			_base::echo_nomen_list_partial($sql_query, 'shop_id');
 		}
 
 	}

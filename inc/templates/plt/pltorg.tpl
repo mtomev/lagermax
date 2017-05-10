@@ -57,50 +57,9 @@
 		$('#table_id').addClass(dataTable_default_class);
 		var config = {
 			paging: true,
-			{*
-			// pltorg_date, id
-			order: [[2, 'asc'], [0, 'asc']],
-			*}
 			"ajax": function (data, callback, settings) {
-				waitingDialog();
-				var api = this.api();
-				api.clear().columns().search('');
-				$.ajax({
-					url: '/plt/pltorg_ajax',
-					method: "POST",
-					data: _self.last_params,
-					"dataType": "json",
-					"cache": false,
-					success: function (result) {
-						if (result.hasOwnProperty('fields')) {
-							// result.data е масива с данни result.fields е масива с имената на полетата
-							var row = {};
-							for ( var i=0, len=result.data.length; i<len; i++ ) {
-								// За всеки ред се създава Object Json и с него се заменя стария ред
-								row = {};
-								for (j = 0, j_len = result.data[i].length; j < j_len; j++) {
-									row[result.fields[j]] = result.data[i][j];
-								}
-								result.data[i] = row;
-							}
-						}
-						callback( result );
-					},
-					"error": function (xhr, error, thrown) {
-						api.clear().columns().search('').draw();
-						if ( error == "parsererror" ) {
-							//fnShowErrorMessage('', 'Invalid JSON response');
-							fnShowErrorMessage('', xhr.responseText);
-						}
-						else if ( xhr.readyState === 4 ) {
-							fnShowErrorMessage('', 'Ajax error');
-						}
-						else
-							fnShowErrorMessage('', xhr.responseText);
-					}
-				});
+				datatables_ajax({ data:_self.last_params, callback:callback, settings:settings, url:'/plt/pltorg_ajax' });
 			},
-
 			columns: [
 				{ title: "#", data: 'id', className: "dt-center td-no-padding", render: display_pltorg_edit },
 
@@ -169,7 +128,7 @@
 			oTable.row({ selected: true }).show().draw(false);
 
 			// Заради Иконата за Upload
-			$("#table_id tbody").on("click", 'input, select, a', function() {
+			$("#table_id tbody").off('click.deselect').on('click.deselect', 'input, select, a', function() {
 				// Не е необходимо да селектвам текущия ред, защото <body> click ще го направи след това
 				oTable.rows({ selected: true }).deselect();
 			});

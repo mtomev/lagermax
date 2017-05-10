@@ -1,5 +1,5 @@
 <?php
-	require_once(COMPS_DIR.'/fpdf181/code128.php');
+	/*require_once(COMPS_DIR.'/fpdf181/code128.php');
 	class plt_PDF extends PDF_Code128 {
 		public $footers = array();
 		public $header_text = false;
@@ -11,17 +11,6 @@
 				$this->SetFont($this->FontFamily,'',11);
 				$this->Cell($this->GetPageWidth()-$this->lMargin-$this->rMargin,5, iconv('UTF-8', 'windows-1251', $this->header_text.' / стр.'.$page), 0, 1, 'R');
 			}
-		}
-
-		// Page footer
-		function Footer() {
-			/*
-			$this->SetY(-20);
-			$this->SetFont('Arial','',8);
-			//$this->Cell(0,10,'Page '.$this->PageNo().'/{nb}',0,0,'C');
-			foreach($this->footers as $footer)
-				$this->Cell(0,3, iconv('UTF-8', 'windows-1252', $footer), 0, 1, 'C');
-			*/
 		}
 
 		//Computes the number of lines a MultiCell of width w will take
@@ -70,7 +59,7 @@
 			}
 			return $nl;
 		}
-	}
+	}*/
 
 	class plt {
 		function __construct ($smarty) {
@@ -135,10 +124,10 @@
 				$where .= " and pltorg_date <= '$to_date'";
 
 			/*
-			$data = _base::nomen_list('pltorg', true, 'pltorg_id', $where);
+			$data = _base::nomen_list("select * from view_pltorg $where order by pltorg_date, pltorg_id");
 			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 			*/
-			_base::echo_nomen_list_partial('pltorg', true, 'pltorg_date, pltorg_id', $where);
+			_base::echo_nomen_list_partial("select * from view_pltorg $where order by pltorg_date, pltorg_id", 'pltorg_id');
 		}
 
 		function pltorg_edit () {
@@ -157,6 +146,7 @@
 				else
 					// Ако потребителя не е към някой Доставчик, то да вземем Доставчика от параметъра за справката
 					$data['org_id'] = $_SESSION['pltorg']['org_id'];
+				$data['pltorg_date'] =  date('Y-m-d');
 			}
 			else {
 				// Ако е корекция на стар
@@ -342,10 +332,10 @@
 				$where .= " and pltshop_date <= '$to_date'";
 
 			/*
-			$data = _base::nomen_list('pltshop', true, 'pltshop_id', $where);
+			$data = _base::nomen_list("select * from view_pltshop $where order by pltshop_date, pltshop_id", 'pltshop_id');
 			echo json_encode(array('data' => $data), JSON_UNESCAPED_UNICODE);
 			*/
-			_base::echo_nomen_list_partial('pltshop', true, 'pltshop_date, pltshop_id', $where);
+			_base::echo_nomen_list_partial("select * from view_pltshop $where order by pltshop_date, pltshop_id", 'pltshop_id');
 		}
 
 		function pltshop_edit () {
@@ -360,6 +350,7 @@
 			if (!$id) {
 				// Ако е нов
 				$data['shop_id'] = $_SESSION['pltshop']['shop_id'];
+				$data['pltshop_date'] =  date('Y-m-d');
 			}
 			else {
 				// Ако е корекция на стар
