@@ -6,19 +6,19 @@
 	<div class="headerrow" style="float:left;">
 		<span class="">
 			{#w_group_name#}
-			<select class="" id="w_group_id" name="w_group_id"> 
+			<select class="" id="w_group_id"> 
 				{html_options options=$select_w_group selected={$smarty.session.$sub_menu.w_group_id}}
 			</select>
 		</span>
 		<span class="" style="padding-left: 10px;">
 			{#warehouse_code#}
-			<select class="" id="warehouse_id" name="warehouse_id"> 
+			<select class="" id="warehouse_id"> 
 				{html_options options=$select_warehouse selected={$smarty.session.$sub_menu.warehouse_id}}
 			</select>
 		</span>
 		<span class="ellipsis" style="padding-left: 10px;">
 			{#org_name#}
-			<select class="select2chosen" id="org_id" name="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
+			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
 			</select>
 			<span class="clear-input" id="org_id_clear">×</span>
@@ -28,13 +28,13 @@
 	<div class="headerrow" style="clear:both; float:left; padding-top:0px;" id="datatable_add_btn_excel">
 		<span class="">
 			{#aviso_date#}
-			<input name="from_date" id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
-			<input name="to_date" id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
+			<input id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
+			<input id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
 		</span>
 
 		<span class="" style="padding-left: 10px;">
 			{#aviso_status#}
-			<select class="" id="aviso_status" name="aviso_status"> 
+			<select class="" id="aviso_status"> 
 				{html_options options=$select_aviso_status selected={$smarty.session.$sub_menu.aviso_status}}
 			</select>
 		</span>

@@ -108,6 +108,10 @@
 				//$_SESSION[$sub_menu]['from_date'] = date('Y-m-d', strtotime(date("Y-m-d"). ' - 7 days'));
 				$_SESSION[$sub_menu]['from_date'] = date('Y-m-d');
 
+			if (!isset($_SESSION[$sub_menu]['aviso_status']))
+				//$_SESSION[$sub_menu]['aviso_status'] = '37';
+				$_SESSION[$sub_menu]['aviso_status'] = -1;
+
 			if (!isset($_SESSION[$sub_menu]['w_group_id']))
 				$_SESSION[$sub_menu]['w_group_id'] = $_SESSION['userdata']['w_group_id'];
 
@@ -117,8 +121,8 @@
 			else
 				$where_warehouse = '';
 			_base::get_select_list('warehouse', null, 'warehouse_code', $where_warehouse, 'warehouse_code');
-
 			_base::get_select_list('org', null, 'org_name');
+			_base::get_select_aviso_status();
 
 			_base::set_table_edit_AccessRights('aviso');
 			_base::put_sys_oper(__METHOD__, 'browse', $sub_menu, 0);
@@ -149,6 +153,16 @@
 				$where .= " and aviso_date >= '$from_date'";
 			if ($to_date)
 				$where .= " and aviso_date <= '$to_date'";
+
+			if ($_SESSION[$sub_menu]['aviso_status'] != -1) {
+				if ($_SESSION[$sub_menu]['aviso_status'] == '03')
+					$where .= " and (aviso_status in ('0','3'))";
+				else
+				if ($_SESSION[$sub_menu]['aviso_status'] == '37')
+					$where .= " and (aviso_status in ('3','7'))";
+				else
+					$where .= " and (aviso_status = '{$_SESSION[$sub_menu]['aviso_status']}')";
+			}
 
 			$sql_query = "select * from view_aviso $where order by aviso_date, aviso_time";
 
@@ -278,10 +292,13 @@
 				$where .= " and aviso_date <= '$to_date'";
 
 			if ($_SESSION[$sub_menu]['aviso_status'] != -1) {
-				if ($_SESSION[$sub_menu]['aviso_status'] != '37')
-					$where .= " and (aviso_status = '{$_SESSION[$sub_menu]['aviso_status']}')";
+				if ($_SESSION[$sub_menu]['aviso_status'] == '03')
+					$where .= " and (aviso_status in ('0','3'))";
 				else
+				if ($_SESSION[$sub_menu]['aviso_status'] == '37')
 					$where .= " and (aviso_status in ('3','7'))";
+				else
+					$where .= " and (aviso_status = '{$_SESSION[$sub_menu]['aviso_status']}')";
 			}
 
 			$_SESSION['memory_middle'] = number_format(memory_get_usage(), 0, '.',' ');
@@ -394,13 +411,17 @@
 
 
 		function aviso_edit () {
-			// aviso_id / warehouse_id
+			// aviso_id / warehouse_id / aviso_change_warehouse
 			$id = intVal($_REQUEST['p1']);
 			$warehouse_id = intVal($_REQUEST['p2']);
+			$aviso_change_warehouse = $_REQUEST['p3'];
 
-			$data = _base::nomen_list_edit('aviso', $id, true, null, $add_select);
+			$data = _base::nomen_list_edit('aviso', $id, true, null);
 			
 			// С какъв интерфейс се редактира
+			// $warehouse_template съдържа suffix-а, който се добавя, за да се получи името на .tpl файла: "aviso/aviso_edit_".$warehouse_template.".tpl";
+			// warehouse_type е CENT, BBXD, PAXD и по него се определя какви полета се попълват, както и кои са задължителни
+			// - aviso_edit_1.tpl, aviso_edt_complete.tpl
 			if (!$id) {
 				// Ако е ново Авизо
 				if (!_base::CheckAccess('aviso_add')) return;
@@ -426,7 +447,18 @@
 				// Ако е корекция на старо Авизо
 				if (!_base::CheckGrant('aviso_view'))
 					if (!_base::CheckAccess('aviso_edit')) return;
-				$warehouse_id = intVal($data['warehouse_id']);
+				
+				// Ако се иска промяна на Платформа
+				if ($aviso_change_warehouse == 'aviso_change_warehouse') {
+					if (!_base::CheckAccess('edit_old_aviso')) return;
+					$data['warehouse_id'] = $warehouse_id;
+					// Дефиницията на склада
+					$warehouse = _base::select_sql("select warehouse_template, w_pack2pallet, warehouse_type from warehouse where warehouse_id = $warehouse_id");
+					$data['warehouse_template'] = $warehouse['warehouse_template'];
+					$data['w_pack2pallet'] = $warehouse['w_pack2pallet'];
+					$data['warehouse_type'] = $warehouse['warehouse_type'];
+				} else
+					$warehouse_id = intVal($data['warehouse_id']);
 
 				// Ако потребител към някой доставчик, без право да вижда всички доставчици, се опитва да отвори неправомерно друго Авизо
 				if (intVal($_SESSION['userdata']['org_id']) and $data['org_id'] != $_SESSION['userdata']['org_id'] and !$_SESSION['userdata']['grants']['view_all_suppliers']) {
@@ -653,6 +685,28 @@
 			}
 		}
 
+		// Промяна на Платформата по съществуващо Авизо
+		function aviso_change_warehouse () {
+		 	if (!_base::CheckAccess('edit_old_aviso')) return;
+			if (!_base::CheckAccess('aviso_edit')) return;
+
+			// aviso_id
+			$id = intVal($_REQUEST['p1']);
+			if (!$id) return;
+
+			$data = _base::nomen_list_edit('aviso', $id, true, null);
+
+			$data['allow_delete'] = false;
+
+			// Списъци за избор
+			_base::get_select_list('w_group', null, null, "where is_active = '1'");
+			_base::get_select_list('warehouse', null, null, "where is_active = '1' and w_group_id = ".intVal($data['w_group_id']));
+
+
+			$this->smarty->assign('data', $data);
+		}
+
+
 
 		function aviso_select_timeslot ($aviso_id = null) {
 			// aviso_id
@@ -864,6 +918,7 @@
 			//_base::get_select_aviso_status(null, true);
 			$temp['0'] = $this->smarty->getConfigVars('aviso_status_0');
 			$temp['3'] = $this->smarty->getConfigVars('aviso_status_3');
+			$temp['8'] = $this->smarty->getConfigVars('aviso_status_8');
 			$temp['9'] = $this->smarty->getConfigVars('aviso_status_9');
 			$this->smarty->assign('select_aviso_status', $temp);
 
@@ -896,16 +951,16 @@
 			$query->AddParam('aviso_status', 'c');
 			$query->AddParam('aviso_reject_reason');
 
-			//Попълва се в момента на сетване на статус от 0 на 3/7/9 или от 3 на 9
-			//- изчиства се при сетване на статус от 3/7/9 на 0
+			//Попълва се в момента на сетване на статус от 0 на >=3
+			//- изчиства се при сетване на статус от >=3 на 0
 			if ($aviso_status_old === '0' and $aviso_status >= '3')
 				$query->AddParamExt('aviso_start_exec', date("Y-m-d H:i:s"), 'd');
 			else
 			if ($aviso_status_old >= '3' and $aviso_status === '0')
 				$query->AddParamExt('aviso_start_exec', '', 'd');
 
-			// Попълва се в момента на сетване на статус от 0/3 на 7/9
-			// - изчиства се при сетване на статус от 7/9 на 3/0
+			// Попълва се в момента на сетване на статус от <=3 на >=7
+			// - изчиства се при сетване на статус от >=7 на <=3
 			if ($aviso_status_old <= '3' and $aviso_status >= '7')
 				$query->AddParamExt('aviso_end_exec', date("Y-m-d H:i:s"), 'd');
 			else
@@ -916,10 +971,11 @@
 			
 			$_SESSION['aviso_id'] = $id;
 
-			// Ако е връщане на Авизо, направо нулирам приетите количества
+			// Ако е връщане или недоставяне на Авизо, направо нулирам приетите количества
+			// 8-недоставено, 9-върнато
 			// Също и ако е сваляне на статуса от >= 7 на <= 3
 			if (
-				($aviso_status_old != '9' and $aviso_status == '9')
+				($aviso_status_old <= '8' and $aviso_status >= '8')
 				or ($aviso_status_old >= '7' and $aviso_status <= '3') 
 			) {
 				$sql_query = "UPDATE aviso_line SET qty_pallet_rcvd = 0, qty_pack_rcvd = 0 WHERE aviso_id = $id";
@@ -1061,16 +1117,16 @@
 			$query->AddParam('aviso_claim_plt_chep', 'n', 0);
 			$query->AddParam('aviso_claim_plt_other', 'n', 0);
 
-			//Попълва се в момента на сетване на статус от 0 на 3/7/9 или от 3 на 9
-			//- изчиства се при сетване на статус от 3/7/9 на 0
+			//Попълва се в момента на сетване на статус от 0 на >=3
+			//- изчиства се при сетване на статус от >=3 на 0
 			if ($aviso_status_old === '0' and $aviso_status >= '3')
 				$query->AddParamExt('aviso_start_exec', date("Y-m-d H:i:s"), 'd');
 			else
 			if ($aviso_status_old >= '3' and $aviso_status === '0')
 				$query->AddParamExt('aviso_start_exec', '', 'd');
 
-			// Попълва се в момента на сетване на статус от 0/3 на 7/9
-			// - изчиства се при сетване на статус от 7/9 на 3/0
+			// Попълва се в момента на сетване на статус от <=3 на >=7
+			// - изчиства се при сетване на статус от >=7 на <=3
 			if ($aviso_status_old <= '3' and $aviso_status >= '7')
 				$query->AddParamExt('aviso_end_exec', date("Y-m-d H:i:s"), 'd');
 			else
@@ -1083,8 +1139,10 @@
 
 
 			// Запис в aviso_line
-			// Ако е връщане на Авизо, направо нулирам приетите количества
-			if ($aviso_status == '9' or $aviso_status <= '3') {
+			// Ако е връщане или недоставяне на Авизо, направо нулирам приетите количества
+			// 8-недоставено, 9-върнато
+			// Също и ако е сваляне на статуса от >= 7 на <= 3
+			if ($aviso_status >= '8' or $aviso_status <= '3') {
 				$sql_query = "UPDATE aviso_line SET qty_pallet_rcvd = 0, qty_pack_rcvd = 0 WHERE aviso_id = $id";
 				_base::execute_sql($sql_query);
 				// Изтриване и на свързания pltorg

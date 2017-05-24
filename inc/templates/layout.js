@@ -26,7 +26,7 @@
 		paging: false,
 		// pageLength да е точно преди номерата на страниците
 		dom: 'frtlp',
-		lengthMenu: [ [20, 50, -1], [20, 50, "All"] ],
+		lengthMenu: [ [15, 20, 50, -1], [15, 20, 50, "All"] ],
 		pageLength: 20,
 		pagingType: "numbers",
 
@@ -628,6 +628,7 @@
 				case '0': return '{#aviso_status_0#}';
 				case '3': return '{#aviso_status_3#}';
 				case '7': return '{#aviso_status_7#}';
+				case '8': return '{#aviso_status_8#}';
 				case '9': return '{#aviso_status_9#}';
 				default: return '';
 			}
@@ -1072,3 +1073,63 @@
 	});
 
 	//$(window).unload(function(){});
+	
+(function($) {
+  $.dragScroll = function(options) {
+    var settings = $.extend({
+      scrollVertical: true,
+      scrollHorizontal: true,
+      cursor: null
+    }, options);
+
+    var clicked = false, draged = false,
+      clickY, clickX;
+
+    var getCursor = function() {
+      if (settings.cursor) return settings.cursor;
+      if (settings.scrollVertical && settings.scrollHorizontal) return 'move';
+      if (settings.scrollVertical) return 'row-resize';
+      if (settings.scrollHorizontal) return 'col-resize';
+    }
+
+    var updateScrollPos = function(e, el) {
+      $('html').css('cursor', getCursor());
+      var $el = $(el);
+      settings.scrollVertical && $el.scrollTop($el.scrollTop() + (clickY - e.pageY));
+      settings.scrollHorizontal && $el.scrollLeft($el.scrollLeft() + (clickX - e.pageX));
+    }
+
+    $(document).on({
+      'mousemove': function(e) {
+        if (clicked) {
+					updateScrollPos(e, this);
+					draged = true;
+				}
+      },
+      'mousedown': function(e) {
+				// Right Mouse
+				if (e.which === 3) {
+					//e.preventDefault();
+					clicked = true;
+					clickY = e.pageY;
+					clickX = e.pageX;
+					//return false;
+				}
+      },
+      'mouseup': function() {
+        clicked = false;
+        $('html').css('cursor', 'auto');
+      },
+      'contextmenu': function(e) {
+				if (draged) {
+					clicked = false;
+					draged = false;
+					//e.preventDefault();
+					return false;
+				}
+      },
+    });
+  }
+}(jQuery))
+
+$.dragScroll();

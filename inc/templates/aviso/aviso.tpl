@@ -2,14 +2,21 @@
 {block name=content}
 {assign var="sub_menu" value=$smarty.session.sub_menu}
 <div id="main">
-	<div class="headerrow" id="headerrow">
+	<div id="headerrow">
+	<div class="headerrow" style="float:left;">
+		{if $smarty.session.userdata.grants.aviso_add == '1'}
+		<span class="" style="padding-right: 10px;">
+			<button class="add_button" url="/aviso/aviso_select_warehouse" rel="edit-0" edit_add_new="{$smarty.session.table_edit}" title="{#Add#} {#table_aviso#}"><span>{#add#}</span></button>
+		</span>
+		{/if}
+
 		<span class="">
 			{#w_group_name#}
-			<select class="" id="w_group_id" name="w_group_id"> 
+			<select class="" id="w_group_id"> 
 				{html_options options=$select_w_group selected={$smarty.session.$sub_menu.w_group_id}}
 			</select>
 		</span>
-		<span class="ellipsis">
+		<span class="ellipsis" style="padding-left: 10px;">
 			{#org_name#}
 			<select class="select2chosen" id="org_id" data-width="15rem;" {if $smarty.session.userdata.grants.view_all_suppliers != '1'}disabled{/if}> 
 				{html_options options=$select_org selected={$smarty.session.$sub_menu.org_id}}
@@ -18,24 +25,28 @@
 			<span class="clear-input" id="org_id_clear">×</span>
 			{/if}
 		</span>
+	</div>
 
-		<span class="" style="padding-left: 10px;">
+	<div class="headerrow" style="clear:both; float:left; padding-top:0px;" id="datatable_add_btn_excel">
+		<span class="">
 			{#aviso_date#}
 			<input id="from_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.from_date}">
 			<input id="to_date" class="date" data-type="Date" type="text" style="width:80px;" value="{$smarty.session.$sub_menu.to_date}">
 		</span>
 
 		<span class="" style="padding-left: 10px;">
+			{#aviso_status#}
+			<select class="" id="aviso_status"> 
+				{html_options options=$select_aviso_status selected={$smarty.session.$sub_menu.aviso_status}}
+			</select>
+		</span>
+
+		<span class="" style="padding-left: 10px;">
 			<button class="submit_button" id="submit_button"><span>{#btn_submit#}</span></button>
 		</span>
 
-		{if $smarty.session.userdata.grants.aviso_add == '1'}
-		<span class="" style="padding-left: 10px;">
-			<button class="add_button" url="/aviso/aviso_select_warehouse" rel="edit-0" edit_add_new="{$smarty.session.table_edit}" title="{#Add#} {#table_aviso#}"><span>{#add#}</span></button>
-		</span>
-		{/if}
-
 		{include file='main_menu/list_search.tpl'}
+	</div>
 	</div>
 
 	<table id="table_id">
@@ -55,6 +66,7 @@
 		this.SetParams = function() {
 			_self.last_params['w_group_id'] = $('#w_group_id', '#headerrow').val();
 			_self.last_params['org_id'] = $('#org_id', '#headerrow').val();
+			_self.last_params['aviso_status'] = $('#aviso_status', '#headerrow').val();
 
 			_self.last_params['from_date'] = EsCon.getParsedVal($('#from_date', '#headerrow'));
 			_self.last_params['to_date'] = EsCon.getParsedVal($('#to_date', '#headerrow'));
@@ -97,7 +109,8 @@
 					render: function ( data, type, row ) {
 						if (type !== 'display') return data;
 						var status = aviso_status(data, type);
-						if (data == 0) {
+						// {* 3-прието 7-приключено *}
+						if (row.aviso_status != '3' && row.aviso_status != '7') {
 							/*{if $smarty.session.userdata.grants.aviso_reception_edit == '1' || $smarty.session.userdata.grants.aviso_reception_view == '1'}*/
 							return '<a href="javascript:;" url="/aviso/aviso_edit_receipt/'+row.aviso_id+'" class="aviso_edit_receipt" title="{#menu_aviso_reception#}">'+displayDIV100(status)+'</a>';
 							/*{else}*/
@@ -217,7 +230,7 @@
 		// Добавяне на tfoot
 		this.mainTable.append("<tfoot>" + '<tr>'+config.columns.map(function () { return "<td></td>"; }).join("")+'</tr>' + "</tfoot>");
 		oTable = this.mainTable.DataTable(config);
-		datatable_add_btn_excel();
+		datatable_add_btn_excel($('#datatable_add_btn_excel'));
 
 		commonInitMFP();
 

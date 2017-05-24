@@ -426,7 +426,6 @@
 	});
 
 	$('#save_button_aviso', '#aviso_edit').click (function () {
-		$('#aviso_status_new', '#aviso_edit').val('7');
 		if (!EsCon.check_mandatory($('#aviso_edit .mandatory').not('#table_line .mandatory'))) return false;
 
 		// Редовете от таблицата
@@ -444,7 +443,9 @@
 					fnShowErrorMessage('', result);
 				}
 				else {
-					clickOpenFile('/aviso/aviso_ppp_display/'+result+'/{$data.ppp_doc}');
+					var aviso_status = $('#aviso_status', '#aviso_edit').val();
+					if (aviso_status == '7')
+						clickOpenFile('/aviso/aviso_ppp_display/'+result+'/{$data.ppp_doc}');
 					window.location.href = callback_url;
 				}
 			},

@@ -1,3 +1,12 @@
 	<div class="status-line">
-		<span>cr: {$data.cr_user_name}, {$data.cr_date|date_format:"%d.%m.%Y %T"} / mo: {$data.mo_user_name}, {$data.mo_date|date_format:"%d.%m.%Y %T"}</span>
+		<span>cr: {$data.cr_user_name}, <span class="cr_date">{$data.cr_date}</span> / mo: {$data.mo_user_name}, <span class="cr_date">{$data.mo_date}</span></span>
 	</div>
+<script type="text/javascript">
+	$(document).ready( function () {
+		$('.status-line span.cr_date').each(function() {
+			var d = EsCon.formatCRDate($(this).text());
+			$(this).removeClass('cr_date');
+			$(this).html(d);
+		});
+});
+</script>

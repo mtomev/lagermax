@@ -86,7 +86,7 @@
 		($.magnificPopup.instance).close();
 
 		waitingDialog();
-		/*
+		/*{*
 		jQuery.post('/aviso/aviso_save/{$data.id}', EsCon.serialize($('#aviso_edit :input').not('#table_line :input')), function (result) {
 			if (!Number(result)) {
 				closeWaitingDialog();
@@ -97,7 +97,7 @@
 				window.location.href = callback_url;
 			}
 		});
-		*/
+		*}*/
 		$.ajax({
 			type: 'POST',
 			async: false,

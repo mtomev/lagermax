@@ -125,11 +125,13 @@
 				{ title: "{#plt_chep#} {#balance_claim#}", data: 'claim_chep', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#plt_chep#} {#balance_ks#}", data: 'ks_chep', className: "dt-right dt-body-gray sum_footer_0", render: EsCon.format0HideZero },
 
+				{*
 				{ title: "{#plt_other#} {#balance_ns#}", data: 'ns_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#plt_other#} {#balance_in#}", data: 'in_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#plt_other#} {#balance_ret#}", data: 'ret_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#plt_other#} {#balance_claim#}", data: 'claim_other', className: "dt-right sum_footer_0", render: EsCon.format0HideZero },
 				{ title: "{#plt_other#} {#balance_ks#}", data: 'ks_other', className: "dt-right dt-body-gray sum_footer_0", render: EsCon.format0HideZero },
+				*}
 
 			],
 

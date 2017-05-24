@@ -127,6 +127,11 @@
 		{/if}
 			<span>id:{$data.id}</span>
 			<button class="cancel_button" id="cancel_button_aviso"><span>{#btn_Cancel#}</span></button>
+
+		{if $data.allow_edit && $smarty.session.userdata.grants.edit_old_aviso == '1' && $data.id != 0}
+			<button class="save_button" id="save_button_old_aviso" style="margin-left: 40px;" title="Директен запис, без промяна на дата и час"><span>{#btn_Save#}</span></button>
+		{/if}
+
 		{if $data.allow_delete}
 			<button class="delete_button" id="delete_button_aviso"><span>{#btn_Delete#}</span></button>
 		{/if}
@@ -173,6 +178,22 @@
 		// Списъка със сгради, притежание на текущия company_id
 		this.org_metro_list = {$select_org_metro};
 		this.shop_list = {$select_shop};
+
+		// {* Ако имаме смяна на Платформа, то да изтрием стойностите на полетата, които не се въвеждат за новата Платформа *}
+		for (var i = 0, len = _self.data_line.length; i < len; i++) {
+			/*{if $data.warehouse_type != '3'}*/
+			// Метро магазин - само за 3 PAXD
+			// shop_name, shop_id
+			_self.data_line[i].shop_id = '0';
+			/*{/if}*/
+			/*{if $data.warehouse_type == '1'}*/
+			// qty_pack, weight, volume
+			_self.data_line[i].qty_pack = '0';
+			_self.data_line[i].weight = '0';
+			_self.data_line[i].volume = '0';
+			/*{/if}*/
+		}
+
 
 		var config = {
 			"bSort": false,
@@ -417,7 +438,7 @@
 						$focused.focus();
 				}
 			});
-		}
+		} // TableFinit
 
 		// Добавяне на tfoot
 		_self.mainTable.append("<tfoot>" + '<tr>' + config.columns.map(function () { return "<td></td>"; }).join("") + '</tr>' + "</tfoot>");
@@ -598,6 +619,38 @@
 
 		// Записа се извършва в aviso_select_timeslot.tpl
 	});
+
+	/*{if $data.allow_edit && $smarty.session.userdata.grants.edit_old_aviso == '1' && $data.id != 0}*/
+		// Директен запис на старо Авизо, без промяна на Дата и Час
+		$('#save_button_old_aviso', '#aviso_edit').click (function () {
+			if (!EsCon.check_mandatory($('#aviso_edit .mandatory').not('#table_line .mandatory'))) return false;
+
+			// Редовете от таблицата
+			if (!vLocalTable.prepareToSave()) return;
+			
+			$('#aviso_edit #aviso_date_timeslot').val(EsCon.formatDate('{$data.aviso_date}'));
+			$('#aviso_edit #aviso_time_timeslot').val('{$data.aviso_time}');
+
+			waitingDialog();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/aviso/aviso_save/{$data.id}',
+				data: EsCon.serialize($('#aviso_edit :input').not('#table_line :input')),
+				success: function (result) {
+					if (!Number(result)) {
+						closeWaitingDialog();
+						fnShowErrorMessage('', result);
+					}
+					else {
+						clickOpenFile('/aviso/aviso_display/'+result+'/MP_Aviso_'+result+'.pdf');
+						window.location.href = callback_url;
+					}
+				},
+			});
+			
+		});
+	/*{/if}*/
 
 	$('#cancel_button_aviso', '#aviso_edit').click (function () {
 		window.location.href = callback_url;

@@ -24,6 +24,9 @@
 			<div class="table-cell">
 				<input id="warehouse_name" class="text readonly" readonly type="text" value="{$data.warehouse_name}">
 			</div>
+			{if $data.allow_edit && $smarty.session.userdata.grants.edit_old_aviso == '1'}
+			<button class="save_button hidden hide_show" id="aviso_change_warehouse"><span>Смяна на платформа</span></button>
+			{/if}
 		</div>
 
 		<div class="table-row">
@@ -74,7 +77,7 @@
 
 	$('#aviso_id', '#aviso_receipt').on('input', function () {
 		$('[name=aviso_id]', '#aviso_receipt').val(0);
-		$('.row-button .hide_show', '#aviso_receipt')
+		$('.hide_show', '#aviso_receipt')
 			.addClass('hidden');
 	});
 	$('#aviso_id', '#aviso_receipt').change(function () {
@@ -114,10 +117,10 @@
 					if (data.aviso_id) {
 						$('#print_button_receipt', '#aviso_receipt')
 							.attr('scan_doc', data.scan_doc);
-						$('.row-button .hide_show', '#aviso_receipt')
+						$('.hide_show', '#aviso_receipt')
 							.removeClass('hidden');
 					} else {
-						$('.row-button .hide_show', '#aviso_receipt')
+						$('.hide_show', '#aviso_receipt')
 							.addClass('hidden');
 					}
 				}
@@ -188,4 +191,24 @@
 	$('#cancel_button_receipt', '#aviso_receipt').click (function () {
 		($.magnificPopup.instance).close();
 	});
+	
+	/*{if $data.allow_edit && $smarty.session.userdata.grants.edit_old_aviso == '1'}*/
+	$('#aviso_change_warehouse', '#aviso_receipt').click (function (event) {
+		var aviso_id = Number(EsCon.getParsedVal($('[name=aviso_id]', '#aviso_receipt')));
+		if (!aviso_id) return;
+
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		// Дали е нов елемент, който после се добавя в таблицата
+		is_edit_child = false;
+		edit_row = null;
+		edit_id = 0;
+		edit_delete = false;
+		edit_add_new = false;
+
+		($.magnificPopup.instance).close();
+		showMFP('/aviso/aviso_change_warehouse/'+aviso_id, { });
+	});
+	/*{/if}*/
 </script>
